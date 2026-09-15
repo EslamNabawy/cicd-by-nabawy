@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CI/CD Engineering — Jenkins Labs</title>
+<style>
+:root{--paper:#f5f6f4;--white:#fff;--ink:#161a19;--muted:#68706d;--line:#d5dad7;--panel:#111614;--panel-2:#1a201d;--text-light:#e8eeeb;--text-muted:#9ca8a3;--accent:#00b87c;--accent-dark:#008f61;--blue:#4387ff;--amber:#d99a24;--red:#d94b4b;--artifact:#8b6cff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0c0f0e;font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+@page{size:A4;margin:0}
+.page{width:210mm;min-height:297mm;padding:16mm 16mm 19mm;margin:8mm auto;position:relative;background:var(--paper);page-break-after:always;overflow:hidden;display:flex;flex-direction:column}
+@media print{body{background:#fff}.page{margin:0;box-shadow:none}h3.sec,.phead h2{break-after:avoid}.terminal,.step,.callout,.kv,.pipeline,.lanes,.vflow,.arch,.cmp{break-inside:avoid}}
+.phead{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.phead .ch{color:var(--accent-dark);font-weight:700}
+.phead h2{font-size:22px;letter-spacing:1px;color:var(--ink);margin:2px 0 6px;text-transform:uppercase}
+.phead hr{border:none;border-top:1.5px solid var(--ink);margin-bottom:10px}
+.pfoot{margin-top:auto;padding-top:8px;font-size:9px;color:var(--muted);display:flex;justify-content:space-between;border-top:1px solid var(--line);letter-spacing:1px}
+h3.sec{font-size:19px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;break-after:avoid}
+h3.sec .n{color:var(--accent-dark);font-family:"Cascadia Code",Consolas,monospace;font-size:13px;margin-right:10px}
+p.body{font-size:11.5px;line-height:1.65;margin:8px 0}
+code,.mono{font-family:"SFMono-Regular","Cascadia Code",Consolas,monospace}
+.cover{background:var(--panel);color:var(--text-light);justify-content:center}
+.cover .brand{font-size:9px;letter-spacing:4px;color:var(--text-muted)}
+.cover h1{font-size:44px;line-height:1.05;margin:10px 0 4px;letter-spacing:1px}
+.cover h1 span{color:var(--accent)}
+.cover .sub{font-size:13px;color:var(--text-muted);margin-bottom:12px;line-height:1.6}
+.cover .tri{font-size:9px;letter-spacing:2.5px;color:var(--accent);margin-bottom:18px;line-height:2}
+.cover .foot{font-size:9px;color:var(--text-muted);letter-spacing:2px;margin-top:auto;padding-top:20px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.cover .sig{font-family:"Brush Script MT","Segoe Script","Snell Roundhand",cursive;font-size:26px;color:var(--accent);transform:rotate(-4deg);text-shadow:0 0 14px rgba(0,184,124,.45);white-space:nowrap}
+.vpipe{display:flex;flex-direction:column;margin:6px 0 14px}
+.vnode{display:flex;align-items:center;gap:10px}
+.vnode .dot{width:11px;height:11px;border-radius:50%;border:2px solid var(--accent);box-shadow:0 0 10px rgba(0,184,124,.45);flex:none}
+
+.cover .vnode img{filter:drop-shadow(0 0 0.9px #18E299) drop-shadow(0 0 4px rgba(24,226,153,.22));}
+.cover .vnode img[src*="github"]{background:none;border-radius:0;padding:0;box-shadow:none;filter:drop-shadow(0 0 0.9px #18E299) drop-shadow(0 0 5px rgba(24,226,153,.28));}
+.cover .vnode img[src*="github"]{background:none;border-radius:0;padding:0;box-shadow:none;filter:drop-shadow(1px 0 0 white) drop-shadow(-1px 0 0 white) drop-shadow(0 1px 0 white) drop-shadow(0 -1px 0 white) drop-shadow(0.7px 0.7px 0 white) drop-shadow(-0.7px -0.7px 0 white) drop-shadow(-0.7px 0.7px 0 white) drop-shadow(0.7px -0.7px 0 white);}
+/* icon: github white on dark, black on light — no halo */
+.cover .vnode img[src*="github"]{filter:invert(1) brightness(1.05);background:none;box-shadow:none;border-radius:0;padding:0;}
+.cover .vnode img:not([src*="github"]){filter:none;}
+/* icon: outline/black icons white on dark covers */
+.cover .vnode img[src*="github"], .cover .vnode img[src*="workflow"], .cover .vnode img[src*="hammer"], .cover .vnode img[src*="package"], .cover .vnode img[src*="database"], .cover .vnode img[src*="puzzle"], .cover .vnode img[src*="server"], .cover .vnode img[src*="terminal"], .cover .vnode img[src*="shield"], .cover .vnode img[src*="activity"], .cover .vnode img[src*="webhook"], .cover .vnode img[src*="wrench"], .cover .vnode img[src*="flask"], .cover .vnode img[src*="rocket"]{filter:invert(1) brightness(1.05);}
+.vnode img{width:22px;height:22px;flex:none;object-fit:contain}
+.vnode b{font-size:11px;letter-spacing:1.8px}
+.vnode small{font-size:9px;color:var(--text-muted)}
+.vline{width:2px;height:14px;background:#2c3531;margin-left:4.5px}
+.opener .bignum{font-size:58px;font-weight:800;line-height:1}
+.opener .ctitle{font-size:28px;letter-spacing:3px;margin:2px 0 10px}
+.opener .lede{font-size:13px;line-height:1.65;max-width:155mm;margin:8px 0}
+.opener .lede em{color:var(--accent-dark);font-style:normal;font-weight:700}
+.step{background:var(--white);border:1px solid var(--line);padding:10px 12px;margin:7px 0;font-size:11.5px;line-height:1.65}
+.step h4{font-size:11px;letter-spacing:1px;margin-bottom:3px}
+.step h4 .tag{color:var(--accent-dark)}
+.terminal{background:#101413;color:#d6e2dc;border-radius:8px;padding:11px 13px;font-family:"SFMono-Regular","Cascadia Code",Consolas,monospace;font-size:9.5px;line-height:1.65;margin:8px 0;overflow-x:auto;white-space:pre}
+.terminal .c{color:#8b9a94}
+.terminal .g{color:var(--accent)}
+.terminal .a{color:var(--amber)}
+.terminal .r{color:var(--red)}
+.terminal .b{color:var(--blue)}
+ul.tight{font-size:11.5px;line-height:1.65;margin:6px 0 6px 18px}
+ul.tight li{margin-bottom:3px}
+.olist{font-size:11.5px;line-height:1.65;margin:6px 0 6px 18px}
+.olist li{margin-bottom:3px}
+table.cmp{width:100%;border-collapse:collapse;font-size:11px;margin:10px 0}
+table.cmp th{background:var(--panel);color:var(--text-light);font-size:9px;letter-spacing:1px;padding:7px 8px;text-align:left}
+table.cmp td{border:1px solid var(--line);padding:7px 8px;background:var(--white);line-height:1.5}
+table.cmp td:first-child{font-weight:700;background:#eef0ee}
+.kv{background:var(--white);border:1px solid var(--line);padding:10px 12px;margin:8px 0;font-size:11.5px;line-height:1.6}
+.kv b{color:var(--accent-dark)}
+.callout{border-left:3px solid var(--accent);background:var(--white);padding:10px 12px;margin:10px 0}
+.callout h4{font-size:9px;letter-spacing:2px;color:var(--accent-dark);margin-bottom:4px}
+.callout p{font-size:11.5px;line-height:1.6}
+.callout.amber{border-left-color:var(--amber)}
+.callout.amber h4{color:var(--amber)}
+.callout.red{border-left-color:var(--red)}
+.callout.red h4{color:var(--red)}
+.callout.blue{border-left-color:var(--blue)}
+.callout.blue h4{color:var(--blue)}
+.pipeline{display:flex;align-items:center;gap:6px;margin:10px 0;flex-wrap:wrap}
+.pipeline .stage{background:var(--white);border:1px solid var(--line);border-left:3px solid var(--accent);padding:8px 10px;min-width:92px;flex:1}
+.pipeline .stage.fail{border-left-color:var(--red)}
+.pipeline .stage.wait{border-left-color:var(--amber)}
+.pipeline .stage.artifact{border-left-color:var(--artifact)}
+.pipeline .stage strong{font-size:10px;letter-spacing:1px;display:block}
+.pipeline .stage small{font-size:9px;color:var(--muted)}
+.pipeline .stage .no{font-family:"Cascadia Code",Consolas,monospace;font-size:8px;color:var(--muted);letter-spacing:1px}
+.pipeline .conn{width:18px;height:2px;background:var(--line);position:relative;flex:none}
+.pipeline .conn:after{content:"›";position:absolute;right:-6px;top:-8px;color:var(--muted);font-size:12px}
+.lanes{margin:10px 0}
+.lanes .lane{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--line);background:var(--white);margin-bottom:6px;font-size:11px}
+.lanes .lane .env{font-weight:700;font-size:9px;letter-spacing:1.5px;min-width:72px}
+.lanes .lane.dev{border-left:3px solid var(--blue)}
+.lanes .lane.stg{border-left:3px solid var(--amber)}
+.lanes .lane.prod{border-left:3px solid var(--accent)}
+.arch{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:6px;align-items:center;margin:10px 0}
+.arch .box{background:var(--white);border:1px solid var(--line);padding:8px 9px;text-align:center}
+.arch .box b{font-size:10px;letter-spacing:1px;display:block}
+.arch .box small{font-size:9px;color:var(--muted)}
+.arch .arrow{color:var(--muted);font-size:16px;text-align:center}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:10px;letter-spacing:1px;font-weight:700}
+.status .dot{width:8px;height:8px;border-radius:50%}
+.status.pass{color:var(--accent-dark)}
+.status.pass .dot{background:var(--accent)}
+.status.fail{color:var(--red)}
+.status.fail .dot{background:var(--red)}
+.status.wait{color:var(--amber)}
+.status.wait .dot{background:var(--amber)}
+.status.run{color:var(--blue)}
+.status.run .dot{background:var(--blue)}
+.badge{font-size:8px;letter-spacing:1.2px;padding:3px 7px;border-radius:10px;border:1px solid var(--line);background:var(--white);font-weight:700}
+.badge.green{border-color:var(--accent);color:var(--accent-dark)}
+.badge.amber{border-color:var(--amber);color:#8a6a10}
+.badge.blue{border-color:var(--blue);color:var(--blue)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.card{background:var(--white);border:1px solid var(--line);padding:10px 11px}
+.card h4{font-size:10px;letter-spacing:1.2px;margin-bottom:4px}
+.card p{font-size:11px;line-height:1.6;color:var(--muted)}
+.card strong{font-size:11px}
+.toc{margin:8px 0}
+.toc a{color:var(--accent-dark);text-decoration:none}
+.toc ol{margin-left:18px;font-size:11.5px;line-height:1.9}
+.toc li span{color:var(--muted);font-size:10px;margin-left:6px}
+.printnote{font-size:9px;color:var(--muted);border:1px dashed var(--line);padding:8px 10px;margin-top:10px;line-height:1.6}
+.labnum{font-size:9px;letter-spacing:2px;color:var(--accent-dark);font-weight:700}
+h4.labtitle{font-size:14px;letter-spacing:1px;margin:2px 0 6px}
+/* m-reflow: screen-only mobile reflow; print unaffected */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0 auto;padding:16px 14px 20px}h3.sec{font-size:16px}.opener .bignum{font-size:42px}.cover h1{font-size:30px}.grid2{grid-template-columns:1fr}.arch{grid-template-columns:1fr}.arch .arrow{transform:rotate(90deg)}}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="page cover">
+<div class="brand">CI/CD SYSTEMS &nbsp;·&nbsp; PIPELINE CONTROL ROOM &nbsp;·&nbsp; JENKINS LABS</div>
+<h1>JENKINS<br><span>LABS</span></h1>
+<div class="sub">Five hands-on labs — webhooks to multibranch to shared libraries to Docker & Terraform on FLOCI.<br>Every push verified, every artifact tagged, every stage observable.</div>
+<div class="tri">WEBHOOK TRIGGER · DOCKER BUILD & PUSH · MULTIBRANCH · SHARED LIBRARY · TERRAFORM + FLOCI</div>
+<div class="vpipe">
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/jenkins/jenkins.svg" alt="Jenkins"><b>SOURCE → TRIGGER</b><small>GitHub webhook · GITScm polling</small></div><div class="vline"></div>
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/docker/docker.svg" alt="Docker"><b>BUILD → REGISTRY</b><small>docker build · tag · push to Docker Hub</small></div><div class="vline"></div>
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/ci-cd/workflow.svg" alt="Pipeline"><b>BRANCH → PIPELINE</b><small>multibranch discovery · env.BRANCH_NAME</small></div><div class="vline"></div>
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/general/puzzle.svg" alt="Shared Library"><b>REUSE → LIBRARY</b><small>vars/ & src/ · @Library version pin</small></div><div class="vline"></div>
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/general/terraform.svg" alt="Terraform"><b>PLAN → APPLY</b><small>init · workspace · plan · approve · apply · FLOCI</small></div>
+</div>
+<div class="foot"><span>05 LABS · 05 FLOWS · ONE CONTROL ROOM</span><span class="sig">Nabawy</span></div>
+</div>
+
+<!-- TOC + HOW TO USE -->
+<div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Jenkins Labs<hr><h2>Contents & Control Room</h2>Lifecycle · How to use this book</div>
+
+<div class="pipeline">
+<div class="stage"><span class="no">01</span><strong>SOURCE</strong><small>Git push</small></div><div class="conn"></div>
+<div class="stage"><span class="no">02</span><strong>TRIGGER</strong><small>webhook / scan</small></div><div class="conn"></div>
+<div class="stage"><span class="no">03</span><strong>BUILD</strong><small>agent + stages</small></div><div class="conn"></div>
+<div class="stage artifact"><span class="no">04</span><strong>ARTIFACT</strong><small>image · plan</small></div><div class="conn"></div>
+<div class="stage"><span class="no">05</span><strong>DEPLOY</strong><small>registry · FLOCI</small></div><div class="conn"></div>
+<div class="stage"><span class="no">06</span><strong>OBSERVE</strong><small>logs · checks</small></div>
+</div>
+
+<h3 class="sec"><span class="n">01 /</span> Contents</h3>
+<div class="toc">
+<ol>
+<li><b>Lab 01 — GitHub Webhook Trigger</b> <span>p. 03 — push → webhook → Jenkins build</span></li>
+<li><b>Lab 02 — Docker Build, Tag & Push</b> <span>p. 06 — Jenkinsfile → Docker Hub → FLOCI deploy</span></li>
+<li><b>Lab 03 — Multibranch Pipeline</b> <span>p. 09 — main / dev / stg · one Jenkinsfile · when</span></li>
+<li><b>Lab 04 — Shared Library</b> <span>p. 12 — Global Library · UatInput · scripted + declarative</span></li>
+<li><b>Lab 05 — Terraform on FLOCI</b> <span>p. 15 — init → workspace → plan → approve → apply</span></li>
+<li><b>Appendix — Proofs & Troubleshooting</b> <span>p. 18 — what green proves · failure map</span></li>
+</ol>
+</div>
+
+<h3 class="sec"><span class="n">02 /</span> Lab Format — Observe · Execute · Verify · Explain</h3>
+<p class="body">Every lab follows the control-room loop: <b>OBSERVE</b> what is currently happening, <b>EXECUTE</b> a precise action, <b>VERIFY</b> via logs/console/registry/scan log, <b>EXPLAIN</b> why. Each lab ends with <b>PROOF</b> — what the experiment demonstrates about the system.</p>
+<div class="grid2">
+<div class="card"><h4>PRE-FLIGHT RULE</h4><p>Step 0 of every lab gathers tools, credentials, repo state, and user inputs <b>before</b> any mutation. No mid-flow surprises.</p></div>
+<div class="card"><h4>PRINTING THIS BOOK</h4><p>Open in browser → <span class="mono">Ctrl/Cmd+P → Save as PDF → Background graphics ON → A4</span>. Colors carry state and survive grayscale because every state pairs <b>color + symbol + label</b>.</p></div>
+</div>
+
+<div class="callout blue"><h4>CONTINUITY</h4><p>Lab 01 wires the trigger. Lab 02 builds the artifact that trigger produces. Lab 03 multiplies the pipeline across branches. Lab 04 extracts reuse. Lab 05 applies the same trigger-build-approve pattern to infrastructure. The same lifecycle recurs — only the payload changes.</p></div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>JENKINS LABS</span><span>02 / 19</span></div>
+</div>
+
+<!-- LAB 01 OPENER -->
+<div class="page opener">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Jenkins Labs<hr><h2>Lab 01</h2>Webhook → Build</div>
+<div class="bignum">01</div>
+<div class="ctitle">GITHUB WEBHOOK TRIGGER</div>
+<p class="lede">A push should be enough. <em>One commit, one webhook, one build — no human clicking Build Now.</em> This lab removes the manual step between GitHub and Jenkins.</p>
+<h3 class="sec"><span class="n">01 /</span> What This Lab Proves</h3>
+<div class="kv"><b>PROOF —</b> Jenkins reacts to Git events via <span class="mono">/github-webhook/</span> and <b>GitHub hook trigger for GITScm polling</b>. Reachability + credentials + branch match are the only three things that can break it.</div>
+<h3 class="sec"><span class="n">02 /</span> Architecture</h3>
+<div class="arch">
+<div class="box"><img src="../assets/icons/git/github.svg" alt="GitHub" style="width:22px;height:22px"><b>GITHUB</b><small>push to branch</small></div><div class="arrow">→</div>
+<div class="box" style="border-left:3px solid var(--amber)"><img src="../assets/icons/jenkins/webhook.svg" alt="Webhook" style="width:22px;height:22px"><b>WEBHOOK</b><small>/github-webhook/</small></div><div class="arrow">→</div>
+<div class="box" style="border-left:3px solid var(--accent)"><img src="../assets/icons/jenkins/jenkins.svg" alt="Jenkins" style="width:22px;height:22px"><b>JENKINS</b><small>Build Triggers</small></div>
+</div>
+<p class="body">GitHub delivers a POST to Jenkins. Jenkins matches the repo + branch, checks out with stored PAT, and starts the job. If any hop is unreachable or mismatched, GitHub's <b>Recent Deliveries</b> shows the failure code — that is the first place to look.</p>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 01 · WEBHOOK</span><span>03 / 19</span></div>
+</div>
+
+<!-- LAB 01 STEP 0 + 1-2 -->
+<div class="page">
+<div class="phead"><span class="ch">Labs</span> &nbsp; Lab 01 — Webhook Trigger<hr><h2>Pre-Flight & Setup</h2>Verify before you mutate</div>
+<h3 class="sec"><span class="n">03 /</span> Step 0 — Pre-Flight (before Step 1)</h3>
+<table class="cmp"><tr><th>Check</th><th>Command / Location</th><th>Decision</th></tr>
+<tr><td>Tools</td><td><span class="mono">curl -s -o /dev/null -w "%{http_code}" http://localhost:8080</span> · <span class="mono">gh --version / gh auth status</span></td><td>If Jenkins only on localhost/WSL → tunnel decision belongs here</td></tr>
+<tr><td>Credentials</td><td>GitHub PAT (<span class="mono">repo</span> scope) · <b>Manage Jenkins → Credentials</b> existing token</td><td>Reuse if present; PAT creation is browser-only — never mid-flow</td></tr>
+<tr><td>Repo state</td><td>Existing job? existing webhook (<span class="mono">Settings → Webhooks</span>)? default branch name?</td><td>Do not assume <span class="mono">main</span>; read it from the repo</td></tr>
+</table>
+<div class="callout amber"><h4>ASK IN ONE BATCH — BEFORE STEP 1</h4><p>Only ask for what is genuinely missing after the checks: repo URL + branch, valid PAT (or generate one), Jenkins public URL / tunnel choice, job name. Then proceed uninterrupted.</p></div>
+
+<h3 class="sec"><span class="n">04 /</span> Steps 1–4 — Job + Credentials + Checkout</h3>
+<div class="step"><h4><span class="tag">01 —</span> Pipeline job</h4> Reuse if exists; else <b>New Item → Pipeline</b> (<span class="mono">github-webhook-pipeline</span>). Paste a placeholder script, save, run once to prove the job itself is green before wiring Git.</div>
+<div class="step"><h4><span class="tag">02 —</span> Repository URL</h4> Copy HTTPS clone URL: <span class="mono">https://github.com/&lt;user&gt;/&lt;repo&gt;.git</span>.</div>
+<div class="step"><h4><span class="tag">03–04 —</span> Credentials via Pipeline Syntax generator</h4> <b>Pipeline Syntax → checkout: Check out from version control → SCM: Git</b> → paste URL → <b>Add → Jenkins → Username with password</b> (username = GitHub user, password = PAT) → ID <span class="mono">github-token</span> → select it → set <b>Branch to build</b> to the confirmed branch → <b>Generate Pipeline Script</b> → paste snippet into job → save → run to confirm checkout pulls the repo.</div>
+<div class="terminal"><span class="c"># generated snippet (example — use the one Jenkins generates for you)</span>
+checkout([$class: 'GitSCM',
+  branches: [[name: '*/main']],
+  userRemoteConfigs: [[url: 'https://github.com/<user>/<repo>.git',
+                       credentialsId: 'github-token']]])</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 01 · WEBHOOK</span><span>04 / 19</span></div>
+</div>
+
+<!-- LAB 01 STEPS 5-7 -->
+<div class="page">
+<div class="phead"><span class="ch">Labs</span> &nbsp; Lab 01 — Webhook Trigger<hr><h2>Wire & Prove</h2>Webhook · Trigger · Push</div>
+<h3 class="sec"><span class="n">05 /</span> Steps 5–6 — Wire Both Sides</h3>
+<div class="step"><h4><span class="tag">05 —</span> GitHub Webhook</h4> <b>Repo → Settings → Webhooks → Add webhook</b> → Payload URL <span class="mono">http://&lt;jenkins-url&gt;/github-webhook/</span> (trailing slash matters) → <span class="mono">application/json</span> → push events → Save → confirm green checkmark (initial ping delivered). If it exists and is green, reuse it.</div>
+<div class="step"><h4><span class="tag">06 —</span> Jenkins trigger</h4> Job → <b>Configure → Build Triggers → GitHub hook trigger for GITScm polling</b> → enable → Save.</div>
+<div class="callout"><h4>WHY THIS EXISTS</h4><p>Without a webhook, Jenkins only learns about pushes when someone clicks Build Now or a poll discovers them late. The webhook moves discovery from <b>minutes/hours</b> to <b>seconds</b>.</p></div>
+
+<h3 class="sec"><span class="n">06 /</span> Step 7 — End-to-End Test</h3>
+<div class="terminal">$ echo "&lt;!-- trigger --&gt;" >> index.html && git commit -am "trigger webhook" && git push
+<span class="c"># then watch Jenkins</span>
+→ Jenkins build history: new build starts automatically
+→ Console Output: checkout pulled latest commit SHA</div>
+<div class="step"><h4><span class="tag">VERIFY —</span> Jenkins build history shows an automatic build.</h4> Console output confirms the checkout SHA matches the pushed commit. GitHub webhook <b>Recent Deliveries</b> shows <span class="mono">200</span>. <span class="status pass"><span class="dot"></span>PASSED</span></div>
+
+<div class="callout red"><h4>GOTCHA</h4><p><b>WSL / localhost Jenkins is invisible to GitHub.</b> Webhooks require a public URL — use <span class="mono">ngrok</span> / <span class="mono">localhost.run</span> or a reverse proxy. Decide in Step 0. <b>Branch mismatch</b> (<span class="mono">main</span> vs <span class="mono">master</span>) also silently breaks checkout — confirm the real default branch.</p></div>
+<div class="kv"><b>PROOF —</b> A file edit + push triggered a build without <b>Build Now</b>. The loop <b>commit → webhook → build</b> is closed. <span class="badge green">● WEBHOOK PROVED</span></div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 01 · WEBHOOK</span><span>05 / 19</span></div>
+</div>
+
+<!-- LAB 02 OPENER -->
+<div class="page opener">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Jenkins Labs<hr><h2>Lab 02</h2>Docker Build · Push · Deploy</div>
+<div class="bignum">02</div>
+<div class="ctitle">DOCKER BUILD &amp; PUSH</div>
+<p class="lede">The artifact is the contract. <em>Build it once, tag it immutably, push it to a registry, run the same image everywhere — including FLOCI.</em></p>
+<h3 class="sec"><span class="n">01 /</span> What This Lab Proves</h3>
+<div class="kv"><b>PROOF —</b> Jenkins can produce a Docker image, authenticate via stored credentials, tag with <span class="mono">build-${BUILD_NUMBER}</span>, push to Docker Hub, and optionally run it inside a <b>FLOCI</b> simulated AWS environment — without hardcoding secrets.</div>
+<h3 class="sec"><span class="n">02 /</span> Flow — Seven Stages</h3>
+<div class="pipeline">
+<div class="stage"><span class="no">01</span><strong>ENV SETUP</strong><small>load config</small></div><div class="conn"></div>
+<div class="stage"><span class="no">02</span><strong>CHECKOUT</strong><small>git clone</small></div><div class="conn"></div>
+<div class="stage"><span class="no">03</span><strong>BUILD</strong><small>docker build</small></div><div class="conn"></div>
+<div class="stage"><span class="no">04</span><strong>AUTH</strong><small>docker login</small></div><div class="conn"></div>
+<div class="stage artifact"><span class="no">05</span><strong>TAG</strong><small>build-N</small></div><div class="conn"></div>
+<div class="stage artifact"><span class="no">06</span><strong>PUSH</strong><small>to Docker Hub</small></div><div class="conn"></div>
+<div class="stage"><span class="no">07</span><strong>DEPLOY</strong><small>FLOCI run</small></div>
+</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 02 · DOCKER</span><span>06 / 19</span></div>
+</div>
+
+<!-- LAB 02 DETAILS -->
+<div class="page">
+<div class="phead"><span class="ch">Labs</span> &nbsp; Lab 02 — Docker<hr><h2>Pre-Flight & Jenkinsfile</h2>Credentials · Pipeline as code</div>
+<h3 class="sec"><span class="n">03 /</span> Step 0 — Pre-Flight</h3>
+<table class="cmp"><tr><th>Check</th><th>Command / Location</th><th>Decision</th></tr>
+<tr><td>Tools</td><td><span class="mono">docker --version</span> · Jenkins <b>Docker Pipeline</b> + <b>Credentials Binding</b> plugins</td><td>Confirm Jenkins user can run docker (group / socket / DiD)</td></tr>
+<tr><td>Credentials</td><td><b>Manage Jenkins → Credentials</b> → Docker Hub credential ID</td><td>Reuse; else need username + <b>access token</b> (not password)</td></tr>
+<tr><td>Repo state</td><td><span class="mono">hello.py</span> · <span class="mono">requirements.txt</span> · <span class="mono">Dockerfile</span> · <span class="mono">Jenkinsfile</span></td><td>Create/commit missing pieces before pipeline</td></tr>
+</table>
+<div class="callout amber"><h4>ASK IN ONE BATCH</h4><p>Docker Hub namespace (<span class="mono">myusername/app</span>), tagging convention (<span class="mono">build-${BUILD_NUMBER}</span>), whether FLOCI deploy is in scope (+ endpoint), repo URL/branch.</p></div>
+
+<h3 class="sec"><span class="n">04 /</span> Steps 1–2 — Repo + Credentials</h3>
+<div class="step"><h4><span class="tag">PREPARE REPO —</span> <span class="mono">hello.py</span> · <span class="mono">requirements.txt</span> · <span class="mono">Dockerfile</span> · <span class="mono">Jenkinsfile</span>.</h4> Commit and push.</div>
+<div class="step"><h4><span class="tag">CREDENTIALS —</span> Manage Jenkins → Credentials → Username with password.</h4> Username = Docker Hub user, Password = access token, ID <span class="mono">dockerhub-creds</span>.</div>
+
+<h3 class="sec"><span class="n">05 /</span> Step 3 — Jenkinsfile (seven stages)</h3>
+<div class="terminal">pipeline {
+  agent any
+  environment {
+    IMAGE_NAME = "myusername/app"
+    IMAGE_TAG  = "build-${env.BUILD_NUMBER}"
+  }
+  stages {
+    stage('Environment Setup') { steps { echo 'Loading environment...' } }
+    stage('Code Checkout')     { steps { checkout scm } }
+    stage('Docker Build')      { steps { sh "docker build -t ${IMAGE_NAME}:local ." } }
+    stage('Authentication') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',
+          usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+          sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+        }
+      }
+    }
+    stage('Image Tagging') { steps { sh "docker tag ${IMAGE_NAME}:local ${IMAGE_NAME}:${IMAGE_TAG}" } }
+    stage('Image Push')    { steps { sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}" } }
+    stage('Application Deployment') {
+      when { expression { return params.DEPLOY_TO_FLOCI == true } }
+      steps { echo "Deploying ${IMAGE_NAME}:${IMAGE_TAG} into FLOCI..." }
+    }
+  }
+}</div>
+<div class="callout red"><h4>GOTCHA</h4><p>Never hardcode the token in the Jenkinsfile. Use <span class="mono">withCredentials</span>. Prefer a scoped <b>access token</b> over the account password.</p></div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 02 · DOCKER</span><span>07 / 19</span></div>
+</div>
+
+<!-- LAB 02 VERIFY -->
+<div class="page">
+<div class="phead"><span class="ch">Labs</span> &nbsp; Lab 02 — Docker<hr><h2>Validate</h2>Registry · Increments · FLOCI</div>
+<h3 class="sec"><span class="n">06 /</span> Steps 4–5 — Run & Validate</h3>
+<div class="step"><h4><span class="tag">JOB —</span> Pipeline → Pipeline script from SCM (reads Jenkinsfile from repo) + webhook trigger (Lab 01).</h4> Push a commit → pipeline runs automatically.</div>
+<div class="terminal"><span class="c"># expected stage progression</span>
+[01] Environment Setup  <span class="g">● PASSED</span>
+[02] Code Checkout      <span class="g">● PASSED</span>
+[03] Docker Build       <span class="g">● PASSED</span>
+[04] Authentication     <span class="g">● PASSED</span>
+[05] Image Tagging      <span class="g">● PASSED</span>
+[06] Image Push         <span class="g">● PASSED</span>
+[07] Application Deploy <span class="a">○ SKIPPED</span> <span class="c">when DEPLOY_TO_FLOCI == false</span></div>
+<div class="step"><h4><span class="tag">VERIFY —</span></h4>
+<ul class="tight">
+<li>Docker Hub shows <span class="mono">myusername/app:build-&lt;N&gt;</span> under the namespace.</li>
+<li>Second push → <span class="mono">build-&lt;N+1&gt;</span> — tag increments with <span class="mono">BUILD_NUMBER</span>.</li>
+<li>If FLOCI in scope → simulation reflects the running <span class="mono">hello.py</span>.</li>
+</ul>
+</div>
+<div class="kv"><b>PROOF —</b> The same commit SHA built once, tagged immutably, and pushed as a reusable artifact. Registry is the handoff to deploy. <span class="badge green">● ARTIFACT PROVED</span></div>
+
+<h3 class="sec"><span class="n">07 /</span> State Transitions</h3>
+<table class="cmp"><tr><th>State</th><th>Meaning</th><th>Recovery</th></tr>
+<tr><td><span class="status run"><span class="dot"></span>BUILDING</span></td><td><span class="mono">docker build</span> in progress</td><td>Watch agent executor, Docker daemon logs</td></tr>
+<tr><td><span class="status pass"><span class="dot"></span>PUSHED</span></td><td>Image visible on Docker Hub</td><td>Pull locally: <span class="mono">docker pull myusername/app:build-N</span></td></tr>
+<tr><td><span class="status fail"><span class="dot"></span>FAILED</span></td><td><span class="mono">docker login</span> or push denied</td><td>Check credential ID, token scope, repo visibility</td></tr>
+</table>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 02 · DOCKER</span><span>08 / 19</span></div>
+</div>
+
+<!-- LAB 03 OPENER -->
+<div class="page opener">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Jenkins Labs<hr><h2>Lab 03</h2>Multibranch · Branch as Job</div>
+<div class="bignum">03</div>
+<div class="ctitle">MULTIBRANCH PIPELINE</div>
+<p class="lede">One job, three branches, one Jenkinsfile. <em>Branches are discovered, not configured — and <span class="mono">when</span> decides what runs where.</em></p>
+<h3 class="sec"><span class="n">01 /</span> What This Lab Proves</h3>
+<div class="kv"><b>PROOF —</b> A <b>Multibranch Pipeline</b> is a <em>folder of branch jobs</em> driven by branch discovery + <span class="mono">Jenkinsfile</span> on each branch. <span class="mono">env.BRANCH_NAME</span> makes one file behave as three pipelines. Deleting a branch orphans its job on next scan.</div>
+<h3 class="sec"><span class="n">02 /</span> Concept — Folder of Jobs</h3>
+<div class="lanes">
+<div class="lane dev"><span class="env">MAIN</span> <span class="mono">Jenkinsfile found → build</span> <span class="badge blue" style="margin-left:auto">main</span></div>
+<div class="lane stg"><span class="env">DEV</span> <span class="mono">Jenkinsfile found → build</span> <span class="badge amber" style="margin-left:auto">dev</span></div>
+<div class="lane prod"><span class="env">STG</span> <span class="mono">Jenkinsfile found + when(stg) runs</span> <span class="badge green" style="margin-left:auto">stg</span></div>
+</div>
+<p class="body">Parent job controls everything: Branch Sources, <b>Filter by name</b> (<span class="mono">main dev stg</span>), and <b>Additional Behaviors</b>. Individual branch items are not directly configurable — they inherit.</p>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 03 · MULTIBRANCH</span><span>09 / 19</span></div>
+</div>
+
+<!-- LAB 03 STEPS -->
+<div class="page">
+<div class="phead"><span class="ch">Labs</span> &nbsp; Lab 03 — Multibranch<hr><h2>Pre-Flight & Wiring</h2>Generic Git source · Three branches</div>
+<h3 class="sec"><span class="n">03 /</span> Step 0 — Pre-Flight</h3>
+<table class="cmp"><tr><th>Check</th><th>Command / Location</th><th>Decision</th></tr>
+<tr><td>Tools</td><td><span class="mono">git --version</span> · <b>Git</b> + <b>Pipeline: Multibranch</b> plugins</td><td>Air-gapped → periodic/manual scans, not webhooks</td></tr>
+<tr><td>Credentials</td><td>Public repo → none; private → Jenkins Git credential (SSH / token)</td><td>Verify <span class="mono">git ls-remote &lt;url&gt;</span> before wiring</td></tr>
+<tr><td>Repo state</td><td>Branches <span class="mono">main / dev / stg</span> exist? <span class="mono">Jenkinsfile</span> on any branch? existing job name?</td><td>Name the multibranch job after the repo</td></tr>
+</table>
+<div class="callout blue"><h4>DESIGN CHOICE</h4><p>This lab uses the <b>generic Git branch source</b> (not GitHub-specific), even if the repo is hosted on GitHub. It proves Jenkins works with any Git remote and forces explicit include filters.</p></div>
+
+<h3 class="sec"><span class="n">04 /</span> Steps 1–4 — Create & Scan</h3>
+<div class="step"><h4><span class="tag">01 —</span> New Item → Multibranch Pipeline</h4> Name = repo name. Click OK.</div>
+<div class="step"><h4><span class="tag">02 —</span> Branch Source → Git</h4> URL = clone URL · Credentials = None (public) or the private-repo credential.</div>
+<div class="step"><h4><span class="tag">03 —</span> Filter + Behaviors</h4> <b>Behaviors → Filter by name (with wildcards)</b> Include: <span class="mono">main dev stg</span> · Exclude: blank. Add: <b>Check out to matching local branch</b> + <b>Clean before/after checkout</b>.</div>
+<div class="step"><h4><span class="tag">04 —</span> Save → observe scan log</h4> <span class="mono">Scan Multibranch Pipeline Log</span> reports <span class="mono">Jenkinsfile not found</span> if the file is not yet on any branch — expected at this point.</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 03 · MULTIBRANCH</span><span>10 / 19</span></div>
+</div>
+
+<!-- LAB 03 STEPS 5-9 -->
+<div class="page">
+<div class="phead"><span class="ch">Labs</span> &nbsp; Lab 03 — Multibranch<hr><h2>Branches · Conditional · Orphans</h2>One file, three behaviors</div>
+<h3 class="sec"><span class="n">05 /</span> Steps 5–7 — Jenkinsfile + Branches</h3>
+<div class="terminal"><span class="c"># Jenkinsfile on default branch (main)</span>
+pipeline {
+  agent { label 'linux' }
+  options { buildDiscarder(logRotator(numToKeepStr: '5')); disableConcurrentBuilds() }
+  stages { stage('Hello') { steps { echo 'hello' } } }
+}</div>
+<div class="step"><h4><span class="tag">05 —</span> Commit Jenkinsfile to main → push.</h4></div>
+<div class="step"><h4><span class="tag">06 —</span> Scan Multibranch Pipeline Now</h4> Log now shows <span class="mono">Jenkinsfile found</span> on main → build triggered. Optionally set a periodic scan interval.</div>
+<div class="step"><h4><span class="tag">07 —</span> Create dev + stg from main</h4> <span class="mono">git checkout -b dev && git push -u origin dev</span> · same for <span class="mono">stg</span> → Scan → all three appear with <span class="mono">Jenkinsfile found</span>.</div>
+
+<h3 class="sec"><span class="n">06 /</span> Step 8 — Branch-Specific Behavior (stg only)</h3>
+<div class="terminal"><span class="c"># on branch stg — add a when-guarded stage</span>
+stage('Staging Verification (stg only)') {
+  when { expression { return env.BRANCH_NAME == 'stg' } }
+  steps { sh 'cat README.md' }
+}</div>
+<div class="step"><h4><span class="tag">EXPECT —</span></h4> <span class="mono">stg</span> build runs the stage and cats the file; <span class="mono">main</span> and <span class="mono">dev</span> skip it (<span class="status wait"><span class="dot"></span>SKIPPED</span>). Visible in stage view / logs.</div>
+
+<h3 class="sec"><span class="n">07 /</span> Step 9 — Orphan Cleanup</h3>
+<div class="terminal"><span class="c"># delete a branch remotely, then rescan</span>
+git push origin --delete dev  <span class="c"># or delete via GitHub UI</span>
+<span class="c"># Jenkins → Scan Multibranch Pipeline Now</span>
+→ scan log: "orphaned item" → dev job removed from folder</div>
+<div class="callout amber"><h4>GOTCHA</h4><p>Deletion does not remove the Jenkins job immediately. Only the <b>next scan</b> evaluates orphans. No webhook here is intentional — this lab simulates an air-gapped Jenkins.</p></div>
+<div class="kv"><b>PROOF —</b> One Jenkinsfile, three jobs, conditional stages by branch, orphan removal on rescan. <span class="badge blue">● MULTIBRANCH PROVED</span></div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 03 · MULTIBRANCH</span><span>11 / 19</span></div>
+</div>
+
+<!-- LAB 04 OPENER -->
+<div class="page opener">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Jenkins Labs<hr><h2>Lab 04</h2>Reuse · Version Pin</div>
+<div class="bignum">04</div>
+<div class="ctitle">SHARED LIBRARY</div>
+<p class="lede">Copy-paste is not reuse. <em>A pipeline library is a dependency: versioned, reviewed, rolled back.</em> One Groovy class, two pipelines, one approval gate.</p>
+<h3 class="sec"><span class="n">01 /</span> What This Lab Proves</h3>
+<div class="kv"><b>PROOF —</b> A <b>Global Pipeline Library</b> (<span class="mono">src/com/&lt;you&gt;/UatInput.groovy</span>) exposes <span class="mono">buildIsUatApproved()</span> (checks <span class="mono">tools/approved.txt</span>) to both scripted and declarative pipelines via <span class="mono">@Library('shared-library')</span>. Changing the library changes all consumers — and reverting fixes them.</div>
+<h3 class="sec"><span class="n">02 /</span> Repo Layout (Jenkins expects this exactly)</h3>
+<div class="terminal">(root)
+ └── src/
+      └── com/
+           └── &lt;yourname&gt;/
+                └── UatInput.groovy   <span class="c">→ class UatInput { boolean buildIsUatApproved() }</span>
+<span class="c">checks workspace file: tools/approved.txt → true / false</span></div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 04 · SHARED LIBRARY</span><span>12 / 19</span></div>
+</div>
+
+<!-- LAB 04 STEPS -->
+<div class="page">
+<div class="phead"><span class="ch">Labs</span> &nbsp; Lab 04 — Shared Library<hr><h2>Pre-Flight & Register</h2>Library as dependency</div>
+<h3 class="sec"><span class="n">03 /</span> Step 0 — Pre-Flight</h3>
+<table class="cmp"><tr><th>Check</th><th>Command / Location</th><th>Decision</th></tr>
+<tr><td>Tools</td><td><span class="mono">curl http://localhost:8080</span> · <span class="mono">git --version</span> · <span class="mono">gh auth status</span></td><td>Public vs private repo decides credential need</td></tr>
+<tr><td>Credentials</td><td>Private repo? → Jenkins credential (username + PAT)</td><td>Public → no credential in library config</td></tr>
+<tr><td>Repo / Jenkins state</td><td>Existing <span class="mono">jenkins-shared-library</span> repo? existing <b>Global Pipeline Libraries</b> entry? existing pipeline job?</td><td>Reuse; confirm default branch name (<span class="mono">main</span> / <span class="mono">master</span>)</td></tr>
+</table>
+
+<h3 class="sec"><span class="n">04 /</span> Steps 1–2 — Repo + Registration</h3>
+<div class="step"><h4><span class="tag">01 —</span> Create (or reuse) the library repo</h4> Example: <span class="mono">jenkins-shared-library</span> → add <span class="mono">src/com/&lt;you&gt;/UatInput.groovy</span> implementing <span class="mono">buildIsUatApproved()</span> → commit to <span class="mono">master</span>/<span class="mono">main</span> → copy clone URL.</div>
+<div class="step"><h4><span class="tag">02 —</span> Manage Jenkins → Configure System → Global Pipeline Libraries → Add</h4> Name: <span class="mono">shared-library</span> · Default version: <span class="mono">master</span> · Retrieval: <b>Modern SCM</b> · SCM: <b>GitHub</b> · Project Repository: pasted URL → <b>Validate</b> → Apply/Save. Reuse if already pointing at this repo.</div>
+<div class="terminal"><span class="c"># UatInput.groovy — minimal logic</span>
+package com.example
+class UatInput implements Serializable {
+  boolean buildIsUatApproved() {
+    return fileExists('tools/approved.txt')
+  }
+}</div>
+<div class="callout"><h4>WHY VERSION PIN MATTERS</h4><p><span class="mono">Default version = master</span> is a live dependency. Pin consumers with <span class="mono">@Library('shared-library@main')</span> or a tag when you want reproducible builds rather than latest.</p></div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 04 · SHARED LIBRARY</span><span>13 / 19</span></div>
+</div>
+
+<!-- LAB 04 STEPS 3-6 -->
+<div class="page">
+<div class="phead"><span class="ch">Labs</span> &nbsp; Lab 04 — Shared Library<hr><h2>Consume · Gate · Validate</h2>Scripted + declarative</div>
+<h3 class="sec"><span class="n">05 /</span> Steps 3–4 — Scripted Pipeline</h3>
+<div class="step"><h4><span class="tag">PIPELINE —</span> New Item → Pipeline (<span class="mono">shared-library-test-pipeline</span>) → uncheck Groovy Sandbox.</h4> Sandbox off avoids approval noise for this simple class (production: use In-process Script Approval instead).</div>
+<div class="terminal">@Library('shared-library') _
+import com.example.UatInput
+def uatInput = new UatInput()
+println "Build is UAT approved: ${uatInput.buildIsUatApproved()}"</div>
+<div class="step"><h4><span class="tag">VERIFY —</span> With <span class="mono">tools/approved.txt</span> present → <span class="mono">true</span>; without → <span class="mono">false</span> in Console Output.</h4></div>
+
+<h3 class="sec"><span class="n">06 /</span> Step 5 — Declarative Pipeline (when gate)</h3>
+<div class="terminal">@Library('shared-library') _
+import com.example.UatInput
+def uatInput = new UatInput()
+pipeline {
+  agent any
+  stages {
+    stage('Run only if approval exists') {
+      when { expression { return uatInput.buildIsUatApproved() } }
+      steps { echo 'The build has been approved.' }
+    }
+  }
+}</div>
+<div class="step"><h4><span class="tag">EXPECT —</span> Stage runs when <span class="mono">approved.txt</span> exists; skipped without failing the build when absent.</h4></div>
+
+<h3 class="sec"><span class="n">07 /</span> Step 6 — End-to-End Validation</h3>
+<ul class="tight">
+<li>With file → <span class="status pass"><span class="dot"></span>PASSED</span> stage executed.</li>
+<li>Without file → <span class="status wait"><span class="dot"></span>SKIPPED</span> — no output from inside <span class="mono">when</span> (not a failure).</li>
+<li>Break the library → both consumers break; revert → both fix (proves shared dependency).</li>
+<li>Trouble: <span class="mono">not found</span> → name/version mismatch; sandbox blocks → approve signature or restrict source.</li>
+</ul>
+<div class="kv"><b>PROOF —</b> Reuse without copy-paste, gated by workspace state, consumed from two pipeline styles. <span class="badge green">● REUSE PROVED</span></div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 04 · SHARED LIBRARY</span><span>14 / 19</span></div>
+</div>
+
+<!-- LAB 05 OPENER -->
+<div class="page opener">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Jenkins Labs<hr><h2>Lab 05</h2>Terraform · FLOCI · Approval Gate</div>
+<div class="bignum">05</div>
+<div class="ctitle">TERRAFORM ON FLOCI</div>
+<p class="lede">Infrastructure is a pipeline too. <em>Webhook → init → workspace → plan → human approve → apply → mail on failure — against a simulated AWS.</em></p>
+<h3 class="sec"><span class="n">01 /</span> What This Lab Proves</h3>
+<div class="kv"><b>PROOF —</b> The same CI/CD loop that builds apps can provision infrastructure: <span class="mono">terraform init / workspace / plan / apply</span> behind a Jenkins <span class="mono">input</span> gate, with <span class="mono">Provider.tf</span> pointing at <b>FLOCI</b> instead of real AWS — safe, cost-free, auditable.</div>
+<h3 class="sec"><span class="n">02 /</span> Architecture</h3>
+<div class="arch">
+<div class="box"><img src="../assets/icons/git/github.svg" alt="GitHub" style="width:22px;height:22px"><b>GITHUB</b><small>VPC.tf · Variables.tf<br>Provider.tf · tfvars</small></div><div class="arrow">→</div>
+<div class="box" style="border-left:3px solid var(--accent)"><img src="../assets/icons/jenkins/jenkins.svg" alt="Jenkins" style="width:22px;height:22px"><b>JENKINS</b><small>Checkout → Init<br>Workspace → Plan<br>Approve → Apply</small></div><div class="arrow">→</div>
+<div class="box" style="border-left:3px solid var(--artifact)"><img src="../assets/icons/general/terraform.svg" alt="Terraform" style="width:22px;height:22px"><b>FLOCI</b><small>simulated VPC<br>Subnets · EC2 · S3</small></div>
+</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 05 · TERRAFORM</span><span>15 / 19</span></div>
+</div>
+
+<!-- LAB 05 PRE-FLIGHT + JENKINSFILE -->
+<div class="page">
+<div class="phead"><span class="ch">Labs</span> &nbsp; Lab 05 — Terraform<hr><h2>Pre-Flight & Pipeline</h2>Workspaces · tfvars · Approve</div>
+<h3 class="sec"><span class="n">03 /</span> Step 0 — Pre-Flight</h3>
+<table class="cmp"><tr><th>Check</th><th>Command / Location</th><th>Decision</th></tr>
+<tr><td>Tools</td><td><span class="mono">terraform -version</span> · Jenkins <b>Terraform</b> + <b>Pipeline</b> + <b>Mailer</b> plugins</td><td>Terraform must exist on the agent that runs <span class="mono">sh 'terraform ...'</span></td></tr>
+<tr><td>Credentials</td><td>FLOCI endpoint / API key / provider block format — user must supply</td><td>Real AWS docs do not apply; FLOCI is the provider target</td></tr>
+<tr><td>Repo / state</td><td><span class="mono">VPC.tf</span> · <span class="mono">Variables.tf</span> · <span class="mono">Provider.tf</span> · <span class="mono">dev / stg.tfvars / Prod</span> · <span class="mono">Jenkinsfile</span> exist?</td><td>Workspaces <span class="mono">dev / stg / prod</span> exist? backend = local or remote?</td></tr>
+</table>
+<div class="callout amber"><h4>ASK IN ONE BATCH</h4><p>Provider.tf FLOCI block (endpoint + credentials), environments/workspaces + tfvars contents, who approves the <span class="mono">input</span> gate, mail recipient for <b>Fail → Mail</b>, repo URL/branch.</p></div>
+
+<h3 class="sec"><span class="n">04 /</span> Steps 1–2 — Repo + Jenkinsfile</h3>
+<div class="step"><h4><span class="tag">REPO —</span> Ensure at repo root:</h4> <span class="mono">VPC.tf</span> · <span class="mono">Variables.tf</span> · <span class="mono">Provider.tf</span> (FLOCI endpoint) · <span class="mono">dev / stg.tfvars / Prod</span> → commit & push.</div>
+<div class="terminal">pipeline {
+  agent any
+  stages {
+    stage('Checkout')        { steps { checkout scm } }
+    stage('Terraform Init')  { steps { sh 'terraform init' } }
+    stage('Workspace Select'){ steps { sh 'terraform workspace select ${ENV_NAME} || terraform workspace new ${ENV_NAME}' } }
+    stage('Plan')            { steps { sh 'terraform plan -var-file=${TFVARS_FILE} -out=tfplan' } }
+    stage('Approve')         { steps { input message: 'Apply this Terraform plan?', ok: 'Approve' } }
+    stage('Apply')           { steps { sh 'terraform apply -auto-approve tfplan' } }
+  }
+  post {
+    success { echo 'Provisioned.' }
+    failure { mail to: 'team@example.com', subject: "Terraform failed: ${env.JOB_NAME}" }
+  }
+}</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 05 · TERRAFORM</span><span>16 / 19</span></div>
+</div>
+
+<!-- LAB 05 EXECUTE VERIFY -->
+<div class="page">
+<div class="phead"><span class="ch">Labs</span> &nbsp; Lab 05 — Terraform<hr><h2>Execute · Verify</h2>Plan is blocked until approved</div>
+<h3 class="sec"><span class="n">05 /</span> Execution Flow</h3>
+<div class="pipeline">
+<div class="stage"><span class="no">01</span><strong>CHECKOUT</strong><small>scm</small></div><div class="conn"></div>
+<div class="stage"><span class="no">02</span><strong>INIT</strong><small>terraform init</small></div><div class="conn"></div>
+<div class="stage"><span class="no">03</span><strong>WORKSPACE</strong><small>select / new</small></div><div class="conn"></div>
+<div class="stage artifact"><span class="no">04</span><strong>PLAN</strong><small>tfplan</small></div><div class="conn"></div>
+<div class="stage wait"><span class="no">05</span><strong>APPROVE</strong><small>input gate</small></div><div class="conn"></div>
+<div class="stage"><span class="no">06</span><strong>APPLY</strong><small>to FLOCI</small></div>
+</div>
+<div class="terminal"><span class="c"># stage view during approval</span>
+[01] Checkout         <span class="g">● PASSED</span>
+[02] Terraform Init   <span class="g">● PASSED</span>
+[03] Workspace Select <span class="g">● PASSED</span>  <span class="c">workspace: stg</span>
+[04] Plan            <span class="g">● PASSED</span>  <span class="c">Plan: 3 to add, 0 to change</span>
+[05] Approve         <span class="a">● WAITING</span>  <span class="a">input: Apply this Terraform plan? [Approve / Abort]</span>
+[06] Apply           <span class="c">○ WAITING</span>
+<span class="c"># after Approve →</span>
+[05] Approve         <span class="g">● APPROVED</span>
+[06] Apply           <span class="g">● PASSED</span>  <span class="c">Simulated VPC / Subnets / EC2 / S3 via FLOCI</span></div>
+
+<h3 class="sec"><span class="n">06 /</span> Verify</h3>
+<ul class="tight">
+<li>Select <span class="mono">stg</span> workspace → plan shows expected diff for <span class="mono">stg.tfvars</span>.</li>
+<li>Approval gate pauses; <b>Abort</b> skips Apply (plan discarded).</li>
+<li>After Approve → FLOCI reflects simulated VPC + Subnets + EC2 + S3.</li>
+<li>On failure → <span class="mono">post { failure { mail ... } }</span> fires (if SMTP configured).</li>
+<li>Push a new commit → webhook re-triggers the same pipeline (Lab 01's trigger reused here).</li>
+</ul>
+<div class="callout"><h4>WHY APPROVAL EXISTS</h4><p>Automation stops where human risk judgment is required. <span class="mono">input</span> is the amber gate between <b>knowing what will change</b> (plan) and <b>changing it</b> (apply).</p></div>
+<div class="kv"><b>PROOF —</b> Infrastructure under the same lifecycle as application code: versioned, planned, approved, applied, observable — without touching real AWS. <span class="badge green">● IAC PROVED</span></div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>LAB 05 · TERRAFORM</span><span>17 / 19</span></div>
+</div>
+
+<!-- APPENDIX -->
+<div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Jenkins Labs<hr><h2>Appendix</h2>Proofs · Failure map · Commands</div>
+<h3 class="sec"><span class="n">01 /</span> What Each Lab Proved</h3>
+<table class="cmp"><tr><th>Lab</th><th>Proved</th><th>Key Signal</th></tr>
+<tr><td>01 Webhook</td><td>Push triggers build automatically</td><td>Jenkins build without Build Now + webhook 200</td></tr>
+<tr><td>02 Docker</td><td>Immutable artifact via registry</td><td><span class="mono">myusername/app:build-N</span> on Docker Hub; N increments</td></tr>
+<tr><td>03 Multibranch</td><td>Branch discovery as jobs</td><td>3 jobs, conditional stg stage, orphan removed on rescan</td></tr>
+<tr><td>04 Shared Lib</td><td>Reuse as versioned dependency</td><td>One class → two pipelines; revert fixes both</td></tr>
+<tr><td>05 Terraform</td><td>Infra as a gated pipeline</td><td>Plan → Approve → Apply on FLOCI; mail on failure</td></tr>
+</table>
+
+<h3 class="sec"><span class="n">02 /</span> Failure → Recovery Map</h3>
+<table class="cmp"><tr><th>Failure</th><th>Where to Look</th><th>Fix</th></tr>
+<tr><td>Webhook 4xx/5xx</td><td>GitHub <b>Recent Deliveries</b></td><td>Public URL / tunnel; trailing slash; webhook secret</td></tr>
+<tr><td>Checkout failed</td><td>Jenkins Console Output</td><td>PAT scope <span class="mono">repo</span>; credential ID; branch name</td></tr>
+<tr><td>Docker login denied</td><td>Stage Authentication log</td><td>Use access token; verify ID <span class="mono">dockerhub-creds</span>; repo visibility</td></tr>
+<tr><td>Multibranch empty</td><td>Scan log: Jenkinsfile not found</td><td>Commit Jenkinsfile to the branch before scanning</td></tr>
+<tr><td>Library not found</td><td>Pipeline log: Library resolution</td><td>Name <span class="mono">shared-library</span> must match <span class="mono">@Library(...)</span>; correct default version</td></tr>
+<tr><td>Terraform plan diff wrong</td><td><span class="mono">terraform plan</span> output</td><td>Wrong workspace / tfvars file; Provider.tf still points to real AWS not FLOCI</td></tr>
+<tr><td>Apply paused forever</td><td>Stage Approve (input)</td><td>Someone must click Approve/Abort; check authorized approvers</td></tr>
+</table>
+
+<h3 class="sec"><span class="n">03 /</span> Key Commands</h3>
+<div class="terminal">curl -s -o /dev/null -w "%{http_code}" http://localhost:8080
+docker --version && docker info
+terraform -version && terraform workspace list
+gh --version && gh auth status
+git ls-remote https://github.com/&lt;user&gt;/&lt;repo&gt;.git
+<span class="c"># branch helpers (Lab 03)</span>
+git checkout -b stg && git push -u origin stg
+git push origin --delete dev && echo "rescan to see orphan removal"</div>
+
+<div class="callout blue"><h4>CONTINUITY — WHAT COMES NEXT</h4><p>These five labs compose: <b>Lab 01's trigger</b> launches <b>Lab 02's build</b>, repeated per <b>Lab 03's branches</b>, deduplicated by <b>Lab 04's library</b>, and applied to infra by <b>Lab 05</b>. The next step is securing the chain — credentials, agents, and permissions — covered in <b>PDF 16 · Jenkins Security</b> and <b>PDF 13 · Credentials</b>.</p></div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>JENKINS LABS · APPENDIX</span><span>18 / 19</span></div>
+</div>
+
+<!-- FINAL SYSTEM MAP -->
+<div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Jenkins Labs<hr><h2>System Map</h2>One loop, five realizations</div>
+<h3 class="sec"><span class="n">04 /</span> Jenkins Labs Loop</h3>
+<div class="vpipe" style="margin:12px 0">
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/git/github.svg" alt="GitHub"><b>SOURCE</b><small>GitHub push · main / dev / stg</small></div><div class="vline"></div>
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/jenkins/webhook.svg" alt="Webhook"><b>TRIGGER</b><small>/github-webhook/ · or branch scan</small></div><div class="vline"></div>
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/jenkins/jenkins.svg" alt="Jenkins"><b>PIPELINE</b><small>controller + agents · Jenkinsfile · @Library</small></div><div class="vline"></div>
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/general/package.svg" alt="Artifact"><b>ARTIFACT</b><small>Docker image build-N · Terraform tfplan</small></div><div class="vline"></div>
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/general/database.svg" alt="Registry"><b>REGISTRY</b><small>Docker Hub · FLOCI simulated state</small></div><div class="vline"></div>
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/deployment/rocket.svg" alt="Deploy"><b>DEPLOY</b><small>FLOCI run · workspace apply</small></div><div class="vline"></div>
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/monitoring/activity.svg" alt="Observe"><b>OBSERVE</b><small>console · scan log · Recent Deliveries · mail on fail</small></div>
+<div style="margin-left:4.5px;margin-top:8px;width:2px;height:10px;background:#2c3531"></div>
+<div style="margin-left:0;font-size:9px;color:var(--accent-dark);letter-spacing:1.5px">└────────────→ FEEDBACK → NEXT PUSH</div>
+</div>
+
+<h3 class="sec"><span class="n">05 /</span> Interview Checks</h3>
+<div class="grid2">
+<div class="card"><h4>WHY DOES /github-webhook/ NEED A TRAILING SLASH?</h4><p>Jenkins registers the endpoint with the slash. Without it GitHub receives a redirect that is not treated as a successful delivery.</p></div>
+<div class="card"><h4>MULTIBRANCH VS WEBHOOK?</h4><p>Multibranch discovers branches by scanning; webhooks notify eagerly. Labs 01 and 03 show both — webhook for immediate trigger, scan for air-gapped/periodic discovery.</p></div>
+<div class="card"><h4>WHY withCredentials?</h4><p>It injects the secret as an env var at runtime, masks it in logs, and avoids storing it in the Jenkinsfile or Git history.</p></div>
+<div class="card"><h4>SHARED LIBRARY VERSION PIN?</h4><p><span class="mono">@Library('lib@tag')</span> freezes the consumer. Unpinned <span class="mono">master</span> tracks latest — useful for shared standards, risky for reproducible builds.</p></div>
+</div>
+<div class="printnote"><b>SOURCES:</b> <span class="mono">jenkins labs/GitHub_Jenkins_Webhook_CICD_Trigger_Setup.md</span> · <span class="mono">Jenkins_Docker_Build_Push_DockerHub_FLOCI_Deploy.md</span> · <span class="mono">Jenkins_Multibranch_Pipeline_With_Git.md</span> · <span class="mono">Jenkins_Shared_Library_Example_with_GitHub.md</span> · <span class="mono">Terraform_Jenkins_FLOCI_CICD_Pipeline.md</span> · Print: Ctrl/Cmd+P → Save as PDF → Background graphics on → A4.</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>JENKINS LABS · SYSTEM MAP</span><span>19 / 19</span></div>
+</div>
+
+</body>
+</html>

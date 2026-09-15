@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI/CD Engineering Manual - Infrastructure Automation</title>
+    <style>
+        :root {
+            --paper: #f5f6f4;
+            --white: #ffffff;
+            --ink: #161a19;
+            --muted: #68706d;
+            --line: #d5dad7;
+            --panel: #111614;
+            --panel-2: #1a201d;
+            --text-light: #e8eeeb;
+            --text-muted: #9ca8a3;
+            --accent: #00b87c;
+            --accent-dark: #008f61;
+            --blue: #4387ff;
+            --amber: #d99a24;
+            --red: #d94b4b;
+            --artifact: #8b6cff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: #333;
+            color: var(--ink);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            line-height: 1.5;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 16mm 16mm 19mm;
+            margin: 8mm auto;
+            position: relative;
+            background: var(--paper);
+            page-break-after: always;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .page:last-child { page-break-after: auto; }
+
+        /* HEADER & FOOTER */
+        .page-header {
+            display: flex;
+            align-items: center;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+        }
+        .h-chip { font-weight: 700; color: var(--ink); }
+        .h-rule { flex: 1; height: 1px; background: var(--line); margin: 0 12px; }
+        .h-title { font-weight: 500; }
+
+        .page-footer {
+            position: absolute;
+            bottom: 10mm;
+            left: 16mm;
+            right: 16mm;
+            display: flex;
+            align-items: center;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .f-left { font-weight: 700; color: var(--ink); }
+        .f-rule { flex: 1; height: 1px; background: var(--line); margin: 0 12px; }
+        .f-right { font-weight: 500; }
+
+        /* CONTENT */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2.section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--ink);
+            display: flex;
+            align-items: baseline;
+        }
+        h2.section-title .n {
+            font-size: 14px;
+            color: var(--artifact);
+            font-weight: 600;
+            margin-right: 8px;
+            letter-spacing: 1px;
+        }
+        h3.sub-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            margin-top: 10px;
+            color: var(--ink);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        p { font-size: 11.5px; color: var(--ink); margin-bottom: 10px; line-height: 1.6; }
+        strong { font-weight: 600; }
+        code { font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace; background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 3px; font-size: 10.5px; }
+        
+        /* COVER */
+        .cover {
+            background: var(--panel);
+            color: var(--text-light);
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+        }
+        .cover-left { padding: 30mm 25mm; display: flex; flex-direction: column; justify-content: space-between; }
+        .cover-right { background: var(--panel-2); display: flex; align-items: center; justify-content: center; border-left: 1px solid #2a2f2d; padding: 40mm 20mm; }
+
+        .cover-title { font-size: 48px; font-weight: 700; line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 15px; }
+        .cover-sub { font-size: 18px; color: var(--text-muted); font-weight: 400; margin-bottom: 40px; line-height: 1.4; }
+        .cover-meta { font-size: 10px; letter-spacing: 3px; color: var(--artifact); text-transform: uppercase; font-weight: 600; border-top: 1px solid #2a2f2d; padding-top: 15px; }
+        .cover-footer { display: flex; justify-content: flex-end; align-items: center; }
+
+        .sig {
+            font-family: "Brush Script MT", "Segoe Script", "Snell Roundhand", cursive;
+            font-size: 32px; 
+            color: var(--accent); 
+            transform: rotate(-4deg);
+            text-shadow: 0 0 14px rgba(0,184,124,.45); 
+            white-space: nowrap;
+            margin-top: 20px;
+        }
+
+        /* VERTICAL PIPELINE (COVER) */
+        .v-pipeline {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+            width: 100%;
+        }
+        .v-stage {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 14px 20px;
+            width: 100%;
+            position: relative;
+        }
+        .v-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--artifact);
+            box-shadow: 0 0 12px var(--artifact);
+            flex-shrink: 0;
+        }
+        .v-stage.idle .v-dot { background: var(--muted); box-shadow: none; }
+        .v-stage.running .v-dot { background: var(--blue); box-shadow: 0 0 12px var(--blue); }
+        .v-stage.amber .v-dot { background: var(--amber); box-shadow: 0 0 12px var(--amber); }
+        .v-info strong { display: block; color: var(--text-light); font-size: 14px; font-weight: 600; letter-spacing: 1px; }
+        .v-info small { display: block; color: var(--text-muted); font-size: 10px; }
+        .v-line {
+            width: 2px; height: 24px; background: var(--text-muted); margin-left: 24px;
+            opacity: 0.3;
+        }
+
+        /* HORIZONTAL PIPELINE */
+        .pipeline {
+            display: flex;
+            align-items: stretch;
+            margin: 20px 0;
+            width: 100%;
+        }
+        .stage {
+            flex: 1;
+            background: var(--white);
+            border: 1px solid var(--line);
+            padding: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border-left-width: 3px;
+        }
+        .stage-no { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .stage strong { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink); }
+        .stage small { font-size: 10px; color: var(--muted); display: block; margin-bottom: 4px; }
+        
+        .stage.passed { border-left-color: var(--accent); }
+        .stage.passed .stage-no { color: var(--accent-dark); }
+        .stage.running { border-left-color: var(--blue); }
+        .stage.running .stage-no { color: var(--blue); }
+        .stage.failed { border-left-color: var(--red); }
+        .stage.failed .stage-no { color: var(--red); }
+        .stage.waiting { border-left-color: var(--amber); }
+        .stage.waiting .stage-no { color: var(--amber); }
+        .stage.artifact { border-left-color: var(--artifact); }
+        .stage.artifact .stage-no { color: var(--artifact); }
+        .stage.skipped { border-left-color: var(--muted); opacity: 0.6; }
+        .stage.skipped .stage-no { color: var(--muted); }
+
+        .connector {
+            width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .connector::before {
+            content: '';
+            width: 100%;
+            height: 2px;
+            background: var(--line);
+        }
+        .connector::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            width: 0; height: 0;
+            border-left: 6px solid var(--line);
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+
+        .status-pill {
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: auto;
+            align-self: flex-start;
+        }
+        .status-pill.passed { background: rgba(0,184,124,0.15); color: var(--accent-dark); }
+        .status-pill.running { background: rgba(67,135,255,0.15); color: var(--blue); }
+        .status-pill.waiting { background: rgba(217,154,36,0.15); color: var(--amber); }
+        .status-pill.failed { background: rgba(217,75,75,0.15); color: var(--red); }
+        .status-pill.skipped { background: rgba(104,112,109,0.15); color: var(--muted); }
+
+        /* TERMINAL */
+        .terminal {
+            background: var(--panel);
+            color: var(--text-light);
+            border-radius: 6px;
+            padding: 14px 16px;
+            font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+            font-size: 10.5px;
+            line-height: 1.65;
+            margin: 10px 0;
+            border: 1px solid #2a2f2d;
+        }
+        .term-line { display: block; }
+        .term-prompt { color: var(--accent); }
+        .term-out { color: var(--text-muted); }
+        .term-ok { color: var(--accent); }
+        .term-warn { color: var(--amber); }
+        .term-err { color: var(--red); }
+        .term-blue { color: var(--blue); }
+        .term-artifact { color: var(--artifact); }
+
+        /* COMMAND + RESULT */
+        .cmdres {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .cmdres > div { display: flex; flex-direction: column; }
+        .cmdres h4 { font-size: 9px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; font-weight: 700; letter-spacing: 1px; }
+        .cmdres .term-box {
+            border: 1px solid var(--line);
+            padding: 10px;
+            background: var(--panel);
+            color: var(--text-light);
+            font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+            font-size: 10px;
+            flex: 1;
+            border-radius: 4px;
+        }
+
+        /* CONCEPT GRID */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        .concept-block h4 { font-size: 10px; text-transform: uppercase; color: var(--artifact); margin-bottom: 6px; font-weight: 700; letter-spacing: 1px; }
+        .concept-block p { font-size: 11px; line-height: 1.5; color: var(--ink); }
+
+        /* CALLOUTS */
+        .callout {
+            border-left: 3px solid var(--accent);
+            background: rgba(0, 184, 124, 0.05);
+            padding: 12px 16px;
+            margin: 15px 0;
+        }
+        .callout h4 { font-size: 10px; text-transform: uppercase; color: var(--accent-dark); margin-bottom: 4px; font-weight: 700; letter-spacing: 1px; }
+        .callout p { font-size: 11.5px; color: var(--ink); line-height: 1.5; margin: 0; }
+
+        .gotcha { border-left-color: var(--amber); background: rgba(217, 154, 36, 0.05); }
+        .gotcha h4 { color: var(--amber); }
+        
+        .interview { border-left-color: var(--blue); background: rgba(67, 135, 255, 0.05); }
+        .interview h4 { color: var(--blue); }
+        .interview p { margin-bottom: 5px; }
+        .interview strong { color: var(--ink); }
+
+        /* DECISION DIAGRAM */
+        .dec-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 11px;
+        }
+        .dec-q { 
+            border: 1px solid var(--ink); 
+            padding: 8px 20px; 
+            font-weight: 600; 
+            text-transform: uppercase;
+            background: var(--white);
+            position: relative;
+        }
+        .dec-q::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background: var(--ink);
+        }
+        .dec-branches {
+            display: flex;
+            justify-content: space-around;
+            width: 80%;
+            margin-top: 20px;
+            position: relative;
+        }
+        .dec-branches::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 10%;
+            width: 80%;
+            height: 20px;
+            border-top: 2px solid var(--ink);
+            border-left: 2px solid var(--ink);
+            border-right: 2px solid var(--ink);
+        }
+        .dec-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .dec-label { font-weight: 700; text-transform: uppercase; font-size: 10px; }
+        .dec-branch.yes .dec-label { color: var(--accent-dark); }
+        .dec-branch.no .dec-label { color: var(--red); }
+        .dec-val { 
+            border: 1px dashed var(--muted); 
+            padding: 8px 12px; 
+            text-align: center; 
+            background: var(--white);
+            font-size: 10px;
+            line-height: 1.4;
+        }
+        .dec-val span { display: block; font-family: monospace; color: var(--blue); margin-top: 4px; }
+
+        /* LAB FORMAT */
+        .lab-step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--line);
+        }
+        .lab-step:last-child { border-bottom: none; }
+        .step-no { 
+            font-size: 10px; 
+            font-weight: 700; 
+            color: var(--artifact); 
+            text-transform: uppercase; 
+            width: 70px; 
+            flex-shrink: 0; 
+            letter-spacing: 1px;
+            padding-top: 2px;
+        }
+        .lab-content p { margin: 0; font-size: 11.5px; }
+
+        /* ARCHITECTURE DIAGRAM */
+        .arch-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 11px;
+        }
+        .arch-row { display: flex; justify-content: center; align-items: center; gap: 20px; }
+        .arch-node {
+            border: 1px solid var(--line);
+            padding: 10px 15px;
+            background: var(--white);
+            text-align: center;
+            width: 180px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        .arch-node.highlight { border-color: var(--accent); color: var(--accent-dark); background: rgba(0,184,124,0.05); }
+        .arch-node.blue { border-color: var(--blue); color: var(--blue); background: rgba(67,135,255,0.05); }
+        .arch-node.amber { border-color: var(--amber); color: var(--amber); background: rgba(217,154,36,0.05); }
+        .arch-node.artifact { border-color: var(--artifact); color: var(--artifact); background: rgba(139,108,255,0.05); }
+        .arch-arrow {
+            height: 24px;
+            width: 2px;
+            background: var(--line);
+            position: relative;
+        }
+        .arch-arrow::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -4px;
+            width: 0; height: 0;
+            border-top: 6px solid var(--line);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+        }
+        .arch-arrow.h { width: 40px; height: 2px; }
+        .arch-arrow.h::after {
+            top: -4px;
+            left: auto;
+            right: -4px;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 6px solid var(--line);
+            border-right: none;
+        }
+        .arch-arrow.labeled::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 10px;
+            top: 4px;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        /* FOLDER TREE */
+        .folder-tree {
+            border: 1px solid var(--line);
+            background: var(--white);
+            padding: 15px;
+            font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+            font-size: 11px;
+            margin: 15px 0;
+        }
+        .ft-item { margin: 4px 0; color: var(--ink); }
+        .ft-item.parent { font-weight: 700; color: var(--artifact); }
+        .ft-item.child { margin-left: 20px; color: var(--muted); }
+        .ft-item.file { margin-left: 40px; color: var(--ink); }
+
+        /* ENVIRONMENT LANES */
+        .lanes { margin: 20px 0; }
+        .lane {
+            border: 1px solid var(--line);
+            margin-bottom: 10px;
+            background: var(--white);
+            display: flex;
+            align-items: stretch;
+        }
+        .lane-header { 
+            background: var(--panel-2); 
+            color: var(--text-light); 
+            padding: 10px 15px; 
+            font-size: 10px; 
+            text-transform: uppercase; 
+            font-weight: 700; 
+            letter-spacing: 1px; 
+            width: 100px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            text-align: center;
+        }
+        .lane-body { 
+            padding: 10px 15px; 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            font-size: 11px;
+        }
+        .lane-status { margin-left: auto; font-size: 9px; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; }
+
+        /* TABLES */
+        table.cmp {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin: 15px 0;
+            background: var(--white);
+        }
+        table.cmp th, table.cmp td {
+            border: 1px solid var(--line);
+            padding: 8px 10px;
+            text-align: left;
+        }
+        table.cmp th {
+            background: var(--panel-2);
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
+        table.cmp td:first-child { font-weight: 600; color: var(--muted); }
+
+        /* SYSTEM MAP */
+        .sys-map {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin: 20px 0;
+        }
+        .map-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        .map-box {
+            border: 1px solid var(--ink);
+            padding: 12px 20px;
+            background: var(--white);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            min-width: 140px;
+        }
+        .map-box.artifact { border-color: var(--artifact); color: var(--artifact); }
+        .map-box.blue { border-color: var(--blue); color: var(--blue); }
+        .map-box.green { border-color: var(--accent); color: var(--accent-dark); }
+        .map-arr { color: var(--muted); font-size: 14px; }
+        .map-line { width: 2px; height: 15px; background: var(--line); margin: 0 auto; }
+        .map-feedback {
+            border: 1px dashed var(--accent);
+            padding: 10px;
+            color: var(--accent-dark);
+            font-size: 10px;
+            text-align: center;
+            margin-top: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        @media print {
+            body { background: none; }
+            .page { margin: 0; box-shadow: none; border: none; }
+        }
+    </style>
+<style>/* m-reflow: responsive mobile layout */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0;padding:16px 14px}.page-footer{font-size:9px}.terminal,.code{overflow-x:auto}}
+</style></head>
+<body>
+
+    <!-- COVER PAGE -->
+    <div class="page cover">
+        <div class="cover-left">
+            <div>
+                <div class="cover-title">CI/CD<br>ENGINEERING</div>
+                <div class="cover-sub">Infrastructure Automation: Terraform & Simulated Cloud</div>
+            </div>
+            <div class="cover-meta">
+                Jenkins Pipelines<br>
+                Terraform Workflows<br>
+                Simulated AWS (FLOCI)
+            </div>
+            <div class="cover-footer">
+                <span class="sig">Nabawy</span>
+            </div>
+        </div>
+        <div class="cover-right">
+            <div class="v-pipeline">
+                <div class="v-stage idle">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>SOURCE</strong>
+                        <small>Github Webhook</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage running">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>INIT</strong>
+                        <small>terraform init</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>PLAN</strong>
+                        <small>Generate execution</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage amber">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>APPROVE</strong>
+                        <small>Manual Gate</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>APPLY</strong>
+                        <small>FLOCI Provisioning</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 2: CHAPTER 1 -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">INFRASTRUCTURE PIPELINE</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">01 /</span> The Infrastructure Pipeline</h2>
+            <p>Infrastructure as Code (IaC) requires the same rigorous CI/CD practices as application code. However, unlike application deployments, infrastructure changes can cause immediate, irreversible state shifts. The pipeline must therefore include strict validation and manual approval gates before applying changes.</p>
+            
+            <div class="pipeline">
+                <div class="stage passed">
+                    <span class="stage-no">01</span>
+                    <strong>CHECKOUT</strong>
+                    <small>Git SCM pull</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage passed">
+                    <span class="stage-no">02</span>
+                    <strong>INIT</strong>
+                    <small>Provider download</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage passed">
+                    <span class="stage-no">03</span>
+                    <strong>PLAN</strong>
+                    <small>State diff</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage waiting">
+                    <span class="stage-no">04</span>
+                    <strong>APPROVE</strong>
+                    <small>Human review</small>
+                    <span class="status-pill waiting">WAITING</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage skipped">
+                    <span class="stage-no">05</span>
+                    <strong>APPLY</strong>
+                    <small>Provision FLOCI</small>
+                    <span class="status-pill skipped">IDLE</span>
+                </div>
+            </div>
+
+            <div class="concept-grid">
+                <div class="concept-block">
+                    <h4>WHAT</h4>
+                    <p>A Jenkins pipeline that executes Terraform commands against a simulated AWS environment (FLOCI) to provision VPCs, subnets, and compute resources.</p>
+                </div>
+                <div class="concept-block">
+                    <h4>WHY</h4>
+                    <p>To practice infrastructure automation safely. FLOCI mimics the AWS API without incurring real costs, allowing teams to test CI/CD workflows aggressively.</p>
+                </div>
+                <div class="concept-block">
+                    <h4>WHEN</h4>
+                    <p>Triggered automatically by a GitHub webhook on push, but pauses for manual approval before the destructive <code>apply</code> stage.</p>
+                </div>
+                <div class="concept-block">
+                    <h4>WHAT CHANGES</h4>
+                    <p>Infrastructure moves from manual CLI execution to a versioned, peer-reviewed, automated pipeline. State shifts become deliberate, logged events.</p>
+                </div>
+            </div>
+
+            <div class="callout">
+                <h4>WHY THIS EXISTS</h4>
+                <p>Without a pipeline, infrastructure drifts. Engineers apply changes locally, state files diverge, and recovery becomes impossible. A pipeline enforces a single, auditable path from code to cloud.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 05 &nbsp;|&nbsp; 02 / 08</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 3: PRE-FLIGHT & ARCHITECTURE -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">PROVISIONING ARCHITECTURE</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">02 /</span> Architecture & Pre-Flight</h2>
+            <p>The pipeline bridges GitHub, Jenkins, and FLOCI. The critical integration point is the <code>Provider.tf</code> file, which redirects standard AWS API calls to the FLOCI simulation endpoint.</p>
+
+            <h3 class="sub-title">Execution Architecture</h3>
+            <div class="arch-diagram">
+                <div class="arch-row">
+                    <div class="arch-node">GITHUB REPO</div>
+                    <div class="arch-arrow h labeled" data-label="1. WEBHOOK"></div>
+                    <div class="arch-node blue">JENKINS CI</div>
+                </div>
+                <div style="height: 20px;"></div>
+                <div class="arch-row">
+                    <div class="arch-node artifact">FLOCI SIMULATION</div>
+                    <div class="arch-arrow h" style="transform: rotate(180deg);"></div>
+                    <div class="arch-node highlight">TERRAFORM CLI</div>
+                </div>
+                <div style="height: 20px;"></div>
+                <div class="arch-row">
+                    <div class="arch-node amber">MAIL NOTIFICATION</div>
+                    <div class="arch-arrow h" style="transform: rotate(180deg);"></div>
+                    <div class="arch-node">JENKINS POST</div>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Pre-Flight Verification</h3>
+            <div class="terminal">
+                <span class="term-line"><span class="term-prompt">$</span> terraform -version</span>
+                <span class="term-line term-out">Terraform v1.5.0</span>
+                <span class="term-line"><span class="term-prompt">$</span> curl -s -o /dev/null -w "%{http_code}" http://localhost:8080</span>
+                <span class="term-line term-ok">200</span>
+                <span class="term-line"><span class="term-prompt">$</span> curl -s -o /dev/null -w "%{http_code}" http://floci-sim.local</span>
+                <span class="term-line term-ok">200</span>
+            </div>
+
+            <div class="callout gotcha">
+                <h4>GOTCHA</h4>
+                <p>FLOCI is a simulation, not real AWS. Standard AWS credential patterns (IAM roles, <code>~/.aws/credentials</code>) do not apply. The <code>Provider.tf</code> must be explicitly configured with the FLOCI endpoint URL and simulation tokens gathered in Step 0.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 05 &nbsp;|&nbsp; 03 / 08</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 4: WORKSPACE ISOLATION -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">ENVIRONMENT ISOLATION</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">03 /</span> Workspace Isolation</h2>
+            <p>Infrastructure state must be isolated per environment. A change in <code>dev</code> must never alter <code>prod</code> state. Terraform workspaces combined with environment-specific <code>.tfvars</code> files achieve this within a single pipeline.</p>
+
+            <h3 class="sub-title">Environment Tracks</h3>
+            <div class="lanes">
+                <div class="lane">
+                    <div class="lane-header" style="background: var(--accent-dark);">DEV</div>
+                    <div class="lane-body">
+                        <span>Workspace: dev &nbsp;|&nbsp; File: dev.tfvars</span>
+                        <span class="lane-status" style="background: rgba(0,184,124,0.15); color: var(--accent-dark);">ACTIVE</span>
+                    </div>
+                </div>
+                <div class="lane">
+                    <div class="lane-header" style="background: var(--blue);">STG</div>
+                    <div class="lane-body">
+                        <span>Workspace: stg &nbsp;|&nbsp; File: stg.tfvars</span>
+                        <span class="lane-status" style="background: rgba(67,135,255,0.15); color: var(--blue);">IDLE</span>
+                    </div>
+                </div>
+                <div class="lane">
+                    <div class="lane-header" style="background: var(--amber);">PROD</div>
+                    <div class="lane-body">
+                        <span>Workspace: prod &nbsp;|&nbsp; File: Prod.tfvars</span>
+                        <span class="lane-status" style="background: rgba(217,154,36,0.15); color: var(--amber);">LOCKED</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Workspace Selection Logic</h3>
+            <div class="terminal">
+                <span class="term-line">sh <span class="term-ok">'terraform workspace select ${ENV_NAME} || terraform workspace new ${ENV_NAME}'</span></span>
+                <span class="term-line term-out">Switched to workspace "dev".</span>
+            </div>
+
+            <div class="callout interview">
+                <h4>INTERVIEW CHECK</h4>
+                <p><strong>Q: Why use workspaces instead of separate directories for state?</strong></p>
+                <p>A: Workspaces allow the same Terraform configuration to manage multiple distinct state files without duplicating code. It simplifies the pipeline by parameterizing the environment via a simple <code>--workspace</code> flag rather than altering backend paths dynamically.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 05 &nbsp;|&nbsp; 04 / 08</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 5: THE APPROVAL GATE -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">MANUAL APPROVAL GATE</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">04 /</span> The Approval Gate</h2>
+            <p>Terraform <code>apply</code> is destructive. A pipeline that auto-applies infrastructure changes is dangerous. The pipeline must pause after the <code>plan</code> stage, presenting the execution plan for human review before proceeding.</p>
+
+            <div class="dec-container">
+                <div class="dec-q">APPLY TERRAFORM PLAN?</div>
+                <div class="dec-branches">
+                    <div class="dec-branch yes">
+                        <div class="dec-label">APPROVE</div>
+                        <div class="dec-val">
+                            EXECUTE APPLY
+                            <span>terraform apply tfplan</span>
+                        </div>
+                    </div>
+                    <div class="dec-branch no">
+                        <div class="dec-label">ABORT</div>
+                        <div class="dec-val">
+                            HALT PIPELINE
+                            <span>No changes applied</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Jenkins Input Step</h3>
+            <div class="terminal">
+                <span class="term-line">stage(<span class="term-blue">'Approve'</span>) {</span>
+                <span class="term-line">    steps {</span>
+                <span class="term-line">        input message: <span class="term-ok">'Apply this Terraform plan?'</span>, ok: <span class="term-ok">'Approve'</span></span>
+                <span class="term-line">    }</span>
+                <span class="term-line">}</span>
+            </div>
+
+            <div class="callout gotcha">
+                <h4>GOTCHA</h4>
+                <p>If the pipeline is aborted at the <code>input</code> step, Jenkins marks the build as <code>ABORTED</code>, not <code>FAILED</code>. Ensure your <code>post</code> actions distinguish between failure (requiring a mail alert) and abort (a deliberate human choice).</p>
+            </div>
+            
+            <div class="callout">
+                <h4>WHY IT MATTERS</h4>
+                <p>Automation stops here because a human decision is required. The <code>plan</code> output is the contract; the <code>apply</code> is the execution. Skipping this gate removes accountability from the infrastructure lifecycle.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 05 &nbsp;|&nbsp; 05 / 08</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 6: FLOCI PROVIDER CONFIG -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">SIMULATED CLOUD</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">05 /</span> FLOCI Provider Configuration</h2>
+            <p>To target FLOCI instead of real AWS, the <code>Provider.tf</code> must override the default AWS endpoints. This intercepts the Terraform AWS provider's HTTP calls and routes them to the local simulation.</p>
+
+            <div class="terminal">
+                <span class="term-line"># Provider.tf</span>
+                <span class="term-line">provider <span class="term-blue">"aws"</span> {</span>
+                <span class="term-line">  region = <span class="term-ok">"us-east-1"</span></span>
+                <span class="term-line">  </span>
+                <span class="term-line">  <span class="term-warn"># Redirect to FLOCI Simulation</span></span>
+                <span class="term-line">  endpoints {</span>
+                <span class="term-line">    ec2     = <span class="term-ok">"http://floci-sim.local/ec2"</span></span>
+                <span class="term-line">    s3      = <span class="term-ok">"http://floci-sim.local/s3"</span></span>
+                <span class="term-line">    elasticloadbalancing = <span class="term-ok">"http://floci-sim.local/elb"</span></span>
+                <span class="term-line">  }</span>
+                <span class="term-line">  </span>
+                <span class="term-line">  skip_credentials_validation = true</span>
+                <span class="term-line">  skip_metadata_api_check     = true</span>
+                <span class="term-line">  skip_requesting_account_id  = true</span>
+                <span class="term-line">}</span>
+            </div>
+
+            <div class="cmdres">
+                <div class="cmd-block">
+                    <h4>COMMAND</h4>
+                    <div class="term-box">
+                        <span class="term-line"><span class="term-prompt">$</span> terraform init</span>
+                    </div>
+                </div>
+                <div class="res-block">
+                    <h4>RESULT</h4>
+                    <div class="term-box">
+                        <span class="term-line term-out">Initializing the backend...</span>
+                        <span class="term-line term-out">Initializing provider plugins...</span>
+                        <span class="term-line term-ok">Terraform has been successfully initialized!</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout">
+                <h4>WHY IT MATTERS</h4>
+                <p>By skipping credential validation and overriding endpoints, Terraform operates in a sandbox. This allows engineers to test complex VPC topologies and EC2 deployments against a mock API, ensuring the IaC logic is sound before touching a real cloud billing account.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 05 &nbsp;|&nbsp; 06 / 08</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 7: LAB END-TO-END -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">LAB: PROVISIONING &amp; RECOVERY</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">06 /</span> Lab: End-to-End Provisioning</h2>
+            <p>Execute the pipeline and observe the state transitions, from webhook trigger through manual approval to simulated deployment and failure recovery.</p>
+
+            <div class="lab-step">
+                <div class="step-no">OBSERVE</div>
+                <div class="lab-content"><p>The GitHub repo contains the Terraform code and Jenkinsfile. The webhook is active. We need to verify the pipeline reaches the approval gate.</p></div>
+            </div>
+            <div class="lab-step">
+                <div class="step-no">EXECUTE</div>
+                <div class="lab-content"><p>Push a minor change to trigger the pipeline. Watch the stages: Checkout -> Init -> Workspace Select -> Plan. The pipeline will pause at "Approve".</p></div>
+            </div>
+            <div class="lab-step">
+                <div class="step-no">VERIFY</div>
+                <div class="lab-content"><p>Review the <code>plan</code> output in the Jenkins logs. Click "Approve". Confirm the <code>apply</code> stage runs and FLOCI reflects the new VPC resources.</p></div>
+            </div>
+            <div class="lab-step">
+                <div class="step-no">PROOF</div>
+                <div class="lab-content"><p>Introduce a syntax error in <code>VPC.tf</code> and push. The pipeline will fail at <code>Plan</code>. The <code>post { failure { mail ... } }</code> block executes, sending an alert.</p></div>
+            </div>
+
+            <h3 class="sub-title">Failure &amp; Recovery Flow</h3>
+            <div class="pipeline">
+                <div class="stage passed">
+                    <span class="stage-no">01</span>
+                    <strong>CHECKOUT</strong>
+                    <small>Success</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage passed">
+                    <span class="stage-no">02</span>
+                    <strong>INIT</strong>
+                    <small>Success</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage failed">
+                    <span class="stage-no">03</span>
+                    <strong>PLAN</strong>
+                    <small>Syntax error</small>
+                    <span class="status-pill failed">FAILED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage skipped">
+                    <span class="stage-no">04</span>
+                    <strong>APPLY</strong>
+                    <small>Blocked</small>
+                    <span class="status-pill skipped">SKIPPED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage failed">
+                    <span class="stage-no">05</span>
+                    <strong>POST</strong>
+                    <small>Mail sent</small>
+                    <span class="status-pill failed">ALERT</span>
+                </div>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 05 &nbsp;|&nbsp; 07 / 08</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 8: SYSTEM MAP & TROUBLESHOOTING -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">SYSTEM MAP</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">07 /</span> System Map & Troubleshooting</h2>
+            <p>Infrastructure pipelines fail in predictable ways: state conflicts, provider mismatches, or unauthorized credentials. Use this map to isolate the failure domain.</p>
+
+            <div class="sys-map">
+                <div class="map-row">
+                    <div class="map-box">SOURCE</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box blue">JENKINS</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box amber">PLAN</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box artifact">APPLY</div>
+                </div>
+                <div class="map-feedback">FEEDBACK: STATE LOCK & SIMULATED RESOURCE STATUS</div>
+            </div>
+
+            <h3 class="sub-title">Troubleshooting Flow</h3>
+            <table class="cmp">
+                <thead>
+                    <tr>
+                        <th>Symptom</th>
+                        <th>Root Cause</th>
+                        <th>Recovery</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="color: var(--red);">Init fails (provider)</td>
+                        <td>FLOCI endpoint unreachable</td>
+                        <td>Verify FLOCI service is running and URL in Provider.tf</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--red);">Plan fails (state lock)</td>
+                        <td>Concurrent pipeline runs</td>
+                        <td>Force unlock state or disable concurrent builds</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--red);">Apply fails (403)</td>
+                        <td>FLOCI simulation token invalid</td>
+                        <td>Update Jenkins credentials for FLOCI provider</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--amber);">Pipeline paused forever</td>
+                        <td>Approval gate ignored</td>
+                        <td>Review Jenkins input prompt or abort build</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout interview">
+                <h4>INTERVIEW CHECK</h4>
+                <p><strong>Q: Why use FLOCI instead of a real AWS Sandbox account?</strong></p>
+                <p>A: Real AWS sandboxes still incur costs and carry the risk of accidental production impact if IAM boundaries are misconfigured. FLOCI provides a zero-cost, zero-risk API mock that is ideal for testing the CI/CD pipeline mechanics themselves.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 05 &nbsp;|&nbsp; 08 / 08</span>
+        </footer>
+    </div>
+
+</body>
+</html>

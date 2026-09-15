@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI/CD Engineering Manual - Container Delivery</title>
+    <style>
+        :root {
+            --paper: #f5f6f4;
+            --white: #ffffff;
+            --ink: #161a19;
+            --muted: #68706d;
+            --line: #d5dad7;
+            --panel: #111614;
+            --panel-2: #1a201d;
+            --text-light: #e8eeeb;
+            --text-muted: #9ca8a3;
+            --accent: #00b87c;
+            --accent-dark: #008f61;
+            --blue: #4387ff;
+            --amber: #d99a24;
+            --red: #d94b4b;
+            --artifact: #8b6cff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: #333;
+            color: var(--ink);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            line-height: 1.5;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 16mm 16mm 19mm;
+            margin: 8mm auto;
+            position: relative;
+            background: var(--paper);
+            page-break-after: always;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .page:last-child { page-break-after: auto; }
+
+        /* HEADER & FOOTER */
+        .page-header {
+            display: flex;
+            align-items: center;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+        }
+        .h-chip { font-weight: 700; color: var(--ink); }
+        .h-rule { flex: 1; height: 1px; background: var(--line); margin: 0 12px; }
+        .h-title { font-weight: 500; }
+
+        .page-footer {
+            position: absolute;
+            bottom: 10mm;
+            left: 16mm;
+            right: 16mm;
+            display: flex;
+            align-items: center;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .f-left { font-weight: 700; color: var(--ink); }
+        .f-rule { flex: 1; height: 1px; background: var(--line); margin: 0 12px; }
+        .f-right { font-weight: 500; }
+
+        /* CONTENT */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2.section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--ink);
+            display: flex;
+            align-items: baseline;
+        }
+        h2.section-title .n {
+            font-size: 14px;
+            color: var(--artifact);
+            font-weight: 600;
+            margin-right: 8px;
+            letter-spacing: 1px;
+        }
+        h3.sub-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            margin-top: 10px;
+            color: var(--ink);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        p { font-size: 11.5px; color: var(--ink); margin-bottom: 10px; line-height: 1.6; }
+        strong { font-weight: 600; }
+        code { font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace; background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 3px; font-size: 10.5px; }
+        
+        /* COVER */
+        .cover {
+            background: var(--panel);
+            color: var(--text-light);
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+        }
+        .cover-left { padding: 30mm 25mm; display: flex; flex-direction: column; justify-content: space-between; }
+        .cover-right { background: var(--panel-2); display: flex; align-items: center; justify-content: center; border-left: 1px solid #2a2f2d; padding: 40mm 20mm; }
+
+        .cover-title { font-size: 48px; font-weight: 700; line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 15px; }
+        .cover-sub { font-size: 18px; color: var(--text-muted); font-weight: 400; margin-bottom: 40px; line-height: 1.4; }
+        .cover-meta { font-size: 10px; letter-spacing: 3px; color: var(--artifact); text-transform: uppercase; font-weight: 600; border-top: 1px solid #2a2f2d; padding-top: 15px; }
+        .cover-footer { display: flex; justify-content: flex-end; align-items: center; }
+
+        .sig {
+            font-family: "Brush Script MT", "Segoe Script", "Snell Roundhand", cursive;
+            font-size: 32px; 
+            color: var(--accent); 
+            transform: rotate(-4deg);
+            text-shadow: 0 0 14px rgba(0,184,124,.45); 
+            white-space: nowrap;
+            margin-top: 20px;
+        }
+
+        /* VERTICAL PIPELINE (COVER) */
+        .v-pipeline {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+            width: 100%;
+        }
+        .v-stage {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 14px 20px;
+            width: 100%;
+            position: relative;
+        }
+        .v-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--artifact);
+            box-shadow: 0 0 12px var(--artifact);
+            flex-shrink: 0;
+        }
+        .v-stage.idle .v-dot { background: var(--muted); box-shadow: none; }
+        .v-stage.running .v-dot { background: var(--blue); box-shadow: 0 0 12px var(--blue); }
+        .v-info strong { display: block; color: var(--text-light); font-size: 14px; font-weight: 600; letter-spacing: 1px; }
+        .v-info small { display: block; color: var(--text-muted); font-size: 10px; }
+        .v-line {
+            width: 2px; height: 24px; background: var(--text-muted); margin-left: 24px;
+            opacity: 0.3;
+        }
+
+        /* HORIZONTAL PIPELINE */
+        .pipeline {
+            display: flex;
+            align-items: stretch;
+            margin: 20px 0;
+            width: 100%;
+        }
+        .stage {
+            flex: 1;
+            background: var(--white);
+            border: 1px solid var(--line);
+            padding: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border-left-width: 3px;
+        }
+        .stage-no { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .stage strong { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink); }
+        .stage small { font-size: 10px; color: var(--muted); display: block; margin-bottom: 4px; }
+        
+        .stage.passed { border-left-color: var(--accent); }
+        .stage.passed .stage-no { color: var(--accent-dark); }
+        .stage.running { border-left-color: var(--blue); }
+        .stage.running .stage-no { color: var(--blue); }
+        .stage.failed { border-left-color: var(--red); }
+        .stage.failed .stage-no { color: var(--red); }
+        .stage.waiting { border-left-color: var(--amber); }
+        .stage.waiting .stage-no { color: var(--amber); }
+        .stage.artifact { border-left-color: var(--artifact); }
+        .stage.artifact .stage-no { color: var(--artifact); }
+
+        .connector {
+            width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .connector::before {
+            content: '';
+            width: 100%;
+            height: 2px;
+            background: var(--line);
+        }
+        .connector::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            width: 0; height: 0;
+            border-left: 6px solid var(--line);
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+
+        .status-pill {
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: auto;
+            align-self: flex-start;
+        }
+        .status-pill.passed { background: rgba(0,184,124,0.15); color: var(--accent-dark); }
+        .status-pill.running { background: rgba(67,135,255,0.15); color: var(--blue); }
+        .status-pill.waiting { background: rgba(217,154,36,0.15); color: var(--amber); }
+        .status-pill.failed { background: rgba(217,75,75,0.15); color: var(--red); }
+
+        /* TERMINAL */
+        .terminal {
+            background: var(--panel);
+            color: var(--text-light);
+            border-radius: 6px;
+            padding: 14px 16px;
+            font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+            font-size: 10.5px;
+            line-height: 1.65;
+            margin: 10px 0;
+            border: 1px solid #2a2f2d;
+        }
+        .term-line { display: block; }
+        .term-prompt { color: var(--accent); }
+        .term-out { color: var(--text-muted); }
+        .term-ok { color: var(--accent); }
+        .term-warn { color: var(--amber); }
+        .term-err { color: var(--red); }
+        .term-blue { color: var(--blue); }
+        .term-artifact { color: var(--artifact); }
+
+        /* COMMAND + RESULT */
+        .cmdres {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .cmdres > div { display: flex; flex-direction: column; }
+        .cmdres h4 { font-size: 9px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; font-weight: 700; letter-spacing: 1px; }
+        .cmdres .term-box {
+            border: 1px solid var(--line);
+            padding: 10px;
+            background: var(--panel);
+            color: var(--text-light);
+            font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+            font-size: 10px;
+            flex: 1;
+            border-radius: 4px;
+        }
+
+        /* CONCEPT GRID */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        .concept-block h4 { font-size: 10px; text-transform: uppercase; color: var(--artifact); margin-bottom: 6px; font-weight: 700; letter-spacing: 1px; }
+        .concept-block p { font-size: 11px; line-height: 1.5; color: var(--ink); }
+
+        /* CALLOUTS */
+        .callout {
+            border-left: 3px solid var(--accent);
+            background: rgba(0, 184, 124, 0.05);
+            padding: 12px 16px;
+            margin: 15px 0;
+        }
+        .callout h4 { font-size: 10px; text-transform: uppercase; color: var(--accent-dark); margin-bottom: 4px; font-weight: 700; letter-spacing: 1px; }
+        .callout p { font-size: 11.5px; color: var(--ink); line-height: 1.5; margin: 0; }
+
+        .gotcha { border-left-color: var(--amber); background: rgba(217, 154, 36, 0.05); }
+        .gotcha h4 { color: var(--amber); }
+        
+        .interview { border-left-color: var(--blue); background: rgba(67, 135, 255, 0.05); }
+        .interview h4 { color: var(--blue); }
+        .interview p { margin-bottom: 5px; }
+        .interview strong { color: var(--ink); }
+
+        /* DECISION DIAGRAM */
+        .dec-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 11px;
+        }
+        .dec-q { 
+            border: 1px solid var(--ink); 
+            padding: 8px 20px; 
+            font-weight: 600; 
+            text-transform: uppercase;
+            background: var(--white);
+            position: relative;
+        }
+        .dec-q::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background: var(--ink);
+        }
+        .dec-branches {
+            display: flex;
+            justify-content: space-around;
+            width: 80%;
+            margin-top: 20px;
+            position: relative;
+        }
+        .dec-branches::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 10%;
+            width: 80%;
+            height: 20px;
+            border-top: 2px solid var(--ink);
+            border-left: 2px solid var(--ink);
+            border-right: 2px solid var(--ink);
+        }
+        .dec-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .dec-label { font-weight: 700; text-transform: uppercase; font-size: 10px; }
+        .dec-branch.yes .dec-label { color: var(--accent-dark); }
+        .dec-branch.no .dec-label { color: var(--red); }
+        .dec-val { 
+            border: 1px dashed var(--muted); 
+            padding: 8px 12px; 
+            text-align: center; 
+            background: var(--white);
+            font-size: 10px;
+            line-height: 1.4;
+        }
+        .dec-val span { display: block; font-family: monospace; color: var(--blue); margin-top: 4px; }
+
+        /* LAB FORMAT */
+        .lab-step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--line);
+        }
+        .lab-step:last-child { border-bottom: none; }
+        .step-no { 
+            font-size: 10px; 
+            font-weight: 700; 
+            color: var(--artifact); 
+            text-transform: uppercase; 
+            width: 70px; 
+            flex-shrink: 0; 
+            letter-spacing: 1px;
+            padding-top: 2px;
+        }
+        .lab-content p { margin: 0; font-size: 11.5px; }
+
+        /* ARCHITECTURE DIAGRAM */
+        .arch-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 11px;
+        }
+        .arch-row { display: flex; justify-content: center; align-items: center; gap: 20px; }
+        .arch-node {
+            border: 1px solid var(--line);
+            padding: 10px 15px;
+            background: var(--white);
+            text-align: center;
+            width: 200px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        .arch-node.highlight { border-color: var(--accent); color: var(--accent-dark); background: rgba(0,184,124,0.05); }
+        .arch-node.blue { border-color: var(--blue); color: var(--blue); background: rgba(67,135,255,0.05); }
+        .arch-node.amber { border-color: var(--amber); color: var(--amber); background: rgba(217,154,36,0.05); }
+        .arch-node.artifact { border-color: var(--artifact); color: var(--artifact); background: rgba(139,108,255,0.05); }
+        .arch-arrow {
+            height: 24px;
+            width: 2px;
+            background: var(--line);
+            position: relative;
+        }
+        .arch-arrow::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -4px;
+            width: 0; height: 0;
+            border-top: 6px solid var(--line);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+        }
+        .arch-arrow.h { width: 40px; height: 2px; }
+        .arch-arrow.h::after {
+            top: -4px;
+            left: auto;
+            right: -4px;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 6px solid var(--line);
+            border-right: none;
+        }
+        .arch-arrow.labeled::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 10px;
+            top: 4px;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* ARTIFACT VISUAL */
+        .artifact-box {
+            border: 2px solid var(--artifact);
+            background: rgba(139,108,255,0.05);
+            padding: 12px;
+            margin: 10px auto;
+            width: 260px;
+            text-align: center;
+            font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+            border-radius: 4px;
+        }
+        .artifact-box .a-label { font-size: 9px; color: var(--artifact); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px; display: block; }
+        .artifact-box .a-name { font-size: 14px; color: var(--ink); font-weight: 600; }
+
+        /* TABLES */
+        table.cmp {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin: 15px 0;
+            background: var(--white);
+        }
+        table.cmp th, table.cmp td {
+            border: 1px solid var(--line);
+            padding: 8px 10px;
+            text-align: left;
+        }
+        table.cmp th {
+            background: var(--panel-2);
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
+        table.cmp td:first-child { font-weight: 600; color: var(--muted); }
+
+        /* SYSTEM MAP */
+        .sys-map {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin: 20px 0;
+        }
+        .map-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        .map-box {
+            border: 1px solid var(--ink);
+            padding: 12px 20px;
+            background: var(--white);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            min-width: 140px;
+        }
+        .map-box.artifact { border-color: var(--artifact); color: var(--artifact); }
+        .map-box.blue { border-color: var(--blue); color: var(--blue); }
+        .map-box.green { border-color: var(--accent); color: var(--accent-dark); }
+        .map-arr { color: var(--muted); font-size: 14px; }
+        .map-line { width: 2px; height: 15px; background: var(--line); margin: 0 auto; }
+        .map-feedback {
+            border: 1px dashed var(--accent);
+            padding: 10px;
+            color: var(--accent-dark);
+            font-size: 10px;
+            text-align: center;
+            margin-top: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        @media print {
+            body { background: none; }
+            .page { margin: 0; box-shadow: none; border: none; }
+        }
+    </style>
+<style>/* m-reflow: responsive mobile layout */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0;padding:16px 14px}.page-footer{font-size:9px}.terminal,.code{overflow-x:auto}}
+</style></head>
+<body>
+
+    <!-- COVER PAGE -->
+    <div class="page cover">
+        <div class="cover-left">
+            <div>
+                <div class="cover-title">CI/CD<br>ENGINEERING</div>
+                <div class="cover-sub">Container Artifacts & Delivery: From Source to Registry</div>
+            </div>
+            <div class="cover-meta">
+                Continuous Integration<br>
+                Container Delivery<br>
+                Simulated Deployment
+            </div>
+            <div class="cover-footer">
+                <span class="sig">Nabawy</span>
+            </div>
+        </div>
+        <div class="cover-right">
+            <div class="v-pipeline">
+                <div class="v-stage idle">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>SOURCE</strong>
+                        <small>Github repository</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage running">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>BUILD</strong>
+                        <small>Docker image</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>TAG</strong>
+                        <small>build-123</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>PUSH</strong>
+                        <small>Docker hub registry</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>DEPLOY</strong>
+                        <small>Floci simulation</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 2: CHAPTER 1 -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">CONTAINER DELIVERY</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">01 /</span> The Container Lifecycle</h2>
+            <p>Moving from source code to a running application requires a deterministic path. The code must be compiled, packaged with its dependencies, and shipped as an immutable artifact. In modern CI/CD, this artifact is a Docker image.</p>
+            
+            <div class="pipeline">
+                <div class="stage passed">
+                    <span class="stage-no">01</span>
+                    <strong>SOURCE</strong>
+                    <small>Git checkout</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage running">
+                    <span class="stage-no">02</span>
+                    <strong>BUILD</strong>
+                    <small>docker build</small>
+                    <span class="status-pill running">RUNNING</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage artifact">
+                    <span class="stage-no">03</span>
+                    <strong>ARTIFACT</strong>
+                    <small>Image tagged</small>
+                    <span class="status-pill waiting">PUSHING</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage waiting">
+                    <span class="stage-no">04</span>
+                    <strong>REGISTRY</strong>
+                    <small>Docker Hub</small>
+                    <span class="status-pill waiting">WAITING</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage">
+                    <span class="stage-no">05</span>
+                    <strong>DEPLOY</strong>
+                    <small>FLOCI Env</small>
+                    <span class="status-pill waiting">WAITING</span>
+                </div>
+            </div>
+
+            <div class="concept-grid">
+                <div class="concept-block">
+                    <h4>WHAT</h4>
+                    <p>A pipeline that pulls source code, builds a Docker image, tags it with a unique build identifier, pushes it to a central registry, and optionally deploys it to a target environment.</p>
+                </div>
+                <div class="concept-block">
+                    <h4>WHY</h4>
+                    <p>Containerizing the application ensures environment parity. The exact artifact that passed CI is the one deployed, eliminating "it works on my machine" discrepancies.</p>
+                </div>
+                <div class="concept-block">
+                    <h4>WHEN</h4>
+                    <p>On every commit or merge to the main branch. The pipeline triggers automatically via webhook, executing the build and push sequence.</p>
+                </div>
+                <div class="concept-block">
+                    <h4>WHAT CHANGES</h4>
+                    <p>The release unit shifts from raw source code to a versioned, immutable container image. The registry becomes the source of truth for deployable software.</p>
+                </div>
+            </div>
+
+            <div class="callout">
+                <h4>WHY THIS EXISTS</h4>
+                <p>Without a standardized packaging format, deployment scripts must understand the application's dependency tree. A Docker image bundles the OS, libraries, and code into a single, static unit, radically simplifying the deployment target.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 02 &nbsp;|&nbsp; 02 / 08</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 3: PRE-FLIGHT & ARCHITECTURE -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">BUILD ARCHITECTURE</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">02 /</span> Build Architecture & Pre-Flight</h2>
+            <p>The pipeline requires specific tools to be available on the Jenkins agent before execution. Verifying these dependencies upfront prevents silent failures during the Docker build or push stages.</p>
+
+            <h3 class="sub-title">Execution Architecture</h3>
+            <div class="arch-diagram">
+                <div class="arch-row">
+                    <div class="arch-node">GITHUB SOURCE</div>
+                    <div class="arch-arrow h labeled" data-label="1. CLONE"></div>
+                    <div class="arch-node blue">JENKINS AGENT</div>
+                </div>
+                <div style="height: 20px;"></div>
+                <div class="arch-row">
+                    <div class="arch-node artifact">DOCKER HUB REGISTRY</div>
+                    <div class="arch-arrow h" style="transform: rotate(180deg);"></div>
+                    <div class="arch-node highlight">DOCKER ENGINE</div>
+                </div>
+                <div style="height: 20px;"></div>
+                <div class="arch-row">
+                    <div class="arch-node amber">FLOCI SIMULATION</div>
+                    <div class="arch-arrow h" style="transform: rotate(180deg);"></div>
+                    <div class="arch-node">RUN CONTAINER</div>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Pre-Flight Verification</h3>
+            <div class="terminal">
+                <span class="term-line"><span class="term-prompt">$</span> docker --version</span>
+                <span class="term-line term-out">Docker version 24.0.2, build cb74dfc</span>
+                <span class="term-line"><span class="term-prompt">$</span> groups jenkins</span>
+                <span class="term-line term-out">jenkins : jenkins <span class="term-ok">docker</span></span>
+                <span class="term-line"><span class="term-prompt">$</span> git --version</span>
+                <span class="term-line term-out">git version 2.34.1</span>
+            </div>
+
+            <div class="callout gotcha">
+                <h4>GOTCHA</h4>
+                <p>Jenkins must have permission to execute Docker commands. The <code>jenkins</code> user must be added to the <code>docker</code> group, or the Docker Pipeline plugin must be configured to use a sidecar container. Otherwise, the build stage will fail with a "permission denied" socket error.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 02 &nbsp;|&nbsp; 03 / 08</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 4: CREDENTIALS & AUTHENTICATION -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">SECURE AUTHENTICATION</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">03 /</span> Registry Authentication</h2>
+            <p>To push an image to a private or public Docker Hub repository, Jenkins must authenticate. Credentials must be stored securely in Jenkins and injected at runtime, never hardcoded into the Jenkinsfile.</p>
+
+            <h3 class="sub-title">Credential Configuration</h3>
+            <p>In Jenkins, navigate to <strong>Manage Jenkins → Credentials</strong> and add a "Username with password" credential. Use your Docker Hub username and an Access Token (not your account password).</p>
+
+            <div class="cmdres">
+                <div class="cmd-block">
+                    <h4>PIPELINE SNIPPET</h4>
+                    <div class="term-box">
+                        <span class="term-line">withCredentials([</span>
+                        <span class="term-line">  usernamePassword(</span>
+                        <span class="term-line">    credentialsId: <span class="term-ok">'dockerhub-creds'</span>,</span>
+                        <span class="term-line">    usernameVariable: <span class="term-blue">'DOCKER_USER'</span>,</span>
+                        <span class="term-line">    passwordVariable: <span class="term-blue">'DOCKER_PASS'</span></span>
+                        <span class="term-line">  )</span>
+                        <span class="term-line">]) {</span>
+                        <span class="term-line">  sh <span class="term-ok">'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'</span></span>
+                        <span class="term-line">}</span>
+                    </div>
+                </div>
+                <div class="res-block">
+                    <h4>EXECUTION RESULT</h4>
+                    <div class="term-box">
+                        <span class="term-line term-out">[Pipeline] stage</span>
+                        <span class="term-line term-out">[Pipeline] withCredentials</span>
+                        <span class="term-line term-warn">Masking supported pattern matches of $DOCKER_USER or $DOCKER_PASS</span>
+                        <span class="term-line term-out">[Pipeline] sh</span>
+                        <span class="term-line"><span class="term-prompt">+</span> echo ****</span>
+                        <span class="term-line term-ok">Login Succeeded</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout gotcha">
+                <h4>GOTCHA</h4>
+                <p>Docker Hub has deprecated password authentication for CLI push operations. You must generate a Personal Access Token (PAT) from Docker Hub's Account Settings → Security and use that token as the password in Jenkins.</p>
+            </div>
+
+            <div class="callout interview">
+                <h4>INTERVIEW CHECK</h4>
+                <p><strong>Q: Why use <code>--password-stdin</code> instead of <code>-p &lt;password&gt;</code>?</strong></p>
+                <p>A: Using <code>-p</code> on the command line exposes the password in the process list and shell history, which other users on the system could read. <code>--password-stdin</code> pipes the token securely via standard input, preventing it from being logged.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 02 &nbsp;|&nbsp; 04 / 08</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 5: JENKINSFILE CONSTRUCTION -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">PIPELINE DEFINITION</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">04 /</span> Jenkinsfile Construction</h2>
+            <p>The declarative pipeline orchestrates the build, tag, and push sequence. Environment variables capture the image name and build tag, ensuring traceability between the Git commit, the Jenkins build number, and the Docker image.</p>
+
+            <div class="terminal">
+                <span class="term-line">pipeline {</span>
+                <span class="term-line">    agent any</span>
+                <span class="term-line">    environment {</span>
+                <span class="term-line">        IMAGE_NAME = <span class="term-ok">"myusername/app"</span></span>
+                <span class="term-line">        IMAGE_TAG  = <span class="term-ok">"build-${env.BUILD_NUMBER}"</span></span>
+                <span class="term-line">    }</span>
+                <span class="term-line">    stages {</span>
+                <span class="term-line">        stage(<span class="term-blue">'Code Checkout'</span>) { steps { checkout scm } }</span>
+                <span class="term-line">        stage(<span class="term-blue">'Docker Build'</span>) {</span>
+                <span class="term-line">            steps { sh <span class="term-ok">"docker build -t ${IMAGE_NAME}:local ."</span> }</span>
+                <span class="term-line">        }</span>
+                <span class="term-line">        stage(<span class="term-blue">'Image Tagging'</span>) {</span>
+                <span class="term-line">            steps { sh <span class="term-ok">"docker tag ${IMAGE_NAME}:local ${IMAGE_NAME}:${IMAGE_TAG}"</span> }</span>
+                <span class="term-line">        }</span>
+                <span class="term-line">        stage(<span class="term-blue">'Image Push'</span>) {</span>
+                <span class="term-line">            steps { sh <span class="term-ok">"docker push ${IMAGE_NAME}:${IMAGE_TAG}"</span> }</span>
+                <span class="term-line">        }</span>
+                <span class="term-line">    }</span>
+                <span class="term-line">}</span>
+            </div>
+
+            <div class="artifact-box">
+                <span class="a-label">Generated Artifact</span>
+                <div class="a-name">myusername/app:build-123</div>
+            </div>
+
+            <div class="callout">
+                <h4>WHY IT MATTERS</h4>
+                <p>Tagging the image with <code>build-${BUILD_NUMBER}</code> creates an immutable, traceable link to the Jenkins execution. If a deployment fails, you can immediately pull the exact image that was deployed and inspect it. Using <code>:latest</code> destroys this traceability.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 02 &nbsp;|&nbsp; 05 / 08</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 6: DEPLOYMENT TRACK -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">SIMULATED DEPLOYMENT</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">05 /</span> The Deployment Track</h2>
+            <p>Once the image is in the registry, the pipeline can optionally deploy it to a target environment. In this lab, the target is FLOCI, a simulated AWS infrastructure environment. The deployment stage must be conditional to allow for build-only runs.</p>
+
+            <div class="dec-container">
+                <div class="dec-q">DEPLOY TO FLOCI?</div>
+                <div class="dec-branches">
+                    <div class="dec-branch yes">
+                        <div class="dec-label">YES</div>
+                        <div class="dec-val">
+                            EXECUTE STAGE 7
+                            <span>DEPLOY_TO_FLOCI=true</span>
+                        </div>
+                    </div>
+                    <div class="dec-branch no">
+                        <div class="dec-label">NO</div>
+                        <div class="dec-val">
+                            HALT PIPELINE
+                            <span>Image remains in Registry</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Environment Lanes</h3>
+            <div class="lanes">
+                <div class="lane">
+                    <div class="lane-header" style="background: var(--artifact);">BUILD</div>
+                    <div class="lane-body">
+                        <span>Docker Build & Push to Registry</span>
+                        <span class="lane-status" style="background: rgba(139,108,255,0.15); color: var(--artifact);">PASSED</span>
+                    </div>
+                </div>
+                <div class="lane">
+                    <div class="lane-header" style="background: var(--blue);">FLOCI</div>
+                    <div class="lane-body">
+                        <span>Run application container in simulated AWS</span>
+                        <span class="lane-status" style="background: rgba(67,135,255,0.15); color: var(--blue);">RUNNING</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Conditional Deployment Stage</h3>
+            <div class="terminal">
+                <span class="term-line">stage(<span class="term-blue">'Application Deployment'</span>) {</span>
+                <span class="term-line">    when { expression { return params.DEPLOY_TO_FLOCI == true } }</span>
+                <span class="term-line">    steps {</span>
+                <span class="term-line">        echo <span class="term-ok">"Deploying ${IMAGE_NAME}:${IMAGE_TAG} to FLOCI..."</span></span>
+                <span class="term-line">        // FLOCI specific run command here</span>
+                <span class="term-line">    }</span>
+                <span class="term-line">}</span>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 02 &nbsp;|&nbsp; 06 / 08</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 7: LAB EXECUTION -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">LAB: END-TO-END DELIVERY</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">06 /</span> Lab: End-to-End Delivery</h2>
+            <p>Execute the pipeline and verify the artifact progression from source code to registry deployment.</p>
+
+            <div class="lab-step">
+                <div class="step-no">OBSERVE</div>
+                <div class="lab-content"><p>The repository contains the Dockerfile and Jenkinsfile. The webhook is configured. We need to verify the image is built and pushed successfully.</p></div>
+            </div>
+            <div class="lab-step">
+                <div class="step-no">EXECUTE</div>
+                <div class="lab-content"><p>Trigger the pipeline via a Git push or manual "Build Now". Observe the Jenkins console output for each stage.</p></div>
+            </div>
+            <div class="lab-step">
+                <div class="step-no">VERIFY</div>
+                <div class="lab-content"><p>Check Docker Hub for the new tag <code>build-&lt;N&gt;</code>. If FLOCI deployment is active, verify the container is running in the simulation.</p></div>
+            </div>
+            <div class="lab-step">
+                <div class="step-no">PROOF</div>
+                <div class="lab-content"><p>The application is now packaged as an immutable artifact and delivered to the registry, ready for deployment.</p></div>
+            </div>
+
+            <div class="pipeline">
+                <div class="stage passed">
+                    <span class="stage-no">01</span>
+                    <strong>BUILD</strong>
+                    <small>docker build</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage passed">
+                    <span class="stage-no">02</span>
+                    <strong>AUTH</strong>
+                    <small>docker login</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage passed">
+                    <span class="stage-no">03</span>
+                    <strong>TAG</strong>
+                    <small>build-124</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage passed">
+                    <span class="stage-no">04</span>
+                    <strong>PUSH</strong>
+                    <small>Docker Hub</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage running">
+                    <span class="stage-no">05</span>
+                    <strong>DEPLOY</strong>
+                    <small>FLOCI</small>
+                    <span class="status-pill running">RUNNING</span>
+                </div>
+            </div>
+
+            <div class="cmdres">
+                <div class="cmd-block">
+                    <h4>COMMAND</h4>
+                    <div class="term-box">
+                        <span class="term-line"><span class="term-prompt">$</span> docker push myusername/app:build-124</span>
+                    </div>
+                </div>
+                <div class="res-block">
+                    <h4>RESULT</h4>
+                    <div class="term-box">
+                        <span class="term-line term-out">The push refers to repository [docker.io/myusername/app]</span>
+                        <span class="term-line term-ok">2c3f4e5d6a7b: Pushed</span>
+                        <span class="term-line term-ok">build-124: digest: sha:4f5b... size: 528</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 02 &nbsp;|&nbsp; 07 / 08</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 8: SYSTEM MAP & TROUBLESHOOTING -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">SYSTEM MAP</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">07 /</span> System Map & Troubleshooting</h2>
+            <p>The container delivery pipeline is a critical path. Failures in building or pushing artifacts will block all downstream deployments. Use this map to contextualize the Docker build process and resolve common failure states.</p>
+
+            <div class="sys-map">
+                <div class="map-row">
+                    <div class="map-box">SOURCE</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box blue">CI BUILD</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box artifact">REGISTRY</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box green">FLOCI ENV</div>
+                </div>
+                <div class="map-feedback">FEEDBACK: DEPLOYMENT STATUS & LOGS RETURNED TO JENKINS</div>
+            </div>
+
+            <h3 class="sub-title">Troubleshooting Flow</h3>
+            <table class="cmp">
+                <thead>
+                    <tr>
+                        <th>Symptom</th>
+                        <th>Root Cause</th>
+                        <th>Recovery</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="color: var(--red);">Build fails (permission)</td>
+                        <td>Jenkins user not in docker group</td>
+                        <td><code>sudo usermod -aG docker jenkins</code></td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--red);">Push fails (unauthorized)</td>
+                        <td>Invalid Docker Hub token</td>
+                        <td>Regenerate Access Token, update Jenkins Credentials</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--red);">Deploy fails (not found)</td>
+                        <td>Image tag mismatch</td>
+                        <td>Ensure FLOCI pulls <code>build-${BUILD_NUMBER}</code></td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--amber);">Build slow/bloated</td>
+                        <td>Invalid Dockerfile layer cache</td>
+                        <td>Optimize Dockerfile (copy deps first)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout interview">
+                <h4>INTERVIEW CHECK</h4>
+                <p><strong>Q: Why tag with the build number instead of the Git commit hash?</strong></p>
+                <p>A: While commit hashes are immutable, they are not human-readable or sequential. The build number provides a simple, incrementing identifier that directly maps to the Jenkins execution, making it easier to discuss and trace ("build 124 failed").</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 02 &nbsp;|&nbsp; 08 / 08</span>
+        </footer>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CI/CD Engineering — PDF 41: GitHub Actions Roadmap 2026</title>
+<style>
+:root{--paper:#f5f6f4;--white:#fff;--ink:#161a19;--muted:#68706d;--line:#d5dad7;--panel:#111614;--panel-2:#1a201d;--text-light:#e8eeeb;--text-muted:#9ca8a3;--accent:#00b87c;--accent-dark:#008f61;--blue:#4387ff;--amber:#d99a24;--red:#d94b4b;--artifact:#8b6cff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0c0f0e;font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+@page{size:A4;margin:0}
+.page{width:210mm;min-height:297mm;padding:16mm 16mm 19mm;margin:8mm auto;position:relative;background:var(--paper);page-break-after:always;overflow:hidden;display:flex;flex-direction:column}
+@media print{body{background:#fff}.page{margin:0;box-shadow:none}h3.sec,.phead h2{break-after:avoid}table.cmp,.qa,.kv,.callout,.terminal,.vflow{break-inside:avoid}}
+.phead{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.phead .ch{color:var(--accent-dark);font-weight:700}
+.phead h2{font-size:22px;letter-spacing:1px;color:var(--ink);margin:2px 0 6px;text-transform:uppercase}
+.phead hr{border:none;border-top:1.5px solid var(--ink);margin-bottom:10px}
+.pfoot{margin-top:auto;padding-top:8px;font-size:9px;color:var(--muted);display:flex;justify-content:space-between;border-top:1px solid var(--line);letter-spacing:1px}
+h3.sec{font-size:18px;margin:14px 0 8px;text-transform:uppercase;letter-spacing:.5px;break-after:avoid}
+h3.sec .n{color:var(--accent-dark);font-family:"Cascadia Code",Consolas,monospace;font-size:13px;margin-right:8px}
+p.body{font-size:13px;line-height:1.65;margin:7px 0}
+p.small{font-size:12px;line-height:1.6;color:var(--muted);margin:6px 0}
+code,.mono{font-family:"SFMono-Regular","Cascadia Code",Consolas,monospace}
+.cover{background:var(--panel);color:var(--text-light);justify-content:center}
+.cover .brand{font-size:10px;letter-spacing:4px;color:var(--text-muted)}
+.cover h1{font-size:38px;line-height:1.05;margin:10px 0 4px;letter-spacing:1px}
+.cover h1 span{color:var(--blue)}
+.cover .sub{font-size:14px;color:var(--text-muted);margin-bottom:16px}
+.cover .tri{font-size:10px;letter-spacing:2.5px;color:var(--text-muted);margin-bottom:22px;line-height:1.9}
+.vpipe{display:flex;flex-direction:column;margin:6px 0 26px}
+.vnode{display:flex;align-items:center;gap:12px}
+.vnode .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--blue);box-shadow:0 0 10px rgba(67,135,255,.5);flex:none}
+.vnode.g .dot{border-color:var(--accent);box-shadow:0 0 10px rgba(0,184,124,.55)}
+.vnode.r .dot{border-color:var(--red);box-shadow:0 0 10px rgba(217,75,75,.5)}
+.vnode.am .dot{border-color:var(--amber);box-shadow:0 0 10px rgba(217,154,36,.55)}
+.vnode.p .dot{border-color:var(--artifact);box-shadow:0 0 10px rgba(139,108,255,.45)}
+
+.cover .vnode img{filter:drop-shadow(0 0 0.9px #18E299) drop-shadow(0 0 4px rgba(24,226,153,.22));}
+.cover .vnode img[src*="github"]{background:none;border-radius:0;padding:0;box-shadow:none;filter:drop-shadow(0 0 0.9px #18E299) drop-shadow(0 0 5px rgba(24,226,153,.28));}
+.cover .vnode img[src*="github"]{background:none;border-radius:0;padding:0;box-shadow:none;filter:drop-shadow(1px 0 0 white) drop-shadow(-1px 0 0 white) drop-shadow(0 1px 0 white) drop-shadow(0 -1px 0 white) drop-shadow(0.7px 0.7px 0 white) drop-shadow(-0.7px -0.7px 0 white) drop-shadow(-0.7px 0.7px 0 white) drop-shadow(0.7px -0.7px 0 white);}
+/* icon: github white on dark, black on light — no halo */
+.cover .vnode img[src*="github"]{filter:invert(1) brightness(1.05);background:none;box-shadow:none;border-radius:0;padding:0;}
+.cover .vnode img:not([src*="github"]){filter:none;}
+/* icon: outline/black icons white on dark covers */
+.cover .vnode img[src*="github"], .cover .vnode img[src*="workflow"], .cover .vnode img[src*="hammer"], .cover .vnode img[src*="package"], .cover .vnode img[src*="database"], .cover .vnode img[src*="puzzle"], .cover .vnode img[src*="server"], .cover .vnode img[src*="terminal"], .cover .vnode img[src*="shield"], .cover .vnode img[src*="activity"], .cover .vnode img[src*="webhook"], .cover .vnode img[src*="wrench"], .cover .vnode img[src*="flask"], .cover .vnode img[src*="rocket"]{filter:invert(1) brightness(1.05);}
+.vnode img{width:24px;height:24px;flex:none}
+.vnode b{font-size:11px;letter-spacing:2px}
+.vnode small{font-size:10px;color:var(--text-muted)}
+.vline{width:2px;height:14px;background:#2c3531;margin-left:6px}
+.cover .foot{font-size:9px;color:var(--text-muted);letter-spacing:2px;margin-top:auto;padding-top:20px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.cover .sig{font-family:"Brush Script MT","Segoe Script","Snell Roundhand",cursive;font-size:26px;color:var(--accent);transform:rotate(-4deg);text-shadow:0 0 14px rgba(0,184,124,.45);white-space:nowrap}
+.opener .bignum{font-size:64px;font-weight:800;line-height:1}
+.opener .ctitle{font-size:28px;letter-spacing:3px;margin:2px 0 12px}
+.opener .lede{font-size:15px;line-height:1.6;max-width:155mm;margin:8px 0}
+.opener .lede em{color:var(--accent-dark);font-style:normal;font-weight:700}
+table.cmp{width:100%;border-collapse:collapse;font-size:11.5px;margin:10px 0}
+table.cmp th{background:var(--panel);color:var(--text-light);font-size:9px;letter-spacing:1px;padding:7px 8px;text-align:left}
+table.cmp td{border:1px solid var(--line);padding:7px 8px;background:var(--white);line-height:1.5}
+table.cmp td:first-child{font-weight:700;background:#eef0ee}
+.callout{border-left:3px solid var(--red);background:var(--white);padding:10px 12px;margin:10px 0}
+.callout.green{border-left-color:var(--accent)}
+.callout.amber{border-left-color:var(--amber)}
+.callout.blue{border-left-color:var(--blue)}
+.callout.purple{border-left-color:var(--artifact)}
+.callout h4{font-size:10px;letter-spacing:1.5px;margin-bottom:4px}
+.callout.red h4{color:var(--red)}.callout.green h4{color:var(--accent-dark)}.callout.amber h4{color:var(--amber)}.callout.blue h4{color:var(--blue)}.callout.purple h4{color:var(--artifact)}
+.callout p{font-size:12px;line-height:1.6}
+.terminal{background:var(--panel);color:var(--text-light);border-radius:8px;padding:14px 16px;font-family:"Cascadia Code",Consolas,monospace;font-size:11px;line-height:1.6;margin:10px 0;white-space:pre-wrap}
+.terminal .g{color:var(--accent)}.terminal .c{color:var(--text-muted)}.terminal .a{color:var(--amber)}.terminal .b{color:var(--blue)}.terminal .r{color:var(--red)}
+.kv{background:var(--white);border:1px solid var(--line);padding:10px 12px;margin:8px 0;font-size:12px;line-height:1.6}
+.kv b{color:var(--accent-dark)}
+ul.tight{font-size:12.5px;line-height:1.65;margin:7px 0 7px 18px}
+ul.tight li{margin-bottom:4px}
+.qa{background:var(--white);border:1px solid var(--line);padding:10px 14px;margin:8px 0;font-size:12px;line-height:1.6}
+.qa .qq{font-weight:700}.qa .aa{color:var(--accent-dark);font-weight:700}
+.vflow{margin:10px 0}
+.fnode{background:var(--white);border:1px solid var(--line);padding:10px 14px;font-size:12px;display:flex;align-items:center;gap:10px}
+.fnode img{width:22px;height:22px;flex:none}
+.fnode b{letter-spacing:1px;font-size:11px}
+.fnode small{color:var(--muted);font-size:11px}
+.farrow{text-align:center;color:var(--accent-dark);font-weight:700;line-height:1.1;padding:2px 0}
+.printnote{font-size:9px;color:var(--muted);border:1px dashed var(--line);padding:10px 12px;margin-top:12px;line-height:1.6}
+/* m-reflow: screen-only mobile reflow; print unaffected */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0 auto;padding:16px 14px 20px}h3.sec{font-size:16px}.opener .bignum{font-size:48px}.cover h1{font-size:28px}.cover .tri{font-size:9px}table.cmp{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}.terminal{font-size:10.5px}.vnode b,.fnode b{font-size:10px}.phead h2{font-size:18px}}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="page cover">
+<div class="brand">CI/CD SYSTEMS &nbsp;·&nbsp; ENGINEERING MANUAL &nbsp;·&nbsp; PDF 41</div>
+<h1>GITHUB ACTIONS<br><span>SECURITY ROADMAP 2026</span></h1>
+<div class="sub">From implicit trust to verifiable, scoped, policy-gated execution</div>
+<div class="tri">DEPENDENCY LOCKING · SCOPED SECRETS<br>POLICY PROTECTIONS · EGRESS FIREWALL<br>ARM64 GA · IMMUTABLE RELEASES</div>
+<div class="vpipe">
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/security/shield.svg" alt="Lock"><b>DEPENDENCY LOCKING</b><small>SHA + hash, transitive — go.sum for Actions</small></div><div class="vline"></div>
+<div class="vnode am"><span class="dot"></span><img src="../assets/icons/general/database.svg" alt="Secrets"><b>SCOPED SECRETS</b><small>repo · branch · env · trusted workflow</small></div><div class="vline"></div>
+<div class="vnode g"><span class="dot"></span><img src="../assets/icons/ci-cd/workflow.svg" alt="Policy"><b>POLICY PROTECTIONS</b><small>rulesets for who/what triggers</small></div><div class="vline"></div>
+<div class="vnode p"><span class="dot"></span><img src="../assets/icons/general/server.svg" alt="Egress"><b>DATA STREAM &amp; FIREWALL</b><small>S3/Event Hub · L7 egress control</small></div><div class="vline"></div>
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/docker/docker.svg" alt="Runners"><b>RUNNERS GA</b><small>Arm64 Linux/Windows · Immutable Releases</small></div>
+</div>
+<div class="foot"><span>02 / 06 · ROADMAPS &amp; STRATEGY</span><span class="sig">Nabawy</span></div>
+</div>
+
+<!-- OPENER: WHY THIS ROADMAP EXISTS -->
+<div class="page opener">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 41<hr><h2>Context</h2>Why GitHub built a security roadmap</div>
+<div class="bignum">41</div>
+<div class="ctitle">THE ATTACK SURFACE</div>
+<p class="lede">In 2025–26 a pattern emerged: <em>compromise a trusted Action → execute inside CI → exfiltrate secrets</em>. The roadmap is GitHub's direct answer to three root causes: <em>implicit trust in workflow dependencies</em>, <em>poor execution visibility</em>, and <em>overly broad credential exposure</em>.</p>
+
+<h3 class="sec"><span class="n">01 /</span> Incidents That Drove the Roadmap</h3>
+<table class="cmp"><tr><th>Incident</th><th>Technique</th><th>What it abused</th></tr>
+<tr><td><span class="mono">tj-actions/changed-files</span></td><td>Compromised trusted Action</td><td>Unpinned <span class="mono">uses:</span> + transitive trust</td></tr>
+<tr><td>Nx build-tool compromise</td><td>Supply-chain injection</td><td>Shared toolchain dependency</td></tr>
+<tr><td><span class="mono">trivy-action</span> tag poisoning</td><td>75 tags force-pushed to malicious commits</td><td>Mutable tags / releases</td></tr>
+<tr><td>"Clinejection"</td><td>Prompt injection via issue title → cache poisoning → exfil</td><td>Untrusted event input driving agent workflows</td></tr>
+</table>
+<div class="callout red"><h4>THE PATTERN</h4><p>Every incident follows the same pipeline: a normal-looking workflow pulls an Action at a friendly tag, that Action (or its transitive dependency) is silently retargeted, and secrets flow outward before anyone notices. SHA pinning <em>at the top level only</em> does not close this gap.</p></div>
+
+<h3 class="sec"><span class="n">02 /</span> Roadmap Pillars</h3>
+<div class="vflow">
+<div class="fnode"><img src="../assets/icons/security/shield.svg" alt="Lock"><b>LOCK DEPENDENCIES</b><small>Make every resolved version verifiable</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/general/database.svg" alt="Scope"><b>SCOPE SECRETS</b><small>Credentials flow only where declared</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/ci-cd/workflow.svg" alt="Policy"><b>ENFORCE POLICY</b><small>Centrally govern who/what can trigger workflows</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/general/server.svg" alt="Monitor"><b>OBSERVE &amp; CONTAIN</b><small>Stream telemetry · firewall egress outside the VM</small></div>
+</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 41</span><span>02 / 06</span></div>
+</div>
+
+<!-- PILLARS A + B -->
+<div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 41<hr><h2>Pillars A &amp; B</h2>Dependency locking · Scoped secrets</div>
+
+<h3 class="sec"><span class="n">03 /</span> A — Locking Workflow Dependencies</h3>
+<p class="body">A new <span class="mono">dependencies:</span> section in workflow YAML. Works like <span class="mono">go.sum</span> / <span class="mono">Cargo.lock</span> — but for Actions. GitHub will resolve and lock <b>direct and transitive</b> Action dependencies via commit SHA + cryptographic hash verification.</p>
+<div class="terminal"><span class="b">name:</span> ci
+<span class="b">on:</span> pull_request
+<span class="b">dependencies:</span>          <span class="c"># NEW — lockfile for Actions</span>
+  <span class="b">actions/checkout:</span> sha256:abc123…  <span class="c"># SHA + hash, verified</span>
+  <span class="b">my-org/composite-action:</span> sha256:def456…  <span class="c"># transitive deps locked too</span>
+<span class="b">jobs:</span>
+  <span class="b">build:</span>
+    <span class="b">runs-on:</span> ubuntu-latest
+    <span class="b">steps:</span>
+      - <span class="b">uses:</span> actions/checkout@abc123  <span class="c"># deterministic, diffable</span></div>
+<div class="kv"><b>WHY THIS MATTERS —</b> Today's SHA pinning only covers top-level <span class="mono">uses:</span> lines, not what a composite Action calls internally. Locking closes that gap: <b>deterministic execution</b>, <b>visible dependency diffs in PRs</b>, and <b>tamper detection even when a SHA looks correct</b> (hash mismatch fails the run). Paired with <b>immutable releases</b> and stricter publishing rules for maintainers.</div>
+<table class="cmp"><tr><th></th><th>Before</th><th>After (locking)</th></tr>
+<tr><td>Scope</td><td>Top-level <span class="mono">uses:</span> only</td><td>Transitive closure (composite Actions included)</td></tr>
+<tr><td>Verification</td><td>SHA equality</td><td>SHA + cryptographic hash</td></tr>
+<tr><td>PR visibility</td><td>No dependency diff</td><td>Lockfile diff surfaces version drift</td></tr>
+</table>
+
+<h3 class="sec"><span class="n">04 /</span> B — Scoped Secrets</h3>
+<p class="body">Secrets will be bindable to a narrower scope instead of flowing broadly by default — and will no longer auto-inherit into reusable workflows.</p>
+<table class="cmp"><tr><th>Scope</th><th>Secret is available only when</th></tr>
+<tr><td>Repository</td><td>Workflow runs inside that specific repo</td></tr>
+<tr><td>Branch</td><td>Workflow runs targeting that branch</td></tr>
+<tr><td>Environment</td><td>Job targets the environment (e.g., <span class="mono">production</span>)</td></tr>
+<tr><td>Trusted workflow</td><td>Only an explicitly approved reusable workflow calls it</td></tr>
+</table>
+<div class="terminal"><span class="c"># BEFORE — secrets auto-inherit</span>
+<span class="b">jobs:</span>
+  <span class="b">deploy:</span>
+    <span class="b">uses:</span> org/central-deploy@v2
+    <span class="b">secrets:</span> inherit               <span class="r"># ← broad, implicit</span>
+
+<span class="c"># AFTER — explicit per-secret binding</span>
+<span class="b">jobs:</span>
+  <span class="b">deploy:</span>
+    <span class="b">uses:</span> org/central-deploy@v2
+    <span class="b">secrets:</span>
+      <span class="b">NPM_TOKEN:</span> ${{ secrets.NPM_TOKEN }}  <span class="c"># scoped to trusted workflow + env</span></div>
+<div class="kv"><b>PERMISSION CHANGE —</b> Repository write access will no longer automatically grant secret-management rights. That moves to custom/delegated roles (separation of duties). Treat <span class="mono">secrets: inherit</span> as deprecated — audit for it now.</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 41</span><span>03 / 06</span></div>
+</div>
+
+<!-- PILLARS C + D -->
+<div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 41<hr><h2>Pillars C &amp; D</h2>Policy protections · Data stream &amp; Firewall</div>
+
+<h3 class="sec"><span class="n">05 /</span> C — Policy-Driven Workflow Execution Protections</h3>
+<p class="body">Extends the existing <b>rulesets</b> framework to centrally govern workflow execution — replacing scattered <span class="mono">if: github.actor != 'dependabot[bot]'</span> guards spread across individual workflow files.</p>
+<table class="cmp"><tr><th>Rule type</th><th>Purpose</th><th>Example</th></tr>
+<tr><td>Actor rules</td><td>Who/what can trigger workflows</td><td>Only <span class="mono">humans</span>, <span class="mono">Dependabot</span>, or a specific GitHub App can fire <span class="mono">deploy.yml</span></td></tr>
+<tr><td>Event rules</td><td>Which events can trigger runs</td><td><span class="mono">push</span> allowed; <span class="mono">issue_comment</span> blocked unless from maintainer</td></tr>
+</table>
+<div class="callout amber"><h4>DIRECTLY TARGETS "COMMENT-AND-CONTROL"</h4><p>Untrusted contributors trigger agent/automation workflows via issue or PR comments, injecting instructions into AI-assisted runs. Central policy prevents the trigger from ever reaching the runner — no per-workflow patching needed. <b>Status:</b> Public preview shipped <b>June 18, 2026</b>.</p></div>
+<div class="terminal"><span class="c"># org-level ruleset (conceptual)</span>
+<span class="b">ruleset:</span> workflow-execution
+  <span class="b">target:</span> workflows
+  <span class="b">conditions:</span>
+    <span class="b">actor:</span> [human, dependabot[bot], my-deploy-app]
+    <span class="b">event:</span> [push, pull_request, workflow_dispatch]
+  <span class="c"># issue_comment / discussion events require actor allow-list</span></div>
+
+<h3 class="sec"><span class="n">06 /</span> D — Endpoint Monitoring &amp; Control</h3>
+<p class="body"><b>Actions data stream</b> — near-real-time telemetry for workflow runs, streamed to <span class="mono">Amazon S3</span> or <span class="mono">Azure Event Hub / Data Explorer</span>. Designed for SIEM/SOC consumption.</p>
+<ul class="tight">
+<li>Workflow execution metadata — status, duration, runner type</li>
+<li>Dependency-resolution detail — which Action resolved to which version</li>
+<li>Network activity — planned; feeds the firewall policy workflow</li>
+</ul>
+<p class="body"><b>Native egress firewall (Layer 7)</b> — runs <em>outside</em> the GitHub-hosted runner VM, so code inside the runner cannot bypass it.</p>
+<table class="cmp"><tr><th>Mode</th><th>Behavior</th><th>Use when</th></tr>
+<tr><td>Monitoring</td><td>Logs all outbound traffic</td><td>Building your allow-list without breakage</td></tr>
+<tr><td>Enforcement</td><td>Blocks requests outside the allow-list</td><td>After allow-list is validated in monitoring</td></tr>
+</table>
+<div class="kv"><b>ROLLOUT DESIGN —</b> Two-mode rollout is intentional: run in Monitoring to discover destinations, cut to Enforcement only when vetted. This is how GitHub avoids "enforcement day breaks every CI" — mirror the same staged adoption inside your org.</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 41</span><span>04 / 06</span></div>
+</div>
+
+<!-- PLATFORM + TIMELINE -->
+<div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 41<hr><h2>Platform &amp; Timeline</h2>Runners · Provenance · When things ship</div>
+
+<h3 class="sec"><span class="n">07 /</span> Platform &amp; Runner Improvements — Shipped 2026</h3>
+<table class="cmp"><tr><th>Capability</th><th>Status</th><th>Why it matters</th></tr>
+<tr><td>Arm64 Linux + Windows runners (GitHub-hosted)</td><td><span style="color:var(--accent-dark);font-weight:700">GA — Sept 2026</span></td><td>Performance/cost/sustainability (real cases: 30 min x86 → ~4 min Arm64); Team + Enterprise Cloud</td></tr>
+<tr><td>Arm64 labels <span class="mono">ubuntu-22.04-arm</span>, <span class="mono">ubuntu-24.04-arm</span>, <span class="mono">windows-11-arm</span></td><td>GA incl. private repos</td><td>Native ARM without virtualization; public repos free</td></tr>
+<tr><td>Immutable Releases</td><td><span style="color:var(--accent-dark);font-weight:700">GA — all orgs/repos</span></td><td>Closes tag-mutability gap (the <span class="mono">trivy-action</span> attack vector)</td></tr>
+<tr><td>Build provenance / SBOM attestations (<span class="mono">actions/attest-build-provenance</span>)</td><td>Maturing as standard</td><td>SLSA-style provenance for release hardening</td></tr>
+</table>
+<div class="callout green"><h4>IMMUTABLE RELEASES — THE QUIET FIX</h4><p>Git tags (and therefore Releases) were historically mutable — an attacker could silently retarget a tag that workflows pinned. Immutable Releases makes that retarget detectable/blocked. Enable it at the org level; pair with dependency locking for end-to-end provenance.</p></div>
+
+<h3 class="sec"><span class="n">08 /</span> Adjacent Trend — AI / Agentic Workflows</h3>
+<p class="body">Copilot coding agent and custom agentic workflows now trigger directly from Actions (PR review agents, release-notes automation, "agent-of-day" patterns). This trend is <em>driving</em> the security roadmap — agent-triggered workflows responding to <span class="mono">issue</span> / <span class="mono">pull_request</span> / <span class="mono">discussion</span> events are exactly the attack surface that Workflow Execution Protections + scoped secrets are designed to contain. Community tooling (e.g., <span class="mono">gh-aw</span>) is fast-moving but outside GitHub's core roadmap.</p>
+
+<h3 class="sec"><span class="n">09 /</span> Summary Timeline (GitHub's announced windows)</h3>
+<table class="cmp"><tr><th>Feature</th><th>Public Preview</th><th>GA</th></tr>
+<tr><td>Workflow dependency locking</td><td>3–6 months from announcement</td><td>+6 months after preview</td></tr>
+<tr><td>Scoped secrets</td><td>3–6 months</td><td>+6 months</td></tr>
+<tr><td>Secret permission model (delegated roles)</td><td>3–6 months</td><td>TBD</td></tr>
+<tr><td>Workflow Execution Protections (rulesets)</td><td style="color:var(--accent-dark);font-weight:700">Shipped — Jun 18, 2026</td><td>TBD</td></tr>
+<tr><td>Actions data stream (S3/Event Hub)</td><td>3–6 months</td><td>+6–9 months</td></tr>
+<tr><td>Native egress firewall (L7)</td><td>6–9 months</td><td>TBD</td></tr>
+</table>
+<p class="small">Timelines are GitHub's "X to Y months" estimates as of the initial roadmap announcement (Feb–Mar 2026). GitHub does not publish hard SLAs — re-verify via the Changelog.</p>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 41</span><span>05 / 06</span></div>
+</div>
+
+<!-- FAILURES + TRACKING + HANDOFF -->
+<div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 41<hr><h2>Failures &amp; Handoff</h2>Anti-patterns · Track progress · Next</div>
+
+<h3 class="sec"><span class="n">10 /</span> Architecture — How the Pillars Compose</h3>
+<div class="vflow">
+<div class="fnode"><img src="../assets/icons/git/github.svg" alt="Workflow"><b>WORKFLOW YAML + DEPENDENCIES LOCKFILE</b><small>Every Action pinned to SHA+hash — transitive closure verified at queue time</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/ci-cd/workflow.svg" alt="Policy"><b>RULESET GATE — ACTOR + EVENT</b><small>Org ruleset decides: can this actor fire this event on this workflow?</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/general/database.svg" alt="Secrets"><b>SCOPED SECRET INJECTION</b><small>Only branch/env/trusted-workflow-scoped secrets enter the job</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/general/server.svg" alt="Runner"><b>RUNNER (OUT-OF-VM FIREWALL)</b><small>L7 egress enforcement outside the VM · streams telemetry to S3/Event Hub</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/general/package.svg" alt="Artifact"><b>ARTIFACT + ATTESTATION</b><small>Immutable release · SLSA provenance · SBOM</small></div>
+</div>
+
+<h3 class="sec"><span class="n">11 /</span> Failure Modes</h3>
+<ul class="tight">
+<li><b>Enforcing the firewall without a monitoring phase</b> — you will deny legitimate package registries and prod endpoints. Always run Monitoring → validate allow-list → Enforcement.</li>
+<li><b>Keeping <span class="mono">secrets: inherit</span></b> — broad inheritance defeats scoped secrets. Grep org for <span class="mono">inherit</span> and convert to per-secret passing.</li>
+<li><b>Pinning top-level only</b> — transitive Actions remain unpinned until locking ships GA. Until then, vendor composite Actions or audit their inner <span class="mono">uses:</span>.</li>
+<li><b>Tag-pinning without Immutable Releases</b> — a tag can still be retargeted. Immutable Releases + SHA+hash locking are the pair.</li>
+<li><b>Leaving <span class="mono">issue_comment</span> triggers unrestricted</span></b> — with agentic workflows, this is a prompt-injection channel. Gate it with Workflow Execution Protections immediately (already in preview).</li>
+</ul>
+<div class="qa"><span class="qq">Q:</span> Which pillar should we adopt first?<br><span class="aa">A:</span> Workflow Execution Protections (already in preview) + enable Immutable Releases today. Scoped secrets and dependency locking in preview next — enroll early. Firewall last, after a monitoring window.</div>
+
+<h3 class="sec"><span class="n">12 /</span> How to Track Progress</h3>
+<div class="terminal"><span class="c"># verify timelines — roadmaps are directional, Changelog is ground truth</span>
+<span class="b">roadmap</span>   → github.com/github/roadmap  <span class="c"># filter label:actions; stages: planned/beta/GA</span>
+<span class="b">changelog</span> → github.blog/changelog      <span class="c"># actual ship dates: Arm64 GA, Immutable GA, etc.</span>
+<span class="b">feedback</span>  → GitHub Public Feedback Discussions  <span class="c"># input on roadmap items</span></div>
+<div class="callout blue"><h4>WHEN TO ADOPT</h4><p>Preview features are for non-production evaluation and telemetry pipelines; gate production rollouts on GA + your own egress allow-list validation. The 3–6 month windows in the timeline table are GitHub's estimates, not commitments.</p></div>
+
+<h3 class="sec"><span class="n">13 /</span> Handoff</h3>
+<p class="body">GitHub's roadmap is not chasing a new pipeline syntax — it is making the existing YAML model's defaults trustworthy. Pair this with <b>PDF 40 (Jenkins)</b> to understand the maturing self-hosted alternative, then continue to <b>PDF 42 · CI/CD Decision Guide</b> for the side-by-side framework you can apply in your own org.</p>
+<div class="printnote"><b>SOURCE:</b> <span class="mono">github-actions-roadmap.md</span> (Sept 2026 research summary) · Compiled from GitHub's 2026 Actions Security Roadmap (announced ~Mar 2026), GitHub Changelog, and <span class="mono">github/roadmap</span>. Timeline windows are GitHub estimates at announcement — verify GA via Changelog. Print: Ctrl/Cmd+P → Save as PDF → Background graphics on → A4.</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 41</span><span>06 / 06</span></div>
+</div>
+
+</body>
+</html>

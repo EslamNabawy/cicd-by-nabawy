@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI/CD Engineering Manual - Automated Triggering</title>
+    <style>
+        :root {
+            --paper: #f5f6f4;
+            --white: #ffffff;
+            --ink: #161a19;
+            --muted: #68706d;
+            --line: #d5dad7;
+            --panel: #111614;
+            --panel-2: #1a201d;
+            --text-light: #e8eeeb;
+            --text-muted: #9ca8a3;
+            --accent: #00b87c;
+            --accent-dark: #008f61;
+            --blue: #4387ff;
+            --amber: #d99a24;
+            --red: #d94b4b;
+            --artifact: #8b6cff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: #333;
+            color: var(--ink);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            line-height: 1.5;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 16mm 16mm 19mm;
+            margin: 8mm auto;
+            position: relative;
+            background: var(--paper);
+            page-break-after: always;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .page:last-child { page-break-after: auto; }
+
+        /* HEADER & FOOTER */
+        .page-header {
+            display: flex;
+            align-items: center;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+        }
+        .h-chip { font-weight: 700; color: var(--ink); }
+        .h-rule { flex: 1; height: 1px; background: var(--line); margin: 0 12px; }
+        .h-title { font-weight: 500; }
+
+        .page-footer {
+            position: absolute;
+            bottom: 10mm;
+            left: 16mm;
+            right: 16mm;
+            display: flex;
+            align-items: center;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .f-left { font-weight: 700; color: var(--ink); }
+        .f-rule { flex: 1; height: 1px; background: var(--line); margin: 0 12px; }
+        .f-right { font-weight: 500; }
+
+        /* CONTENT */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2.section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--ink);
+            display: flex;
+            align-items: baseline;
+        }
+        h2.section-title .n {
+            font-size: 14px;
+            color: var(--accent);
+            font-weight: 600;
+            margin-right: 8px;
+            letter-spacing: 1px;
+        }
+        h3.sub-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--ink);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        p { font-size: 11.5px; color: var(--ink); margin-bottom: 10px; line-height: 1.6; }
+        strong { font-weight: 600; }
+        
+        /* COVER */
+        .cover {
+            background: var(--panel);
+            color: var(--text-light);
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+        }
+        .cover-left { padding: 30mm 25mm; display: flex; flex-direction: column; justify-content: space-between; }
+        .cover-right { background: var(--panel-2); display: flex; align-items: center; justify-content: center; border-left: 1px solid #2a2f2d; padding: 40mm 20mm; }
+
+        .cover-title { font-size: 48px; font-weight: 700; line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 15px; }
+        .cover-sub { font-size: 18px; color: var(--text-muted); font-weight: 400; margin-bottom: 40px; line-height: 1.4; }
+        .cover-meta { font-size: 10px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; font-weight: 600; border-top: 1px solid #2a2f2d; padding-top: 15px; }
+        .cover-footer { display: flex; justify-content: flex-end; align-items: center; }
+
+        .sig {
+            font-family: "Brush Script MT", "Segoe Script", "Snell Roundhand", cursive;
+            font-size: 32px; 
+            color: var(--accent); 
+            transform: rotate(-4deg);
+            text-shadow: 0 0 14px rgba(0,184,124,.45); 
+            white-space: nowrap;
+            margin-top: 20px;
+        }
+
+        /* VERTICAL PIPELINE (COVER) */
+        .v-pipeline {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+            width: 100%;
+        }
+        .v-stage {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 14px 20px;
+            width: 100%;
+            position: relative;
+        }
+        .v-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 12px var(--accent);
+            flex-shrink: 0;
+        }
+        .v-stage.idle .v-dot { background: var(--muted); box-shadow: none; }
+        .v-stage.running .v-dot { background: var(--blue); box-shadow: 0 0 12px var(--blue); }
+        .v-info strong { display: block; color: var(--text-light); font-size: 14px; font-weight: 600; letter-spacing: 1px; }
+        .v-info small { display: block; color: var(--text-muted); font-size: 10px; }
+        .v-line {
+            width: 2px; height: 24px; background: var(--text-muted); margin-left: 24px;
+            opacity: 0.3;
+        }
+
+        /* HORIZONTAL PIPELINE */
+        .pipeline {
+            display: flex;
+            align-items: stretch;
+            margin: 20px 0;
+            width: 100%;
+        }
+        .stage {
+            flex: 1;
+            background: var(--white);
+            border: 1px solid var(--line);
+            padding: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border-left-width: 3px;
+        }
+        .stage-no { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .stage strong { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink); }
+        .stage small { font-size: 10px; color: var(--muted); display: block; margin-bottom: 4px; }
+        
+        .stage.passed { border-left-color: var(--accent); }
+        .stage.passed .stage-no { color: var(--accent-dark); }
+        .stage.running { border-left-color: var(--blue); }
+        .stage.running .stage-no { color: var(--blue); }
+        .stage.failed { border-left-color: var(--red); }
+        .stage.failed .stage-no { color: var(--red); }
+        .stage.waiting { border-left-color: var(--amber); }
+        .stage.waiting .stage-no { color: var(--amber); }
+        .stage.artifact { border-left-color: var(--artifact); }
+        .stage.artifact .stage-no { color: var(--artifact); }
+
+        .connector {
+            width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .connector::before {
+            content: '';
+            width: 100%;
+            height: 2px;
+            background: var(--line);
+        }
+        .connector::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            width: 0; height: 0;
+            border-left: 6px solid var(--line);
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+
+        .status-pill {
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: auto;
+            align-self: flex-start;
+        }
+        .status-pill.passed { background: rgba(0,184,124,0.15); color: var(--accent-dark); }
+        .status-pill.running { background: rgba(67,135,255,0.15); color: var(--blue); }
+        .status-pill.waiting { background: rgba(217,154,36,0.15); color: var(--amber); }
+        .status-pill.failed { background: rgba(217,75,75,0.15); color: var(--red); }
+
+        /* TERMINAL */
+        .terminal {
+            background: var(--panel);
+            color: var(--text-light);
+            border-radius: 6px;
+            padding: 14px 16px;
+            font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+            font-size: 10.5px;
+            line-height: 1.65;
+            margin: 10px 0;
+            border: 1px solid #2a2f2d;
+        }
+        .term-line { display: block; }
+        .term-prompt { color: var(--accent); }
+        .term-out { color: var(--text-muted); }
+        .term-ok { color: var(--accent); }
+        .term-warn { color: var(--amber); }
+        .term-err { color: var(--red); }
+        .term-blue { color: var(--blue); }
+
+        /* COMMAND + RESULT */
+        .cmdres {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .cmdres > div { display: flex; flex-direction: column; }
+        .cmdres h4 { font-size: 9px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; font-weight: 700; letter-spacing: 1px; }
+        .cmdres .term-box {
+            border: 1px solid var(--line);
+            padding: 10px;
+            background: var(--panel);
+            color: var(--text-light);
+            font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+            font-size: 10px;
+            flex: 1;
+            border-radius: 4px;
+        }
+
+        /* CONCEPT GRID */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        .concept-block h4 { font-size: 10px; text-transform: uppercase; color: var(--accent-dark); margin-bottom: 6px; font-weight: 700; letter-spacing: 1px; }
+        .concept-block p { font-size: 11px; line-height: 1.5; color: var(--ink); }
+
+        /* CALLOUTS */
+        .callout {
+            border-left: 3px solid var(--accent);
+            background: rgba(0, 184, 124, 0.05);
+            padding: 12px 16px;
+            margin: 15px 0;
+        }
+        .callout h4 { font-size: 10px; text-transform: uppercase; color: var(--accent-dark); margin-bottom: 4px; font-weight: 700; letter-spacing: 1px; }
+        .callout p { font-size: 11.5px; color: var(--ink); line-height: 1.5; margin: 0; }
+
+        .gotcha { border-left-color: var(--amber); background: rgba(217, 154, 36, 0.05); }
+        .gotcha h4 { color: var(--amber); }
+        
+        .interview { border-left-color: var(--blue); background: rgba(67, 135, 255, 0.05); }
+        .interview h4 { color: var(--blue); }
+        .interview p { margin-bottom: 5px; }
+        .interview strong { color: var(--ink); }
+
+        /* DECISION DIAGRAM */
+        .dec-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 11px;
+        }
+        .dec-q { 
+            border: 1px solid var(--ink); 
+            padding: 8px 20px; 
+            font-weight: 600; 
+            text-transform: uppercase;
+            background: var(--white);
+            position: relative;
+        }
+        .dec-q::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background: var(--ink);
+        }
+        .dec-branches {
+            display: flex;
+            justify-content: space-around;
+            width: 80%;
+            margin-top: 20px;
+            position: relative;
+        }
+        .dec-branches::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 10%;
+            width: 80%;
+            height: 20px;
+            border-top: 2px solid var(--ink);
+            border-left: 2px solid var(--ink);
+            border-right: 2px solid var(--ink);
+        }
+        .dec-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .dec-label { font-weight: 700; text-transform: uppercase; font-size: 10px; }
+        .dec-branch.yes .dec-label { color: var(--accent-dark); }
+        .dec-branch.no .dec-label { color: var(--red); }
+        .dec-val { 
+            border: 1px dashed var(--muted); 
+            padding: 8px 12px; 
+            text-align: center; 
+            background: var(--white);
+            font-size: 10px;
+            line-height: 1.4;
+        }
+        .dec-val span { display: block; font-family: monospace; color: var(--blue); margin-top: 4px; }
+
+        /* LAB FORMAT */
+        .lab-step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--line);
+        }
+        .lab-step:last-child { border-bottom: none; }
+        .step-no { 
+            font-size: 10px; 
+            font-weight: 700; 
+            color: var(--accent); 
+            text-transform: uppercase; 
+            width: 70px; 
+            flex-shrink: 0; 
+            letter-spacing: 1px;
+            padding-top: 2px;
+        }
+        .lab-content p { margin: 0; font-size: 11.5px; }
+
+        /* ARCHITECTURE DIAGRAM */
+        .arch-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 11px;
+        }
+        .arch-node {
+            border: 1px solid var(--line);
+            padding: 10px 20px;
+            background: var(--white);
+            text-align: center;
+            width: 260px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        .arch-node.highlight { border-color: var(--accent); color: var(--accent-dark); background: rgba(0,184,124,0.05); }
+        .arch-node.blue { border-color: var(--blue); color: var(--blue); background: rgba(67,135,255,0.05); }
+        .arch-node.amber { border-color: var(--amber); color: var(--amber); background: rgba(217,154,36,0.05); }
+        .arch-arrow {
+            height: 24px;
+            width: 2px;
+            background: var(--line);
+            position: relative;
+        }
+        .arch-arrow::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -4px;
+            width: 0; height: 0;
+            border-top: 6px solid var(--line);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+        }
+        .arch-arrow.labeled::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 10px;
+            top: 4px;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* ENVIRONMENT LANES */
+        .lanes { margin: 20px 0; }
+        .lane {
+            border: 1px solid var(--line);
+            margin-bottom: 10px;
+            background: var(--white);
+            display: flex;
+            align-items: stretch;
+        }
+        .lane-header { 
+            background: var(--panel-2); 
+            color: var(--text-light); 
+            padding: 10px 15px; 
+            font-size: 10px; 
+            text-transform: uppercase; 
+            font-weight: 700; 
+            letter-spacing: 1px; 
+            width: 100px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            text-align: center;
+        }
+        .lane-body { 
+            padding: 10px 15px; 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            font-size: 11px;
+        }
+        .lane-status { margin-left: auto; font-size: 9px; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; }
+        
+        /* TABLES */
+        table.cmp {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin: 15px 0;
+            background: var(--white);
+        }
+        table.cmp th, table.cmp td {
+            border: 1px solid var(--line);
+            padding: 8px 10px;
+            text-align: left;
+        }
+        table.cmp th {
+            background: var(--panel-2);
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
+        table.cmp td:first-child { font-weight: 600; color: var(--muted); }
+
+        /* SYSTEM MAP */
+        .sys-map {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin: 20px 0;
+        }
+        .map-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        .map-box {
+            border: 1px solid var(--ink);
+            padding: 12px 20px;
+            background: var(--white);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            min-width: 140px;
+        }
+        .map-box.artifact { border-color: var(--artifact); color: var(--artifact); }
+        .map-box.blue { border-color: var(--blue); color: var(--blue); }
+        .map-box.green { border-color: var(--accent); color: var(--accent-dark); }
+        .map-arr { color: var(--muted); font-size: 14px; }
+        .map-line { width: 2px; height: 15px; background: var(--line); margin: 0 auto; }
+        .map-feedback {
+            border: 1px dashed var(--accent);
+            padding: 10px;
+            color: var(--accent-dark);
+            font-size: 10px;
+            text-align: center;
+            margin-top: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        @media print {
+            body { background: none; }
+            .page { margin: 0; box-shadow: none; border: none; }
+        }
+    </style>
+<style>/* m-reflow: responsive mobile layout */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0;padding:16px 14px}.page-footer{font-size:9px}.terminal,.code{overflow-x:auto}}
+</style></head>
+<body>
+
+    <!-- COVER PAGE -->
+    <div class="page cover">
+        <div class="cover-left">
+            <div>
+                <div class="cover-title">CI/CD<br>ENGINEERING</div>
+                <div class="cover-sub">From Commit to Production:<br>Automated Triggering & Webhooks</div>
+            </div>
+            <div class="cover-meta">
+                Continuous Integration<br>
+                Continuous Delivery<br>
+                Continuous Deployment
+            </div>
+            <div class="cover-footer">
+                <span class="sig">Nabawy</span>
+            </div>
+        </div>
+        <div class="cover-right">
+            <div class="v-pipeline">
+                <div class="v-stage idle">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>SOURCE</strong>
+                        <small>Git repository</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage running">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>WEBHOOK</strong>
+                        <small>Push event delivery</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>JENKINS</strong>
+                        <small>Trigger received</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>CHECKOUT</strong>
+                        <small>Pull latest code</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>BUILD</strong>
+                        <small>Execute pipeline</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 2: CHAPTER 1 -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">AUTOMATED TRIGGERING</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">01 /</span> Automated Integration Foundations</h2>
+            <p>A pipeline is not magic. It is a deterministic sequence of machines making decisions about your code. However, for this sequence to be truly continuous, the transition between a developer's commit and the pipeline execution must be automatic. This is achieved through webhooks.</p>
+            
+            <div class="pipeline">
+                <div class="stage passed">
+                    <span class="stage-no">01</span>
+                    <strong>COMMIT</strong>
+                    <small>git push origin main</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage running">
+                    <span class="stage-no">02</span>
+                    <strong>WEBHOOK</strong>
+                    <small>HTTP POST payload</small>
+                    <span class="status-pill running">RUNNING</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage waiting">
+                    <span class="stage-no">03</span>
+                    <strong>JENKINS</strong>
+                    <small>Trigger detected</small>
+                    <span class="status-pill waiting">WAITING</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage">
+                    <span class="stage-no">04</span>
+                    <strong>CHECKOUT</strong>
+                    <small>Pull repository</small>
+                    <span class="status-pill waiting">WAITING</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage">
+                    <span class="stage-no">05</span>
+                    <strong>BUILD</strong>
+                    <small>Execute pipeline</small>
+                    <span class="status-pill waiting">WAITING</span>
+                </div>
+            </div>
+
+            <div class="concept-grid">
+                <div class="concept-block">
+                    <h4>WHAT</h4>
+                    <p>A webhook is a custom HTTP callback triggered by an event, such as a git push. When the event occurs, the source system (GitHub) sends an HTTP POST request to the target system (Jenkins).</p>
+                </div>
+                <div class="concept-block">
+                    <h4>WHY</h4>
+                    <p>Polling (Jenkins constantly asking GitHub "any changes?") is inefficient and introduces latency. Webhooks provide instant, event-driven execution with zero wasted resources.</p>
+                </div>
+                <div class="concept-block">
+                    <h4>WHEN</h4>
+                    <p>Whenever a change is pushed to the repository. This includes commits to main, feature branches, or tagged releases, depending on the configured filter.</p>
+                </div>
+                <div class="concept-block">
+                    <h4>WHAT CHANGES</h4>
+                    <p>The development loop tightens. Feedback on a broken commit returns in minutes, not hours. The integration of code becomes a continuous, automatic flow rather than a manual chore.</p>
+                </div>
+            </div>
+
+            <div class="callout">
+                <h4>WHY THIS EXISTS</h4>
+                <p>Without automated triggering, a developer must manually notify the CI system that new code exists. This context switch breaks flow and inevitably leads to forgotten builds and integration delays. The webhook closes the gap between intent and execution.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 01 &nbsp;|&nbsp; 02 / 09</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 3: PRE-FLIGHT ANALYSIS -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">CONFIGURATION PRE-FLIGHT</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">02 /</span> Pre-Flight Analysis</h2>
+            <p>Before configuring a single setting, verify that all tools, credentials, and network paths are operational. A failure in webhook delivery is silent—Jenkins simply never runs. Resolve all dependencies in this phase before executing the setup.</p>
+
+            <h3 class="sub-title">Environment Verification</h3>
+            <div class="terminal">
+                <span class="term-line"><span class="term-prompt">$</span> curl -s -o /dev/null -w "%{http_code}" http://localhost:8080</span>
+                <span class="term-line term-ok">200</span>
+                <span class="term-line"><span class="term-prompt">$</span> gh auth status</span>
+                <span class="term-line term-out">Logged in to github.com as dev-user</span>
+                <span class="term-line"><span class="term-prompt">$</span> ngrok http 8080</span>
+                <span class="term-line term-out">Session Status                online</span>
+                <span class="term-line term-out">Forwarding                    http://1a2b-3c4d.ngrok.io -> http://localhost:8080</span>
+            </div>
+
+            <h3 class="sub-title">Dependency Check</h3>
+            <table class="cmp">
+                <thead>
+                    <tr>
+                        <th>Requirement</th>
+                        <th>Status</th>
+                        <th>Action if Missing</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Jenkins Admin Access</td>
+                        <td style="color: var(--accent-dark); font-weight: 700;">CONFIRMED</td>
+                        <td>Request access from Jenkins admin</td>
+                    </tr>
+                    <tr>
+                        <td>GitHub PAT (repo scope)</td>
+                        <td style="color: var(--accent-dark); font-weight: 700;">CONFIRMED</td>
+                        <td>Generate in GitHub Developer Settings</td>
+                    </tr>
+                    <tr>
+                        <td>Public Jenkins URL</td>
+                        <td style="color: var(--accent-dark); font-weight: 700;">CONFIRMED</td>
+                        <td>Start ngrok or configure reverse proxy</td>
+                    </tr>
+                    <tr>
+                        <td>Target Repository URL</td>
+                        <td style="color: var(--accent-dark); font-weight: 700;">CONFIRMED</td>
+                        <td>Identify repo and default branch (main/master)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout gotcha">
+                <h4>GOTCHA</h4>
+                <p>If Jenkins is running locally (WSL, Docker, or localhost), GitHub cannot reach it. A tunneling tool like <code>ngrok</code> is mandatory to expose Jenkins to the public internet. Do not proceed to webhook configuration without a public URL.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 01 &nbsp;|&nbsp; 03 / 09</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 4: REACHABILITY DECISION -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">NETWORK REACHABILITY</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">03 /</span> Reachability & Network Paths</h2>
+            <p>The webhook requires a clear HTTP path from GitHub's servers to your Jenkins instance. This is the most common point of failure in CI/CD automation. Determine your network topology before setting the Payload URL.</p>
+
+            <div class="dec-container">
+                <div class="dec-q">IS JENKINS PUBLICLY REACHABLE?</div>
+                <div class="dec-branches">
+                    <div class="dec-branch yes">
+                        <div class="dec-label">YES</div>
+                        <div class="dec-val">
+                            USE DIRECT URL
+                            <span>https://jenkins.company.com</span>
+                        </div>
+                    </div>
+                    <div class="dec-branch no">
+                        <div class="dec-label">NO</div>
+                        <div class="dec-val">
+                            USE TUNNEL
+                            <span>ngrok http 8080</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Establishing the Tunnel</h3>
+            <p>If Jenkins is behind a NAT or local firewall, route traffic through a tunnel. This provides a temporary public URL that forwards incoming HTTP requests directly to your local port.</p>
+
+            <div class="cmdres">
+                <div class="cmd-block">
+                    <h4>COMMAND</h4>
+                    <div class="term-box">
+                        <span class="term-line"><span class="term-prompt">$</span> ngrok http 8080</span>
+                    </div>
+                </div>
+                <div class="res-block">
+                    <h4>RESULT</h4>
+                    <div class="term-box">
+                        <span class="term-line term-out">Forwarding</span>
+                        <span class="term-line term-ok">https://1a2b-3c4d.ngrok.io</span>
+                        <span class="term-line term-out">-> http://localhost:8080</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout interview">
+                <h4>INTERVIEW CHECK</h4>
+                <p><strong>Q: Why can't I just use my local IP for the webhook?</strong></p>
+                <p>A: GitHub's webhooks are sent from their public cloud infrastructure. Your local machine's IP (e.g., 192.168.x.x) is not routable from the public internet. A tunnel or public IP is required to bridge the connection.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 01 &nbsp;|&nbsp; 04 / 09</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 5: PIPELINE CONSTRUCTION -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">PIPELINE CONSTRUCTION</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">04 /</span> Job & Credential Setup</h2>
+            <p>Build the Jenkins pipeline structure and configure authenticated access to the GitHub repository. Never use raw GitHub passwords; always use a Personal Access Token (PAT) stored securely in Jenkins.</p>
+
+            <h3 class="sub-title">Step 1: Create Pipeline Job</h3>
+            <div class="terminal">
+                <span class="term-line term-out">Jenkins Dashboard -> New Item</span>
+                <span class="term-line"><span class="term-prompt">></span> Name: <span class="term-blue">github-webhook-pipeline</span></span>
+                <span class="term-line"><span class="term-prompt">></span> Type: <span class="term-blue">Pipeline</span></span>
+                <span class="term-line term-out">Pipeline Definition: Pipeline script</span>
+                <span class="term-line term-out">Initial Script:</span>
+                <span class="term-line">pipeline {</span>
+                <span class="term-line">    agent any</span>
+                <span class="term-line">    stages { stage('Test') { steps { echo 'Build OK' } } }</span>
+                <span class="term-line">}</span>
+            </div>
+
+            <h3 class="sub-title">Step 2: Configure Secure Credentials</h3>
+            <p>Navigate to <strong>Pipeline Syntax -> checkout: Check out from version control</strong>. Generate the Groovy snippet using a new credential of type <strong>Username with password</strong>. Use your GitHub username as the username, and the PAT as the password.</p>
+
+            <div class="callout gotcha">
+                <h4>GOTCHA</h4>
+                <p>GitHub has deprecated password authentication for Git operations. Using your account password will result in a 403 Forbidden error during checkout. The PAT acts as a scoped, revocable proxy for your password.</p>
+            </div>
+
+            <div class="callout interview">
+                <h4>INTERVIEW CHECK</h4>
+                <p><strong>Q: What is the difference between a PAT and a password?</strong></p>
+                <p>A: A password grants full access to an account. A PAT is a scoped token that limits access to specific repositories and actions, can have an expiration date, and can be revoked without changing the account password.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 01 &nbsp;|&nbsp; 05 / 09</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 6: LAB 01 SECURE CHECKOUT -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">LAB 01: AUTHENTICATED CHECKOUT</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">05 /</span> Lab: Secure Checkout</h2>
+            <p>Execute the authenticated checkout configuration. This lab verifies that Jenkins can securely access the private repository using the generated PAT credentials.</p>
+
+            <div class="lab-step">
+                <div class="step-no">OBSERVE</div>
+                <div class="lab-content"><p>The pipeline needs to pull source code from a private repository. Anonymous access is disabled. We need to verify the credential binding works.</p></div>
+            </div>
+            <div class="lab-step">
+                <div class="step-no">EXECUTE</div>
+                <div class="lab-content"><p>In Jenkins Job Configuration, paste the generated Groovy <code>checkout</code> snippet into the Pipeline script block. Ensure the <code>credentialsId</code> matches the ID of the created PAT credential (e.g., <code>github-token</code>).</p></div>
+            </div>
+            <div class="lab-step">
+                <div class="step-no">VERIFY</div>
+                <div class="lab-content"><p>Save the job and click "Build Now". Check the Console Output for the git fetch commands succeeding without authentication errors.</p></div>
+            </div>
+            <div class="lab-step">
+                <div class="step-no">EXPLAIN</div>
+                <div class="lab-content"><p>Jenkins injected the PAT into the Git command environment, allowing the fetch to succeed over HTTPS. The workspace now contains the repository files.</p></div>
+            </div>
+
+            <h3 class="sub-title">Generated Groovy Snippet</h3>
+            <div class="terminal">
+                <span class="term-line">checkout([</span>
+                <span class="term-line">    $class: 'GitSCM', </span>
+                <span class="term-line">    branches: [[name: '<span class="term-blue">*/main</span>']], </span>
+                <span class="term-line">    userRemoteConfigs: [[</span>
+                <span class="term-line">        url: '<span class="term-blue">https://github.com/user/repo.git</span>', </span>
+                <span class="term-line">        credentialsId: '<span class="term-ok">github-token</span>'</span>
+                <span class="term-line">    ]]</span>
+                <span class="term-line">])</span>
+            </div>
+
+            <div class="pipeline">
+                <div class="stage passed">
+                    <span class="stage-no">01</span>
+                    <strong>CONFIG</strong>
+                    <small>Job created</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage passed">
+                    <span class="stage-no">02</span>
+                    <strong>CREDENTIALS</strong>
+                    <small>PAT added</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage passed">
+                    <span class="stage-no">03</span>
+                    <strong>CHECKOUT</strong>
+                    <small>Code pulled</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 01 &nbsp;|&nbsp; 06 / 09</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 7: WEBHOOK BRIDGE -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">THE WEBHOOK BRIDGE</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">06 /</span> The Webhook Bridge</h2>
+            <p>With the pipeline ready, establish the automated trigger. This requires configuring the webhook on GitHub and enabling the corresponding listener on Jenkins.</p>
+
+            <h3 class="sub-title">Architecture Flow</h3>
+            <div class="arch-diagram">
+                <div class="arch-node">DEVELOPER (git push)</div>
+                <div class="arch-arrow labeled" data-label="1. PUSH EVENT"></div>
+                <div class="arch-node highlight">GITHUB REPOSITORY</div>
+                <div class="arch-arrow labeled" data-label="2. HTTP POST PAYLOAD"></div>
+                <div class="arch-node blue">JENKINS /github-webhook/</div>
+                <div class="arch-arrow labeled" data-label="3. TRIGGER JOB"></div>
+                <div class="arch-node">PIPELINE EXECUTION</div>
+            </div>
+
+            <h3 class="sub-title">Step 5: GitHub Configuration</h3>
+            <p>In GitHub, navigate to <strong>Repo Settings -> Webhooks -> Add webhook</strong>. Set the Payload URL to the Jenkins endpoint. The trailing slash is critical.</p>
+            
+            <div class="terminal">
+                <span class="term-line term-out">Payload URL:</span>
+                <span class="term-line term-blue">https://<your-jenkins-url>/github-webhook/</span>
+                <span class="term-line term-out">Content type: application/json</span>
+                <span class="term-line term-out">Trigger: Just the push event</span>
+            </div>
+
+            <div class="callout gotcha">
+                <h4>GOTCHA</h4>
+                <p>The URL <code>/github-webhook/</code> must include the trailing slash. Without it, Jenkins' routing will fail and return a 404, causing GitHub to mark the webhook as failed (red X).</p>
+            </div>
+
+            <h3 class="sub-title">Step 6: Jenkins Trigger Configuration</h3>
+            <p>In the Jenkins Job configuration, scroll to <strong>Build Triggers</strong>. Enable <strong>GitHub hook trigger for GITScm polling</strong>. This tells Jenkins to react when the webhook payload is received, rather than polling on a schedule.</p>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 01 &nbsp;|&nbsp; 07 / 09</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 8: LAB 02 END-TO-END -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">LAB 02: END-TO-END TRIGGER</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">07 /</span> Lab: End-to-End Trigger</h2>
+            <p>Test the complete automation loop. A commit pushed to GitHub should automatically trigger the Jenkins pipeline without any manual intervention.</p>
+
+            <div class="lab-step">
+                <div class="step-no">OBSERVE</div>
+                <div class="lab-content"><p>The webhook is configured, and the Jenkins trigger is enabled. We need to verify the event-driven connection.</p></div>
+            </div>
+            <div class="lab-step">
+                <div class="step-no">EXECUTE</div>
+                <div class="lab-content"><p>Make a trivial change to the repository (e.g., add a comment to a file). Commit and push to the main branch.</p></div>
+            </div>
+            <div class="lab-step">
+                <div class="step-no">VERIFY</div>
+                <div class="lab-content"><p>Watch the Jenkins dashboard. A new build should appear in the Build History within seconds, marked as triggered by "GitHub push".</p></div>
+            </div>
+            <div class="lab-step">
+                <div class="step-no">PROOF</div>
+                <div class="lab-content"><p>The automation loop is closed. Human intervention is no longer required for integration. The pipeline is truly continuous.</p></div>
+            </div>
+
+            <div class="cmdres">
+                <div class="cmd-block">
+                    <h4>COMMAND</h4>
+                    <div class="term-box">
+                        <span class="term-line"><span class="term-prompt">$</span> echo "// update" >> index.html</span>
+                        <span class="term-line"><span class="term-prompt">$</span> git add .</span>
+                        <span class="term-line"><span class="term-prompt">$</span> git commit -m "test trigger"</span>
+                        <span class="term-line"><span class="term-prompt">$</span> git push origin main</span>
+                    </div>
+                </div>
+                <div class="res-block">
+                    <h4>RESULT</h4>
+                    <div class="term-box">
+                        <span class="term-line term-out">Enumerating objects: 5, done.</span>
+                        <span class="term-line term-out">Writing objects: 100% (3/3), 340 bytes.</span>
+                        <span class="term-line term-ok">To github.com:user/repo.git</span>
+                        <span class="term-line term-ok">e7f8a9c..d1c2b3a  main -> main</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline">
+                <div class="stage passed">
+                    <span class="stage-no">01</span>
+                    <strong>GIT PUSH</strong>
+                    <small>Commit sent</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage passed">
+                    <span class="stage-no">02</span>
+                    <strong>WEBHOOK</strong>
+                    <small>HTTP POST sent</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage running">
+                    <span class="stage-no">03</span>
+                    <strong>JENKINS</strong>
+                    <small>Auto-build started</small>
+                    <span class="status-pill running">RUNNING</span>
+                </div>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 01 &nbsp;|&nbsp; 08 / 09</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 9: SYSTEM MAP & TROUBLESHOOTING -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD SYSTEMS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">SYSTEM MAP</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">08 /</span> System Map & Troubleshooting</h2>
+            <p>The automated trigger is a critical link in the broader deployment lifecycle. If it fails, the entire pipeline stalls. Use this map to contextualize the webhook and troubleshoot failures.</p>
+
+            <div class="sys-map">
+                <div class="map-row">
+                    <div class="map-box">SOURCE</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box green">WEBHOOK</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box blue">JENKINS CI</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box artifact">ARTIFACT</div>
+                </div>
+                <div class="map-feedback">FEEDBACK LOOP: DEVELOPER NOTIFIED OF BUILD STATUS</div>
+            </div>
+
+            <h3 class="sub-title">Troubleshooting Flow</h3>
+            <table class="cmp">
+                <thead>
+                    <tr>
+                        <th>Symptom</th>
+                        <th>Root Cause</th>
+                        <th>Recovery</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="color: var(--red);">Jenkins never triggers</td>
+                        <td>Webhook not delivered</td>
+                        <td>Check GitHub Webhook "Recent Deliveries" for HTTP errors</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--red);">GitHub shows 404</td>
+                        <td>Missing trailing slash</td>
+                        <td>Ensure URL ends with <code>/github-webhook/</code></td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--red);">Checkout fails (403)</td>
+                        <td>Invalid PAT or expired</td>
+                        <td>Regenerate PAT in GitHub, update Jenkins Credentials</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--red);">Checkout fails (branch)</td>
+                        <td>Wrong branch name</td>
+                        <td>Verify default branch (<code>main</code> vs <code>master</code>)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="lanes">
+                <div class="lane">
+                    <div class="lane-header" style="background: var(--accent-dark);">DEV</div>
+                    <div class="lane-body">
+                        <span>Automated CI Trigger</span>
+                        <span class="lane-status" style="background: rgba(0,184,124,0.15); color: var(--accent-dark);">PASSED</span>
+                    </div>
+                </div>
+                <div class="lane">
+                    <div class="lane-header" style="background: var(--blue);">STAGING</div>
+                    <div class="lane-body">
+                        <span>Auto-Deploy on Success</span>
+                        <span class="lane-status" style="background: rgba(67,135,255,0.15); color: var(--blue);">RUNNING</span>
+                    </div>
+                </div>
+                <div class="lane">
+                    <div class="lane-header" style="background: var(--amber);">PROD</div>
+                    <div class="lane-body">
+                        <span>Manual Approval Gate</span>
+                        <span class="lane-status" style="background: rgba(217,154,36,0.15); color: var(--amber);">BLOCKED</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">CH 01 &nbsp;|&nbsp; 09 / 09</span>
+        </footer>
+    </div>
+
+</body>
+</html>

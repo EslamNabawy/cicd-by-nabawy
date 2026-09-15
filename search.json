@@ -1,0 +1,1212 @@
+[
+ {
+  "id": "foundations",
+  "title": "CI/CD Foundations",
+  "desc": "The automated path from commit to production: CI, delivery, deployment, and the full lifecycle.",
+  "cat": "CI/CD",
+  "dif": "Beginner",
+  "tags": [
+   "lifecycle",
+   "ci",
+   "cd"
+  ],
+  "time": 25,
+  "sections": [
+   "Cover — CI/CDENGINEERING",
+   "1 Foundations",
+   "1.1 1 / The CI/CD Lifecycle",
+   "1.2 2 / How to read this manual",
+   "2 Continuous Integration",
+   "2.1 3 / What Is Continuous Integration",
+   "2.1.1 WHY THIS EXISTS",
+   "2.2 4 / What happens without CI/CD",
+   "3 CI vs CD · Delivery vs Deployment",
+   "3.1 5 / CI vs Delivery vs Deployment",
+   "3.1.1 GOTCHA",
+   "4 Pipeline &amp; Status",
+   "4.1 6 / Anatomy of a Pipeline",
+   "4.2 7 / The Status System",
+   "5 Environments &amp; Flow",
+   "5.1 8 / Environment Lanes: One Artifact, Three Tracks"
+  ],
+  "body": "CI/CD Overview CI/CD is the automated path from a developer's commit to verified, deployable software — Continuous Integration proves every change works, Continuous Delivery/Deployment ships it. 1. What Is It? Building on the big-picture overview above, we now define the three disciplines that make up CI/CD. - Continuous Integration CI : developers merge small changes frequently; each merge triggers an automated build + test + scan. Broken code is caught in minutes, not weeks. CI answers: does this change work? - Continuous Delivery: every change that passes CI is releasable — a human or policy decides when to deploy. Delivery answers: could users have it right now? Yes — at any time. - Continuous Deployment: every change that passes CI reaches production automatically no human gate . Deployment doesn't ask — it ships. CI Continuous Delivery Continuous Deployment --- --- --- --- Question Does it work? Could we ship it? — ships itself Trigger Commit / merge Validated artifact Validated artifact Human gate No Yes approval No Output Verified code Releasable artifact Production deployment 2. Why Does It Exist? Small batches, fast feedback, reproducible artifacts. A 20-line bug found by CI in 4 minutes costs almost nothing; the same bug surfacing after a month-long branch merge costs days. What Happens Without CI/CD? - Long-lived branches → merge hell. Weeks of divergent work collide at merge time; untangling conflicts takes days and reintroduces bugs. - \"Works on my machine\" releases. No reproducible build means testing one thing and shipping another — every deploy is a gamble. - Manual testing → bugs reach users. Humans skip steps under pressure; the checks that exist don't run on every change. - Manual deploys → release fear. Deployments become rare, big, traumatic events nobody deploys on Friday , so each one carries more risk. - No feedback loop. The same class of bug ships again and again because nothing feeds production lessons back into verification. With CI/CD, "
+ },
+ {
+  "id": "git-branching",
+  "title": "Git, Branching & Pull Requests",
+  "desc": "The quality gate that feeds CI: branches, reviews, triggers, and branching models.",
+  "cat": "CI/CD",
+  "dif": "Beginner",
+  "tags": [
+   "git",
+   "branching",
+   "pr"
+  ],
+  "time": 25,
+  "sections": [
+   "Cover — GIT, BRANCHING&amp; PULL REQUESTS",
+   "1 Source Control",
+   "1.1 01 / What Each Piece Is",
+   "1.2 02 / Why the Gate Exists",
+   "2 Flow &amp; Commands",
+   "2.1 03 / How the Flow Executes",
+   "2.2 04 / Commands",
+   "3 Models &amp; Discipline",
+   "3.1 05 / Branching Models",
+   "3.2 06 / Failure Modes &amp; Best Practices",
+   "3.2.1 GOTCHA",
+   "4 Check &amp; Handoff",
+   "4.1 07 / Interview Check",
+   "4.2 08 / Handoff"
+  ],
+  "body": "Git, Branching & Pull Requests Git records every change; branching isolates work; the Pull Request PR is the review + automated-check gate that triggers CI. 1. What Is It? Picking up from CI/CD Overview ../00-foundations/cicd-overview.md , where we saw the CI/CD lifecycle triggered by a Git push, we now examine how Git, branching, and Pull Requests create the quality gate that feeds CI. - Git: distributed version control — every commit is a snapshot with author, message, parent. - Branching: an independent line of work feature/login , hotfix/crash forked from main . - Pull Request: a proposal to merge a branch, combining human review with automated status checks. - CI Trigger: the event that starts a pipeline — PR opened/updated, push to main , schedule, or manual. 2. Why Does It Exist? Now that you understand the components, the next question is why this workflow exists — answered below. Direct pushes to main bypass review and verification. The branch → PR → CI → merge flow makes every change Reviewed, Tested, and Traceable before it can break the pipeline. 3. Where Does It Fit? Now that you understand why the workflow exists, the next question is where it fits in the bigger CI/CD picture — mapped below. Role Detail ------ -------- WHAT Versioned change proposal PRODUCER Developer CONSUMER CI pipeline, reviewers PRODUCES Merge commit + trigger event FAILS AS Merge conflicts, red checks, stale branches 4. How It Works Now that you see where Git fits, the next question is how the branch → PR → CI → merge flow executes step by step — detailed below. 1. Branch from main , commit small logical units. 2. Push branch, open PR — CI trigger fires pull_request , push . 3. Runner executes build/test/scan; results post back as PR checks. 4. Reviewer approves; branch merges only when checks are green branch protection . 5. Merge to main fires the post-merge pipeline artifact build . 5. Commands / Configuration Now that you've seen the step-by-step flow, the next question is how"
+ },
+ {
+  "id": "pipelines",
+  "title": "CI/CD Pipelines",
+  "desc": "Stages, jobs, steps, runners, hermetic builds, BuildKit and Kaniko.",
+  "cat": "CI/CD",
+  "dif": "Beginner",
+  "tags": [
+   "pipeline",
+   "runners",
+   "hermetic"
+  ],
+  "time": 35,
+  "sections": [
+   "Cover — CI/CDPIPELINES",
+   "1 Pipelines",
+   "1.1 01 / Vocabulary",
+   "2 Execution",
+   "2.1 02 / How a Run Executes",
+   "2.2 03 / Canonical Workflow",
+   "3 Stages &amp; Builders",
+   "3.1 04 / The Three Verification Stages",
+   "3.2 05 / Without a Daemon: BuildKit &amp; Kaniko",
+   "4 Discipline",
+   "4.1 06 / Failure Modes",
+   "5 Handoff",
+   "5.1 07 / Handoff"
+  ],
+  "body": "CI/CD Pipelines A pipeline is the automated workflow from trigger to deployment — stages phases contain jobs units of work contain steps operations , executed by runners. 1. What Is It? Picking up from Git, Branching & Pull Requests ../01-source-control/git-branching-pull-requests.md , where a merge fires the trigger — we now examine the pipeline that the trigger starts. Term Meaning Example ------ --------- --------- Pipeline Whole automated workflow .github/workflows/ci.yml Stage Logical phase build → test → scan Job Unit of work often parallel unit-tests , docker-build Step Single operation in a job npm ci , npm test Runner / Agent Machine executing jobs GitHub-hosted ubuntu-latest , self-hosted agent 2. Why Does It Exist? Manual build → test → scan → package is slow and inconsistent. A pipeline makes verification automatic, repeatable, and fast on every change. 3. Where Does It Fit? 4. How It Works 1. Trigger fires PR, push, schedule . 2. Runner checks out code, sets up toolchain with dependency cache . 3. Build compiles/bundles; Test runs unit/integration suites; Security Scan checks deps/secrets/config. 4. Fail-fast or continue-on-error per policy; results + logs return as feedback. 5. On success of all required jobs, the artifact job packages and pushes. 5. Example GitHub Actions 6. The Three Verification Stages - Build: npm ci → npm run build , docker build . Must be hermetic — sealed from the ambient machine: pinned dependencies, clean environment, no hidden host tools — so the same commit builds byte-identically anywhere. Failure = code doesn't compile/bundle. - Test: unit fast, per-PR → integration services → E2E/smoke staging . Keep PR suites < 10 min; move slow suites to post-merge. - Security Scan: dependency audit npm audit , secret scan gitleaks , SAST/image scan Trivy . Run on every PR — shifting left is cheaper than incident response. Now that you understand what can fail, the next question is where successful builds go — which is exactly what Arti"
+ },
+ {
+  "id": "artifacts",
+  "title": "Artifact Management",
+  "desc": "Build once, promote the digest everywhere: registries, versioning, signing, SBOM.",
+  "cat": "CI/CD",
+  "dif": "Intermediate",
+  "tags": [
+   "registry",
+   "sbom",
+   "signing"
+  ],
+  "time": 35,
+  "sections": [
+   "Cover — ARTIFACTMANAGEMENT",
+   "1 Artifacts",
+   "1.1 01 / Vocabulary",
+   "1.2 02 / Why Immutability",
+   "2 Lifecycle",
+   "2.1 03 / Producer, Consumer, Lifecycle",
+   "2.2 04 / Commands",
+   "2.3 05 / Versioning",
+   "3 Trust &amp; Handoff",
+   "3.1 06 / Failure Modes",
+   "3.1.1 SUPPLY-CHAIN TRUST",
+   "3.2 07 / Handoff"
+  ],
+  "body": "Artifact Management An artifact is the versioned, immutable output of a build Docker image, jar, zip . The registry stores it; promotion moves the same artifact toward production. 1. What Is It? Picking up from CI/CD Pipelines ../06-ci-cd-pipelines/pipelines.md , where the build succeeds — we now follow the one thing that outlives the pipeline: the artifact. Term Meaning ------ --------- Artifact Built output + version e.g. app:1.4.2 , app:sha-9f3a Registry Storage + distribution Docker Hub, GHCR, ECR, Nexus, Artifactory Promotion Same artifact approved from staging → production never rebuild 2. Why Does It Exist? Rebuilding per environment means testing one binary and shipping another. Immutable artifacts guarantee what passed staging is what runs in production . 3. Where Does It Fit? Role Detail ------ -------- PRODUCER Build job in CI pipeline CONSUMER CD pipeline / deployment STORAGE Artifact registry LIFECYCLE Build → Store → Promote → Deploy → Retire 4. How It Works 1. CI builds once: docker build -t registry/app:sha-9f3a . 2. Push with immutable tag commit SHA + moving tag main-latest . 3. Staging deploys sha-9f3a ; smoke tests pass. 4. Promotion tags/approves the same digest content hash — the image's fingerprint for production 1.4.2 . 5. Retention policy prunes old untagged images. 5. Commands / Configuration 6. Versioning - Immutable primary tag: commit SHA sha-9f3a — traceable, never overwritten. - Human tags: semver semantic versioning, MAJOR.MINOR.PATCH , e.g. 1.4.2 applied at promotion, never rebuilt. - Never deploy :latest to production — it is unrepeatable. Versioning Schemes Scheme Example Best for -------- --------- ---------- Commit SHA app:sha-9f3a2c1 Primary immutable tag — every build traceable to code Semver 1.4.2 Human releases, changelogs, compatibility promises Build numbers app:build-1042 Sequential CI runs Jenkins BUILD_NUMBER ; simple ordering, no code link Date-based 2026.09.09-3 Nightly/scheduled builds where recency matters Combine: S"
+ },
+ {
+  "id": "delivery",
+  "title": "Continuous Delivery",
+  "desc": "Releasable always, deployed by decision: staging, approvals, promotion.",
+  "cat": "CI/CD",
+  "dif": "Intermediate",
+  "tags": [
+   "delivery",
+   "staging",
+   "approvals"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — CONTINUOUSDELIVERY",
+   "1 Delivery",
+   "1.1 01 / Delivery vs Deployment",
+   "2 Flow",
+   "2.1 02 / How Delivery Executes",
+   "2.2 03 / Promotion as Code",
+   "3 Environments",
+   "3.1 04 / Staging vs Production",
+   "4 Check &amp; Handoff",
+   "4.1 05 / Interview Check",
+   "4.2 06 / Handoff"
+  ],
+  "body": "Continuous Delivery Continuous Delivery: every change that passes CI is releasable — deployment to staging is automatic, to production is a decision approval . Continuous Deployment removes even that gate. 1. What Is It? Picking up from Artifact Management ../05-artifacts-and-packaging/artifact-management.md , where the digest was frozen — we now move that exact artifact through staging to production. - Continuous Delivery: pipeline auto-deploys to staging; production needs an approval/policy gate. - Continuous Deployment: pipeline auto-deploys to production too. - Environment: a runtime context — staging prod-like rehearsal vs production real users . - Release: a version made available; Deployment: installing it somewhere; Promotion: approving the same artifact for the next environment. Delivery vs Deployment One gate of difference: Continuous Delivery Continuous Deployment --- --- --- After CI passes Releasable, auto-staged Shipped to production Production deploy A human/policy decision Automatic Motto \"We could ship anytime\" \"We do ship every time\" Risk control Approval gate Progressive delivery + fast rollback 2. Why Does It Exist? Merging is not shipping. Delivery closes the gap: staging proves the artifact in prod-like conditions, approvals control risk, and releases become routine instead of events. 3. Where Does It Fit? 4. How It Works 1. Post-merge pipeline pushes artifact; CD auto-deploys its digest to staging. 2. Automated smoke tests + optional manual QA run in staging. 3. Approval gate: human click, or policy gate that auto-approves when all checks are green, the deploy lands inside the allowed time window change window — e.g. business hours, never Friday night , and the code owner has signed off. 4. CD deploys the same digest to production using per-environment config env vars, secrets, scaling . 5. Post-deploy verification health checks, error budget — the allowable failure quota; if it burns too fast, releases halt confirms success. 5. Example Helm t"
+ },
+ {
+  "id": "strategies",
+  "title": "Deployment Strategies",
+  "desc": "Same artifact, different traffic shape: Rolling, Blue/Green, Canary, Recreate, Feature Flags.",
+  "cat": "CI/CD",
+  "dif": "Intermediate",
+  "tags": [
+   "canary",
+   "blue-green",
+   "flags"
+  ],
+  "time": 35,
+  "sections": [
+   "Cover — DEPLOYMENTSTRATEGIES",
+   "1 Shapes",
+   "1.1 01 / Five Shapes",
+   "2 Mechanics",
+   "2.1 02 / How Each Moves Traffic",
+   "2.2 03 / Failure Modes",
+   "3 Check &amp; Handoff",
+   "3.1 04 / Interview Check",
+   "3.2 05 / Handoff"
+  ],
+  "body": "Deployment Strategies A deployment strategy answers how a new version replaces the old one : all at once, side by side, or slice by slice. Same artifact, different traffic shape — pick by blast radius. 1. What Is It? Picking up from Continuous Delivery ../07-continuous-delivery/continuous-delivery.md , where the approval gate opened — we now choose how the new version meets real traffic. Strategy Shape Downtime Rollback ---------- ------- ---------- ---------- Recreate Stop all → start new Yes Slow redeploy old Rolling Replace pods/instances gradually No Slow roll back gradually Blue/Green Two full environments, switch traffic No Instant switch back Canary New version to a small subset first, expand on success No Fast drain canary Feature Flags Both versions deployed; code path toggled at runtime No Instant flip flag 2. Why Does It Exist? Deploying is the riskiest moment in CD: new code meets real traffic, data, and scale. Strategies bound the blast radius — how many users feel a bad release before you stop it. 3. Where Does It Fit? Role Detail ------ -------- PRODUCER CD pipeline same digest as staging CONSUMER Production traffic DECIDES Risk tolerance, traffic control, data compatibility 4. How Each Works Recreate: delete all old replicas, start new ones. Simplest; downtime during the gap. Use only where brief outages are acceptable dev tools, batch jobs . Rolling: replace instances one batch at a time maxUnavailable , maxSurge in Kubernetes . No downtime, but a bad version slowly poisons the fleet — pair with health probes that halt the rollout. Blue/Green: run Blue current and Green new side by side; validate Green with mirrored or smoke traffic; flip the router. Rollback = flip back. Costs double capacity during the switch. Canary: route 5% of users to the new version; watch golden signals error rate, p99 ; expand 5→25→50→100% or drain on alert. Needs traffic splitting service mesh, ingress weights and version-labeled metrics. Feature Flags: ship the code dark,"
+ },
+ {
+  "id": "ci",
+  "title": "Continuous Integration",
+  "desc": "Merge discipline: gates, queues, trunk.",
+  "cat": "CI/CD",
+  "dif": "Beginner",
+  "tags": [
+   "ci",
+   "gates",
+   "trunk"
+  ],
+  "time": 25,
+  "sections": [
+   "Cover — CONTINUOUSINTEGRATION",
+   "1 Discipline",
+   "1.1 01 / The Three Habits",
+   "2 Gates",
+   "2.1 02 / PR Gates &amp; Merge Queues",
+   "2.2 03 / Trunk Discipline",
+   "3 Handoff",
+   "3.1 04 / Handoff"
+  ],
+  "body": "Continuous Integration Continuous Integration is the team discipline of merging small changes frequently with automated verification — the practice behind the pipeline, not the pipeline itself. 1. What Is It? Picking up from Git, Branching & Pull Requests ../01-source-control/git-branching-pull-requests.md , where the PR gate was built — CI is the discipline that makes the gate meaningful: integrate daily, verify automatically, fix immediately. - Integrate: merge to shared main at least daily; branches live hours-to-days, never weeks. - Verify: every merge runs build + test + scan see CI/CD Pipelines ../06-ci-cd-pipelines/pipelines.md for the machinery . - Fix: a red main is the team's top priority — stop the line, revert or fix forward, then resume. 2. Why Does It Exist? Integration pain grows with branch age: two-day branches merge in minutes, two-month branches merge in weeks. CI converts one terrifying merge into dozens of trivial ones. 3. PR Gates & Merge Queues - PR gate: required status checks green CI + approvals enforced by branch protection. No green, no merge — no exceptions, no admin overrides \"just this once.\" - Merge queue: on busy main , merges serialize through a queue that rebases each PR onto the latest green main and re-verifies before landing. Prevents the \"green on branch, red on main\" race. - Linear history rebase/squash merges keeps main bisectable: any commit builds, any commit reverts cleanly. - Preflight builds: validate the diff on CI infrastructure before it lands on main — prevention beats fast reverts on busy branches. 4. Trunk Discipline - Tiny branches, daily merges; feature flags hide unfinished work instead of long branches. - main is always releasable — a broken main blocks everyone, so whoever breaks it fixes it first. - Measure: merge frequency per developer per week. Falling numbers mean branches are growing teeth. - Build master large teams : a rotating shepherd who tends the pipeline and reverts lingering breakage — a temporar"
+ },
+ {
+  "id": "build",
+  "title": "Build Systems",
+  "desc": "Hermetic builds, caching, multi-stage images.",
+  "cat": "Build",
+  "dif": "Intermediate",
+  "tags": [
+   "build",
+   "caching",
+   "docker"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — Build Systems",
+   "1 1. What Is It?",
+   "2 2. Hermetic Builds",
+   "3 3. Caching Done Right",
+   "4 4. Tool Notes",
+   "5 5. Failure Modes",
+   "6 6. Interview Notes",
+   "7 Related Topics"
+  ],
+  "body": "Build Systems A build system turns source into runnable output deterministically: dependency resolution, compilation, bundling — the same inputs must always produce the same outputs. 1. What Is It? Picking up from CI/CD Pipelines ../06-ci-cd-pipelines/pipelines.md , where the build stage was defined — here is what actually runs inside it: Maven/Gradle JVM , npm JS , Go modules, Cargo — each resolving declared dependencies into a compiled/bundled artifact. 2. Hermetic Builds Hermetic = sealed from the ambient machine see glossary . Concretely: pinned dependency versions lockfiles: package-lock.json , pom.xml versions, go.sum , clean container per build, no latest tags, no host-installed toolchains. Violation symptom: \"works in CI, fails locally\" in reverse — the build drank something from its environment. 3. Caching Done Right Cache layers, fastest first: dependency cache keyed on lockfiles → remote build cache Gradle remote, BuildKit registry cache → artifact reuse skip rebuild when inputs unchanged . Golden rule: the cache key must include every input; a stale key ships stale code silently. 4. Tool Notes - Maven/Gradle: standard layouts, wrapper scripts mvnw , gradlew pin the toolchain itself — commit them. - npm: npm ci lockfile-exact in CI, never npm install ; cache ~/.npm . - Docker builds: BuildKit with --secret mounts and registry cache see pipelines BuildKit section ../06-ci-cd-pipelines/pipelines.md ; multi-stage so SDKs never ship in runtime images. 5. Failure Modes - Unpinned deps → \"it built yesterday\"; fix with lockfiles + dependabot-style updates as PRs. - Bloated images SDK in prod → slow pulls, huge attack surface; fix with multi-stage builds. - Cache poisoning stale key → phantom green; fix by keying on lockfiles + periodic cache-bust verification. 6. Interview Notes - Hermetic vs reproducible: sealed environment vs byte-identical output reproducible is stricter . - Why npm ci over npm install in CI. - Multi-stage Docker: what ships vs what builds. R"
+ },
+ {
+  "id": "testing",
+  "title": "Testing Strategy",
+  "desc": "Pyramid, placement, flaky policy.",
+  "cat": "Testing",
+  "dif": "Intermediate",
+  "tags": [
+   "testing",
+   "pyramid",
+   "flaky"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — Testing Strategy",
+   "1 1. What Is It?",
+   "2 2. The Pyramid in Pipelines",
+   "3 3. Placement Rules",
+   "4 4. Flaky Policy",
+   "5 5. Capacity &amp; Performance Placement",
+   "6 6. Failure Modes",
+   "7 7. Interview Notes",
+   "8 Related Topics"
+  ],
+  "body": "Testing Strategy Testing strategy decides which tests run where : fast unit tests gate every PR, slow E2E proves staging — the pyramid keeps feedback fast without losing coverage. 1. What Is It? Picking up from Build Systems ../03-build-systems/build-systems.md , where output became deterministic — now prove it's correct, at the right stage, at the right cost. 2. The Pyramid in Pipelines Layer Speed Runs in Guards ------- ------- --------- -------- Unit ms each, minutes total Every PR Logic correctness Contract seconds Every PR provider + consumer API compatibility between services Integration minutes Post-merge / staging Wiring, DBs, queues E2E / smoke minutes–tens of minutes Staging, post-deploy Real user journeys Many unit, fewer E2E: an inverted pyramid all Selenium, no units is slow, flaky, and tells you nothing a unit test couldn't in milliseconds. Test doubles, cheapest first: stub canned answers → fake working shortcut, e.g. in-memory store → mock verifies interactions . Mock roles and boundaries, never implementation trivia — over-mocked suites shatter on every refactor while missing real regressions. 3. Placement Rules - PR pipeline: unit + contract + fast integration < 10 min total . Anything slower moves post-merge. - Staging: full integration + E2E + smoke after deploy; failures block promotion, not merges. - Post-deploy: synthetic smoke probes continuously — the pipeline's last test never ends. - Acceptance criteria as executable specs: analyst + tester + developer agree the criteria before coding, written so the pipeline can run them Given-When-Then . Docs that can't fail the build drift from behavior. 4. Flaky Policy Flaky test protocol: quarantine to a non-blocking suite immediately same day , assign an owner, fix-or-delete deadline of one sprint. A flaky gate teaches developers that red is meaningless — the most expensive test debt there is. 5. Capacity & Performance Placement Functional tests prove correctness; capacity tests prove survival. Treat"
+ },
+ {
+  "id": "deployment-auto",
+  "title": "Continuous Deployment",
+  "desc": "Auto-to-prod prereqs and kill criteria.",
+  "cat": "CI/CD",
+  "dif": "Advanced",
+  "tags": [
+   "deployment",
+   "progressive",
+   "automation"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — Continuous Deployment",
+   "1 1. What Is It?",
+   "2 2. Prerequisites (All Non-Negotiable)",
+   "3 3. Failure Modes",
+   "4 4. Delivery vs Deployment: When Each",
+   "5 5. Interview Notes",
+   "6 Related Topics"
+  ],
+  "body": "Continuous Deployment Continuous Deployment removes the last human gate: every change passing all automated checks reaches production by itself. Freedom bought with automation rigor most teams haven't built yet. 1. What Is It? Picking up from Continuous Delivery ../07-continuous-delivery/continuous-delivery.md , where a human approved production — here the pipeline approves itself. Delivery asks \"could we ship?\"; Deployment ships. 2. Prerequisites All Non-Negotiable - Full automation: build, test, scan, staging deploy, smoke, promotion — zero manual steps. Any human errand becomes the bottleneck that breaks the model. - Progressive delivery: canary or flags on every release see Deployment Strategies ../10-deployment-strategies/deployment-strategies.md — automation needs a small blast radius to be safe. - Kill criteria: automated halt conditions error-budget burn, p99 regression, business KPI drop that stop and roll back without asking. - Observability: version-labeled everything, SLOs with burn alerts, on-call that trusts the automation see Observability ../13-observability-and-feedback/observability-feedback.md . - Trunk discipline + flags: unfinished work hides behind flags; branches live hours-to-days, never weeks — main is always shippable. 3. Failure Modes - Automating a flaky pipeline → auto-shipping bugs at machine speed; fix gates first, automate second. - No kill criteria → bad release reaches 100% \"successfully\"; every auto-promotion needs an automated halt. - Database migrations without expand-contract → auto-deploy corrupts state; migrations must be backward-compatible across versions. - On-call distrusts automation → humans re-add manual gates; fix with practiced, boring rollbacks that build confidence. 4. Delivery vs Deployment: When Each - Delivery human gate : regulated industries, data migrations, marketing-coordinated launches, teams still building gate maturity. - Deployment no gate : SaaS with progressive delivery, strong SLOs, practiced rollback"
+ },
+ {
+  "id": "envs",
+  "title": "Environments & Release",
+  "desc": "Topology, config vs code, release trains.",
+  "cat": "Delivery",
+  "dif": "Intermediate",
+  "tags": [
+   "environments",
+   "config",
+   "release"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — Environments &amp; Release",
+   "1 1. What Is It?",
+   "2 2. Environment Topology",
+   "3 3. Config vs Code",
+   "4 4. Release Trains &amp; Promotion Paths",
+   "5 5. Failure Modes",
+   "6 6. Interview Notes",
+   "7 Related Topics"
+  ],
+  "body": "Environments & Release Environments are runtime contexts with different data, scale, and risk; release is the discipline of moving one artifact across them safely — same binary, different config, explicit promotion paths. 1. What Is It? Picking up from Continuous Deployment ../08-continuous-deployment/continuous-deployment.md , where automation needed safe landing zones — here is how those zones are built and governed. 2. Environment Topology Env Purpose Data Deploys ----- --------- ------ --------- Dev Individual velocity Fake/local Continuous, anything Preview per-PR Review the actual change Sanitized snapshot Auto per PR, destroyed on merge Staging Prod rehearsal Sanitized/anonymized prod-like Auto on main Production Real users Real Gated delivery or automated deployment Preview environments are the highest-leverage addition: reviewers click the change instead of imagining it. 3. Config vs Code The artifact never changes between environments; everything else does via config: env vars for simple values, secret stores for credentials, config maps/files for structured settings. Inject each setting at the latest safe point — build-time injection forces per-environment artifacts and voids test-what-you-ship; deploy- or runtime injection keeps one binary everywhere. Twelve-factor discipline: a diff between staging and production behavior must be explainable by config diff alone — never by \"we built it differently.\" 4. Release Trains & Promotion Paths - Release train: scheduled departures e.g. Tuesdays/Thursdays ; whatever is green and approved rides, the rest waits for the next train. Predictable for stakeholders, calming for on-call. - Promotion path: dev → preview → staging → production, each gate explicit checks + approvals + signals . Skipping environments is the process smell that precedes incidents. - Hotfix lane: a documented fast path fewer approvals, same checks for production fires — used rarely, reviewed always. - Release readiness checklist: owners named, c"
+ },
+ {
+  "id": "security",
+  "title": "CI/CD Security",
+  "desc": "Secrets, signing, SBOM, least privilege.",
+  "cat": "Security",
+  "dif": "Advanced",
+  "tags": [
+   "secrets",
+   "sbom",
+   "supply-chain"
+  ],
+  "time": 40,
+  "sections": [
+   "Cover — CI/CD Security",
+   "1 1. What Is It?",
+   "2 2. Secrets Discipline",
+   "3 3. Signing, SBOM &amp; Provenance",
+   "4 4. Least Privilege Everywhere",
+   "5 5. Supply-Chain Gates",
+   "6 6. Failure Modes",
+   "7 7. Interview Notes",
+   "8 Related Topics"
+  ],
+  "body": "CI/CD Security The pipeline is production infrastructure with production secrets and the power to ship code — attack it like one: least privilege, signed artifacts, verified supply chain. 1. What Is It? Picking up from Environments & Release ../09-environments-and-release/environments-release.md , whose zones carry real credentials — the pipeline itself is the highest-value target in the estate: it holds deploy keys, signs releases, and runs attacker-influenced PR code. 2. Secrets Discipline - Store in managers Vault, cloud KMS, Jenkins credentials store, GitHub environments — never in repos, images, logs, or chat. - Scope narrowly per-env, per-job , rotate on schedule and on any leak, audit every access. - PR builds from forks get zero production secrets — credential-free sandboxes only see Jenkins Agents ../15-platforms-and-tools/jenkins/jenkins-agents.md trust boundary . 3. Signing, SBOM & Provenance Build once, then: sign the digest cosign , generate the SBOM Syft/Trivy , attest provenance SLSA: who built, from which commit, in which pipeline . Deploy policies admit only signed, attested images — see Artifact Management ../05-artifacts-and-packaging/artifact-management.md . When the next CVE lands, query SBOMs to find affected digests in minutes. 4. Least Privilege Everywhere - CI tokens: per-repo, minimal scopes, short TTL OIDC federation beats long-lived keys — workloads mint credentials, nobody stores them . - Pipeline permissions: GITHUB_TOKEN minimal scopes; Jenkins agents can't read other jobs' secrets agent→controller deny . - Humans: matrix authorization, SSO + MFA, no shared admin accounts, no standing prod access without review. 5. Supply-Chain Gates Pin everything: action SHAs not @v4 tags , base image digests not :latest , plugin versions, lockfiles. Verify checksums on download. Each PR that bumps a dependency re-runs the full gate — Dependabot PRs are untrusted code until proven otherwise. 6. Failure Modes - Secret in git history → rotate immediate"
+ },
+ {
+  "id": "rollback",
+  "title": "Rollback & Recovery",
+  "desc": "Per-strategy moves, drills, postmortems.",
+  "cat": "Reliability",
+  "dif": "Intermediate",
+  "tags": [
+   "rollback",
+   "recovery",
+   "mttr"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — Rollback &amp; Recovery",
+   "1 1. What Is It?",
+   "2 2. Rollback per Strategy",
+   "3 3. Rollback vs Forward-Fix Decision",
+   "4 4. Recovery Drills (MTTR Practice)",
+   "5 5. Postmortems That Prevent Recurrence",
+   "6 6. Data Migration Practice",
+   "7 7. Failure Modes",
+   "8 8. Interview Notes",
+   "9 Related Topics"
+  ],
+  "body": "Rollback & Recovery Rollback is a feature, not an apology: a practiced, boring path from bad production back to good — decided by signals, executed in minutes, reviewed afterward. 1. What Is It? Picking up from CI/CD Security ../11-security/cicd-security.md , where defenses were hardened — defenses still fail, so recovery must be engineered with the same rigor as release. 2. Rollback per Strategy Strategy Rollback move Time ---------- -------------- ------ Rolling Roll back batch by batch or rollout undo Minutes Blue/Green Flip router back to Blue Seconds Canary Drain canary, 100% to stable Seconds–minutes Feature flag Toggle off Instant Recreate Redeploy previous digest Slowest — avoid where recovery matters Rollback deploys a previous known-good digest Artifact Management ../05-artifacts-and-packaging/artifact-management.md — never a fresh build. Fresh builds during incidents add untested variables to a fire. 3. Rollback vs Forward-Fix Decision - Rollback when: cause unknown, blast radius growing, error budget burning fast, or the fix is uncertain. Default for Sev1. - Forward-fix when: cause known, fix tiny and verified, rollback itself risky migrations already applied — data can't \"roll back,\" only migrate forward . - Decider: on-call with pre-agreed thresholds, not a committee. Decide in minutes; review in the postmortem. 4. Recovery Drills MTTR Practice - Game days: inject failure in staging kill pods, expire certs, break the pipeline , time the recovery, fix the gaps found. - Rollback rehearsal: each service rolls back on staging quarterly until MTTR is measured, not guessed. - Jenkins/server recovery: restore JENKINS_HOME backup to fresh infra, replay smoke pipeline see Jenkins Advanced ../15-platforms-and-tools/jenkins/jenkins-advanced.md . 5. Postmortems That Prevent Recurrence Blameless, owner-assigned, pipeline-linked: every action item becomes a test, check, alert, or runbook — or it will recur. Track repeat-incident rate; a postmortem without a merged p"
+ },
+ {
+  "id": "lab-01",
+  "title": "Lab 01-02 · Core: Pipeline Labs",
+  "desc": "First pipeline to hermetic build and test: green checks, gates, DAG, caching.",
+  "cat": "Labs",
+  "dif": "Beginner",
+  "tags": [
+   "lab",
+   "pipeline",
+   "build"
+  ],
+  "time": 90,
+  "sections": [
+   "Cover — Page 1",
+   "1 01 / First Pipeline",
+   "1.0.1 OBJECTIVE",
+   "1.0.2 ARCHITECTURE",
+   "1.1 Step 1: Add the Workflow",
+   "1.1.1 EXPECTED RESULT",
+   "2 02 / Enforce the Gate",
+   "2.1 Step 2: Require the Check",
+   "2.2 Verification &amp; Failure Scenarios",
+   "2.2.1 GOTCHA",
+   "2.2.2 INTERVIEW CHECK",
+   "3 03 / Build and Test DAG",
+   "3.0.1 OBJECTIVE",
+   "3.0.2 THE DAG EDGE",
+   "3.1 Step 1: Split and Cache",
+   "4 04 / Hermeticity &amp; Caching"
+  ],
+  "body": "Lab 01 — First Pipeline Objective Ship a green CI pipeline on GitHub Actions: push → build → test → status check on the PR. Prerequisites - A GitHub repo you own; Node 20+ locally any tiny JS project works, even package.json + one test file . - Concepts: CI/CD Pipelines ../06-ci-cd-pipelines/pipelines.md , GitHub Actions ../15-platforms-and-tools/github-actions.md . Architecture Push → GitHub webhook → hosted runner ubuntu-latest → checkout → setup-node → npm ci → npm test → green check on PR. Setup Repo with package.json containing a test script even \"test\": \"node --test\" . Step 1 — Add the workflow Execute Create .github/workflows/ci.yml : Push to a branch, open a PR. Expected Result Actions tab shows the run green; the PR shows a green check. Why This is the smallest closed loop: trigger → runner → job → feedback on the PR see pipeline anatomy ../06-ci-cd-pipelines/pipelines.md . Step 2 — Require the check Execute Repo Settings → Branches → protect main → require build status check. Push a breaking change to a PR. Expected Result Merge button blocked until green. Why An unenforced gate is decoration; branch protection makes CI a rule see PR gates ../02-continuous-integration/continuous-integration.md . Verification - PR shows green check from the workflow. - Merging to main without green is blocked. - Breaking the test turns the PR red. Failure Scenarios - npm ci fails: lockfile missing or out of sync — run npm install locally, commit the lockfile. - Runner queues long: free-tier concurrency; retry, or shrink the job. Cleanup Keep the workflow — every later lab extends it. What This Proved Triggers fire pipelines, runners execute jobs, checks gate merges. Continue with Lab 02 02-build-and-test.md . Interview Notes - What the green check actually proves — and which misconfiguration lets red code merge anyway. - Why breaking the test on purpose is the real verification, not the green run."
+ },
+ {
+  "id": "lab-03",
+  "title": "Lab 03-04 · Core: Artifacts & Deployment",
+  "desc": "Immutable artifacts, SBOMs, and promotion from staging to a gated production release.",
+  "cat": "Labs",
+  "dif": "Intermediate",
+  "tags": [
+   "lab",
+   "artifacts",
+   "deployment"
+  ],
+  "time": 105,
+  "sections": [
+   "Cover — Page 1",
+   "1 01 / Artifact Immutability",
+   "1.0.1 OBJECTIVE",
+   "1.0.2 IMMUTABILITY",
+   "1.1 Step 1: Build Once, Tag SHA",
+   "1.1.1 EXPECTED RESULT",
+   "2 02 / Software Bill of Materials",
+   "2.1 Step 2: Attach SBOM",
+   "2.1.1 COMMAND",
+   "2.1.2 RESULT",
+   "2.2 Verification &amp; Failure Scenarios",
+   "2.2.1 GOTCHA",
+   "2.2.2 INTERVIEW CHECK",
+   "3 03 / Environment Promotion",
+   "3.1 Step 1: Staging Auto-Deploys",
+   "3.1.1 WHY IT MATTERS"
+  ],
+  "body": "Lab 03 — Artifacts Objective Build a Docker image once, tag it by commit SHA, push to GHCR, attach an SBOM — then prove staging and prod would run the same digest. Prerequisites - Lab 02 green; a Dockerfile multi-stage, node:20-slim runtime ; concepts: Artifact Management ../05-artifacts-and-packaging/artifact-management.md . Architecture Merge to main → build image → tag ghcr.io/<you /<app :sha-<short → push GHCR → generate SBOM → print digest the deployable identity . Setup Enable GitHub Packages GHCR on the repo; workflow needs packages: write permission. Step 1 — Build once, tag SHA Execute Expected Result GHCR shows sha-<short tag; logs print the digest. Why SHA tag = immutable identity; the digest not :latest is what every environment deploys see versioning ../05-artifacts-and-packaging/artifact-management.md . Step 2 — Attach SBOM Execute Add after push: anchore/sbom-action@v0 on the pushed image; inspect the artifact. Expected Result SBOM artifact lists every package inside the image. Why The ingredient list that makes the next CVE answerable in minutes, not days. Verification - GHCR holds an immutable SHA tag. - Same digest referenced twice = same bytes. - SBOM artifact present. Failure Scenarios - 403 on push: missing packages: write — add the permission block. - latest deployed somewhere: retag nothing; fix consumers to pin the digest. Cleanup Keep images; they are small and prove immutability. What This Proved Build-once identity, SHA discipline, SBOM habit. Continue with Lab 04 04-deployment.md . Interview Notes - Digest vs tag: why redeploying latest can silently change what's running. - The 403 on push — which single permission block fixes it and why least privilege demands it."
+ },
+ {
+  "id": "lab-05",
+  "title": "Lab 05-06 · Core: Rollback & Jenkins",
+  "desc": "Break prod, recover via rollback and postmortem, then run it live on Jenkins via Compose.",
+  "cat": "Labs",
+  "dif": "Intermediate",
+  "tags": [
+   "lab",
+   "rollback",
+   "jenkins"
+  ],
+  "time": 105,
+  "sections": [
+   "Cover — Page 1",
+   "1 01 / The Incident & Recovery",
+   "1.0.1 OBJECTIVE",
+   "1.0.2 WHY RECOVERY?",
+   "1.1 Step 1: Cause the Incident",
+   "1.1.1 EXPECTED RESULT",
+   "2 02 / Rollback & Postmortem",
+   "2.1 Step 2: Roll Back, Don't Rebuild",
+   "2.2 Step 3: Postmortem with Teeth",
+   "2.2.1 GOTCHA",
+   "2.2.2 INTERVIEW CHECK",
+   "3 03 / Controller & Agent Split",
+   "3.0.1 OBJECTIVE",
+   "3.0.2 ZERO EXECUTORS",
+   "3.1 Docker Compose Setup",
+   "3.1.1 EXPECTED RESULT"
+  ],
+  "body": "Lab 05 — Rollback Objective Break production deliberately, then recover by redeploying the previous known-good digest — and write the postmortem. Prerequisites - Lab 04 green with two successful production deploys you need a previous good digest ; concepts: Rollback & Recovery ../14-reliability-and-recovery/rollback-recovery.md . Architecture Bad merge → staging green-but-wrong tests miss it → approved to prod → incident → redeploy previous digest → postmortem with a pipeline action item. Setup Note the current production digest; keep its value handy. Step 1 — Cause the incident Execute Merge a change that passes tests but breaks the app's visible output e.g. wrong port, broken route . Promote to production. Expected Result Production is broken despite a green pipeline. Why Green ≠ correct: tests cover what you thought of. This is why recovery must be engineered, not improvised. Step 2 — Roll back, don't rebuild Execute Redeploy the previous digest to production re-run the old deploy-prod or dispatch with the saved digest . Time yourself. Expected Result Production healthy in minutes; no fresh build involved. Why Old digests are proven; fresh builds add untested variables to a fire see rollback rule ../14-reliability-and-recovery/rollback-recovery.md . Step 3 — Postmortem with teeth Execute Write: timeline, root cause, and one action item that becomes a pipeline change a new test, check, or alert — then implement it. Expected Result A merged pipeline change that would have caught this incident. Why Postmortems without merged changes are diary entries. Verification - Recovery time measured aim: minutes . - Previous digest redeployed, not a fresh build. - One preventive pipeline change merged. Failure Scenarios - Previous digest unknown: promotion didn't record digests — log every deployed digest from now on. - Rollback also broken: data migrated forward — forward-fix with expand-contract instead. Cleanup Keep the postmortem in the repo docs/postmortems/ . What This P"
+ },
+ {
+  "id": "lab-07",
+  "title": "Lab 07-08 · Core: Governance & Recovery",
+  "desc": "Reusable pipeline libraries plus backup, destroy-restore, and replay drills.",
+  "cat": "Labs",
+  "dif": "Advanced",
+  "tags": [
+   "lab",
+   "shared-library",
+   "backup"
+  ],
+  "time": 120,
+  "sections": [
+   "Cover — Page 1",
+   "1 01 / Pipeline Code Reuse",
+   "1.0.1 OBJECTIVE",
+   "1.0.2 ARCHITECTURE",
+   "1.1 Setup: The Library Repository",
+   "1.1.1 WHY IT MATTERS",
+   "2 02 / Registration & Consumption",
+   "2.1 Step 1: Register the Library",
+   "2.2 Step 2: Consume from Two Pipelines",
+   "2.2.1 GOTCHA",
+   "3 03 / System Map & Troubleshooting",
+   "3.1 Troubleshooting Flow",
+   "3.1.1 INTERVIEW CHECK",
+   "4 04 / Disaster Recovery",
+   "4.0.1 OBJECTIVE",
+   "4.0.2 OFFLINE BACKUP"
+  ],
+  "body": "Lab 07 — Jenkins Shared Library Objective Extract a duplicated pipeline step into a versioned shared library consumed by two pipelines — reuse without copy-paste. Prerequisites - Lab 06 running; a second pipeline job; a git repo to host the library. Architecture Library repo vars/notifySlack.groovy -style step → Global Pipeline Libraries → two Jenkinsfiles call the same step → one fix propagates to both. Setup Create repo pipeline-library with vars/standardTest.groovy : Step 1 — Register the library Execute Manage Jenkins → System → Global Pipeline Libraries → add my-lib , default version main , source pointing at the repo. Expected Result Library listed, HEAD resolved. Why Versioned libraries are dependencies: pinned, reviewed, rollback-able — unlike copy-pasted steps. Step 2 — Consume from two pipelines Execute In both Jenkinsfiles: Expected Result Both pipelines green, both calling the shared step. Why One definition, N consumers — the DRY payoff, with the version pin as the safety rail. Verification - Both pipelines call the library step. - Breaking the library breaks both proves sharing ; reverting fixes both. - Library change went through PR review on its own repo. Failure Scenarios - Library my-lib not found : name mismatch or version unresolvable — check Global config + repo branch. - Untrusted library on sandbox: approve signatures or restrict to trusted source. Cleanup Keep the library repo — it is the seed of pipeline governance. What This Proved Reusable pipeline code with versioning. Continue with Lab 08 08-jenkins-backup-restore.md . Interview Notes - Library not found : the two causes name vs version and where each is configured. - Why library changes go through PR review on their own repo — what unreviewed shared code risks."
+ },
+ {
+  "id": "cheatsheet",
+  "title": "Command Cheatsheet",
+  "desc": "Every lab command grouped by tool.",
+  "cat": "Reference",
+  "dif": "Beginner",
+  "tags": [
+   "reference",
+   "commands"
+  ],
+  "time": 15,
+  "sections": [
+   "Cover — Command Cheatsheet",
+   "1 Git",
+   "2 npm / Builds",
+   "3 Docker / GHCR",
+   "4 Jenkins (Compose lab)",
+   "5 Jenkins backup",
+   "6 GitHub Actions snippets",
+   "7 Interview Notes",
+   "8 Related Topics"
+  ],
+  "body": "Command Cheatsheet Every command used across the labs and guides, grouped by tool. Copy-paste ready; details live in the linked chapters. Git See Git, Branching & Pull Requests ../01-source-control/git-branching-pull-requests.md . npm / Builds See Build Systems ../03-build-systems/build-systems.md . Docker / GHCR See Artifact Management ../05-artifacts-and-packaging/artifact-management.md . Jenkins Compose lab See Lab 06 ../16-labs/06-jenkins-controller.md , Lab 08 ../16-labs/08-jenkins-backup-restore.md . Jenkins backup See Jenkins Advanced ../15-platforms-and-tools/jenkins/jenkins-advanced.md . GitHub Actions snippets See GitHub Actions ../15-platforms-and-tools/github-actions.md . Interview Notes - Reproduce any pipeline in this file from memory: trigger, build, gate, promote, rollback. - Which snippet pins versions — and what breaks first when nothing is pinned. - Where the approval gate lives in each platform's snippet, and what happens without it. Related Topics - Topic Index ../TOPIC_INDEX.md - Glossary ../GLOSSARY.md"
+ },
+ {
+  "id": "gitlab",
+  "title": "GitLab CI",
+  "desc": "Stages, needs DAG, runners plus tags, review apps, merge trains.",
+  "cat": "Platforms",
+  "dif": "Intermediate",
+  "tags": [
+   "gitlab",
+   "runners"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — GitLab CI",
+   "1 1. What Is It?",
+   "2 2. Pipeline Anatomy (GitLab Vocabulary)",
+   "3 3. Runners &amp; Tags",
+   "4 4. Environments, Review Apps &amp; Merge Trains",
+   "5 5. GitLab vs the Sisters",
+   "6 6. Failure Modes",
+   "7 7. Interview Notes",
+   "8 Related Topics"
+  ],
+  "body": "GitLab CI GitLab CI is the pipeline engine inside GitLab: one YAML file in the repo .gitlab-ci.yml driving stages, runners, and environments — the same concepts as Jenkins and Actions, with GitLab's own vocabulary. 1. What Is It? Picking up from GitHub Actions ../15-platforms-and-tools/github-actions.md , where workflows lived beside the code — GitLab goes further: repo, pipeline, registry, and environments are one product, so the pipeline natively knows about merge requests, environments, and review apps. 2. Pipeline Anatomy GitLab Vocabulary - Stages run in order; jobs in the same stage run in parallel. - needs: builds a DAG like Actions , skipping stage waits. - rules: decides when jobs run merge request only, main only, paths changed — replaces the older only/except . - artifacts: passes files between jobs reports, coverage, JUnit ; cache: speeds reruns lockfile-keyed, same discipline as everywhere . 3. Runners & Tags Runner scope Use -------------- ----- Shared Fleet managed by the instance; default for most jobs Group / project specific GPU, private network, compliance isolation Tags tags: gpu Route jobs to capable runners One job = one runner by default; scale = more runners. Self-managed runners need the same patching/scaling discipline as any self-hosted fleet. 4. Environments, Review Apps & Merge Trains - Environments environment: staging/production track what's deployed where; production gates add manual approvals — the same delivery-vs-deployment line as everywhere. - Review apps on_stop: teardown spin a live environment per merge request and destroy it on merge — GitLab's built-in preview environments. - Merge trains serialize merges onto latest green main with re-verification — the same race the merge queue solves elsewhere. 5. GitLab vs the Sisters GitLab CI GitHub Actions Jenkins --- --- --- --- Config lives .gitlab-ci.yml in repo .github/workflows/ Jenkinsfile in repo Runners Shared fleet + tags Hosted + ARC Controller + agents Environments Built-in"
+ },
+ {
+  "id": "argocd",
+  "title": "ArgoCD and GitOps",
+  "desc": "Pull delivery, Application, sync waves, ApplicationSets.",
+  "cat": "Platforms",
+  "dif": "Advanced",
+  "tags": [
+   "gitops",
+   "argocd"
+  ],
+  "time": 40,
+  "sections": [
+   "Cover — ArgoCD and GitOps",
+   "1 1. What Is It?",
+   "2 2. Push vs Pull",
+   "3 3. Core Objects",
+   "4 4. Where It Fits",
+   "5 5. Failure Modes",
+   "6 6. Interview Notes",
+   "7 Related Topics"
+  ],
+  "body": "ArgoCD & GitOps GitOps: git is the desired state, an in-cluster operator pulls reality toward it. ArgoCD is that operator for Kubernetes — the pipeline stops pushing to prod and starts committing to git. 1. What Is It? Picking up from GitLab CI gitlab-ci.md , where pipelines pushed artifacts outward — ArgoCD inverts the last mile: the CI pipeline builds the image and commits the new digest to a manifests repo; ArgoCD running inside the cluster notices and syncs. Cluster credentials never leave the cluster. 2. Push vs Pull Push classic CD Pull GitOps --- --- --- Actor External pipeline holds cluster creds In-cluster agent, creds stay inside Source of truth Pipeline run history Git commit Rollback Redeploy old digest git revert Drift Silent until noticed Detected + optionally auto-healed 3. Core Objects - Application: what repo+path+revision goes where cluster+namespace . - Sync waves + hooks: order resources CRDs before CRs, migrations before app — the deployment strategy's sequencing, declaratively. - ApplicationSet: one template → N environments/tenants; preview environments become a generator, not a script. - Image Updater optional : tracks new digests and commits them — automation with git as the audit trail. 4. Where It Fits CI still builds, tests, scans, signs everything upstream unchanged . The handoff changes: instead of kubectl apply from CI, CI commits image: sha-9f3a to the ops repo. Promotion = pull request between env branches/folders — reviewable, revertable, auditable. 5. Failure Modes - Auto-sync + bad commit → bad state propagates at machine speed; gate with manual sync on prod or automated kill criteria. - Secrets in the manifests repo → use external secret operators External Secrets, Sealed Secrets ; git holds references, never values. - selfHeal fighting hotfixes → emergency kubectl edits get reverted; declare a break-glass procedure pause sync, fix, commit . - Monorepo scale → thousands of Applications; shard by team/cluster with ApplicationSets."
+ },
+ {
+  "id": "iac",
+  "title": "IaC for Environments",
+  "desc": "Terraform envs, state per env, plan review, drift.",
+  "cat": "Platforms",
+  "dif": "Intermediate",
+  "tags": [
+   "terraform",
+   "iac"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — IaC for Environments",
+   "1 1. What Is It?",
+   "2 2. Structure That Scales",
+   "3 3. IaC in the Pipeline",
+   "4 4. Preview Environments, Automated",
+   "5 5. Failure Modes",
+   "6 6. Interview Notes",
+   "7 Related Topics"
+  ],
+  "body": "IaC for Environments Environments are too important to be clicked into existence: Terraform or equivalent declares every environment's infrastructure so staging and production differ only by config — never by history. 1. What Is It? Picking up from ArgoCD & GitOps ../15-platforms-and-tools/argocd-gitops.md , where app state became declarative — IaC does the same for everything underneath: VPCs, clusters, databases, DNS, IAM. Same modules, different inputs per environment. 2. Structure That Scales - State per environment never shared : one blast radius per state file; remote backend with locking. - Modules pinned by version — floating module sources are :latest with extra steps. - Env diff = input diff: instance sizes, counts, secrets references. A behavioral difference not explainable by inputs is a bug. 3. IaC in the Pipeline - terraform plan on every PR touching envs/ — the plan is the review. - apply gated like any production deployment approvals on prod, auto on dev . - Drift detection on schedule: plan nightly, alert on unexpected diffs — the IaC equivalent of ArgoCD's self-heal. - Jenkins controller itself can be code too JCasC — see Jenkins Advanced ../15-platforms-and-tools/jenkins/jenkins-advanced.md . 4. Preview Environments, Automated Combine the pieces: PR → pipeline runs a Terraform workspace or ArgoCD ApplicationSet → ephemeral env with sanitized data → destroy on merge. The highest-leverage environment pattern, fully automated, zero snowflakes. 5. Failure Modes - Shared state across envs → dev apply deletes prod tables; separate states, separate credentials. - Unreviewed apply on prod → treat IaC changes like code: PR, plan output, approval. - Secrets in state files → state holds secrets in plaintext; encrypt backends, restrict access, prefer external secret stores. - ClickOps drift → someone \"fixes\" prod in the console; drift alerts + periodic apply reconciliation. 6. Interview Notes - Why state-per-environment blast radius . - Plan-as-review: what m"
+ },
+ {
+  "id": "observability",
+  "title": "Observability & Feedback",
+  "desc": "Deploy, observe, learn, fix: golden signals, SLOs, DORA, postmortems.",
+  "cat": "CI/CD",
+  "dif": "Intermediate",
+  "tags": [
+   "slo",
+   "dora",
+   "metrics"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — OBSERVABILITY&amp; FEEDBACK",
+   "1 Feedback",
+   "1.1 01 / Vocabulary",
+   "2 Mechanism",
+   "2.1 02 / How the Loop Runs",
+   "2.2 03 / The DORA Four",
+   "3 Discipline",
+   "3.1 04 / Failure Modes",
+   "4 Handoff",
+   "4.1 05 / Handoff"
+  ],
+  "body": "Observability & Feedback Observability logs, metrics, traces reveals what a deployment actually did; feedback routes that signal back to the developer so the loop — commit → production → learning — closes. 1. What Is It? Picking up from Continuous Delivery ../07-continuous-delivery/continuous-delivery.md , where the digest reached production — we now watch what it does there and feed the lessons back. - Observability: logs events , metrics numbers over time , traces request paths answering \"what is production doing?\" - Feedback: every signal returned to the author: PR check results, staging smoke verdicts, prod alerts, DORA trends DORA = DevOps Research & Assessment; its four delivery signals are listed in §7 . 2. Why Does It Exist? Without feedback, deployment is a cliff — code leaves the pipeline and nobody learns. The loop deploy → observe → learn → fix is what makes CI/CD self-improving instead of merely automated. 3. Where Does It Fit? Signal Consumer Action -------- ---------- -------- PR checks Developer Fix before merge Staging smoke Team Block promotion Error-rate/latency alert On-call Roll back or forward-fix Deploy frequency, MTTR mean time to recovery trends Leads Improve pipeline 4. How It Works 1. Every deploy is labeled version/SHA so logs/metrics correlate with the change. 2. Dashboards track golden signals — the four user-visible health metrics: latency, traffic, errors, saturation — plus business KPIs. 3. Alerts fire on symptom error budget burn — failures consuming the allowed quota too fast; p99 spike — the slowest 1% of requests degrading , not on every deploy. 4. Incident → revert or forward-fix → postmortem feeds back into pipeline gates new test, new scan, tighter approval . 5. Example 6. Failure Modes - Alert fatigue noisy thresholds → alerts ignored; fix with SLO-based alerts SLO = Service Level Objective, e.g. 99.9% successful requests; alert when the error budget burns, not on every blip . - Unlabeled deploys can't tell which version brok"
+ },
+ {
+  "id": "jenkins-domain",
+  "title": "Jenkins Domain",
+  "desc": "The map: every generic concept becomes a controller, agent, or Jenkinsfile.",
+  "cat": "Jenkins",
+  "dif": "Beginner",
+  "tags": [
+   "jenkins",
+   "map"
+  ],
+  "time": 20,
+  "sections": [
+   "Cover — JENKINSDOMAIN",
+   "1 Jenkins Map",
+   "1.1 01 / Why Jenkins",
+   "1.2 02 / Concept Map",
+   "2 Rules &amp; Handoff",
+   "2.1 03 / The Golden Rule",
+   "2.1.1 DISTINCTIVELY JENKINS ONLY",
+   "2.2 04 / Reading Order"
+  ],
+  "body": "Jenkins Jenkins is an open-source automation server that implements CI/CD concepts: pipelines become Jenkinsfiles, runners become agents, secrets become credentials. Concepts live in CI/CD Pipelines ../../06-ci-cd-pipelines/pipelines.md ; Jenkins specifics live here. Picking up from Observability & Feedback ../../13-observability-and-feedback/observability-feedback.md , where the loop closed — we now implement that entire loop in Jenkins, starting with the topology that runs everything. Concept → Jenkins Map Generic Concept Jenkins Implementation Document --- --- --- Pipeline Jenkins Pipeline Declarative / Scripted jenkins-pipelines.md jenkins-pipelines.md Runner / Agent Jenkins agent node , executor slots jenkins-agents.md jenkins-agents.md CI Trigger Webhook, polling, multibranch scan jenkins-webhooks.md jenkins-webhooks.md Secrets Credentials store + bindings jenkins-credentials.md jenkins-credentials.md Extensibility Plugins jenkins-plugins.md jenkins-plugins.md Server topology Controller + agents jenkins-architecture.md jenkins-architecture.md Hardening Auth matrix, agent-to-controller rules jenkins-security.md jenkins-security.md Installation WAR / Docker / package jenkins-setup.md jenkins-setup.md Debugging Build logs, executor states jenkins-troubleshooting.md jenkins-troubleshooting.md Why Jenkins? - WHAT: open-source automation server — pipelines as code Jenkinsfile , 1,800+ plugins, controller + agents topology. Self-hosted, free, runs anywhere. - WHY: vendor-neutral, owns your data/secrets on your infra, reaches exotic targets mainframes, air-gapped, Windows/GPU builders SaaS runners can't, and its plugin ecosystem covers nearly every tool. - WITHOUT IT manual CI or scripts on laptops : no audit trail of who built what, secrets scattered in shell history, \"release laptop\" as single point of failure, no PR gates, every release depends on one person's memory. Reading Order 1. Architecture jenkins-architecture.md → 2. Setup jenkins-setup.md → 3. Pipelines j"
+ },
+ {
+  "id": "jenkins-architecture",
+  "title": "Jenkins Architecture",
+  "desc": "Controller schedules, agents execute: topology, state, remoting, Docker planes.",
+  "cat": "Jenkins",
+  "dif": "Beginner",
+  "tags": [
+   "jenkins",
+   "architecture"
+  ],
+  "time": 25,
+  "sections": [
+   "Cover — JENKINSARCHITECTURE",
+   "1 Topology",
+   "1.1 01 / The Three Parts",
+   "1.2 02 / What Lives in JENKINS_HOME",
+   "2 Docker &amp; Sizing",
+   "2.1 03 / Jenkins in Docker: Three Planes",
+   "2.2 04 / Sizing Rules",
+   "3 Failures &amp; Handoff",
+   "3.1 05 / Failure Modes",
+   "3.2 06 / Handoff"
+  ],
+  "body": "Jenkins Architecture Jenkins follows a controller–agent topology: the controller schedules work and serves the UI; agents nodes provide executors that actually run builds. 1. What Is It? Picking up from the Jenkins Domain map README.md — we now examine the controller–agent topology that every pipeline, agent, and credential later plugs into. - Controller: holds configuration JENKINS_HOME , the job queue, build history, UI/API, and the credentials store. Runs no or minimal builds itself in production. - Agent node : a machine VM, container, laptop connected to the controller offering executors — numbered slots, each running one build at a time. - Remoting: the communication channel inbound TCP/WebSocket or outbound SSH over which the controller ships work to agents. Inbound = the agent dials out survives NAT and firewalls ; SSH = the controller dials in simpler on flat networks . 2. Diagram 3. Key Directories JENKINS_HOME Path Holds ------ ------- jobs/ Job configs + build history workspace/ Checked-out code per job rebuildable, deletable plugins/ Installed plugins credentials.xml / secrets/ Encrypted secrets back up securely config.xml Global configuration 4. Sizing Rules - Controller: CPU-light, I/O-sensitive build history, XML — give it fast disk, not 64 cores. - Zero executors on the controller in production of executors: 0 so a runaway build can't wedge the UI. - Scale with agents, preferably ephemeral Docker/Kubernetes cloud so capacity matches queue length. 5. Jenkins in Docker: How It Works One docker run produces three planes inside a single container: - Controller process: Jenkins WAR runs as PID 1 Java inside the container; UI on 8080, agent traffic on 50000 — both published to the host. - State: JENKINS_HOME lives on a named volume, not the container layer — recreating the container loses nothing. - Building images: the mounted socket lets the container's Docker CLI ask the host daemon to build/run sibling containers. Jenkins never runs a daemon itself un"
+ },
+ {
+  "id": "jenkins-setup",
+  "title": "Jenkins Setup",
+  "desc": "One container, one volume, one socket: install to first green build in seven steps.",
+  "cat": "Jenkins",
+  "dif": "Beginner",
+  "tags": [
+   "jenkins",
+   "setup",
+   "docker"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — JENKINSSETUP",
+   "1 Install",
+   "1.1 01 / Run &amp; Unlock",
+   "2 Platforms",
+   "2.1 02 / Where to Run It",
+   "2.2 03 / Smoke Test",
+   "3 Seven Steps",
+   "3.1 04 / Run &amp; Use, End to End",
+   "4 Harden &amp; Handoff",
+   "4.1 05 / Production Checklist",
+   "4.2 06 / Handoff"
+  ],
+  "body": "Jenkins Setup Run Jenkins the reproducible way: a pinned Docker image with a persistent volume — never an untracked WAR on someone's laptop. 1. Recommended Install Docker Picking up from Jenkins Architecture jenkins-architecture.md , where the controller–agent topology was defined — we now run it: one container, one volume, one socket. Open http://localhost:8080 → paste the admin password → Install suggested plugins → create admin user. 2. Alternatives Method When -------- ------ jenkins/jenkins:lts Docker image Default: local dev, training, labs OS package apt / yum Long-lived on-prem server Kubernetes Helm chart Production with ephemeral agents Bare jenkins.war Only for debugging — hard to reproduce 3. Windows vs WSL2: Where to Run Jenkins - Yes, Jenkins runs natively on Windows: Windows installer jenkins.msi or java -jar jenkins.war with a supported JDK 17 or 21 . Works fine as controller or as a Windows build agent needed for .NET / MSBuild / PowerShell workloads . - Prefer Docker Desktop WSL2 backend on a Windows dev machine: same docker run command from §1 works in PowerShell or WSL2, keeps paths/line-endings Linux-normal, and matches CI. This is the default recommendation for this KB. - Prefer WSL2 Ubuntu when: pipelines assume sh , make , docker , or Linux-only tooling; you want apt packages and case-sensitive paths without Cygwin/Git-Bash quirks. - Keep a Windows agent when: you must build Windows artifacts — run controller in Docker/WSL2, attach a Windows agent via inbound WebSocket agent, label it windows , and constrain those jobs with agent { label 'windows' } . - Pitfalls on native Windows: bat vs sh steps use bat for .bat /PowerShell steps, sh only on Linux agents ; Git auto-CRLF breaking shell scripts; C:\\ vs /var/jenkins_home path mapping into containers; Windows firewall blocking ports 8080/50000. 4. First Pipeline Job Smoke Test 1. New Item → Pipeline → name it hello . 2. Definition: Pipeline script , enter: 3. Build Now → green ball = controller "
+ },
+ {
+  "id": "jenkins-pipelines",
+  "title": "Jenkins Pipelines",
+  "desc": "Jenkinsfiles: Declarative vs Scripted, multibranch, Docker CI/CD, approval gates.",
+  "cat": "Jenkins",
+  "dif": "Intermediate",
+  "tags": [
+   "jenkinsfile",
+   "declarative"
+  ],
+  "time": 35,
+  "sections": [
+   "Cover — JENKINSPIPELINES",
+   "1 Mapping",
+   "1.1 01 / Generic → Jenkins",
+   "1.2 02 / Declarative vs Scripted",
+   "2 Canonical",
+   "2.1 03 / Canonical Jenkinsfile",
+   "2.2 04 / Multibranch = PR Gates",
+   "3 Docker CI/CD",
+   "3.1 05 / Full Arc in Docker",
+   "4 DinD &amp; Handoff",
+   "4.1 06 / Socket vs DinD",
+   "4.2 07 / Handoff"
+  ],
+  "body": "Jenkins Pipelines A Jenkins Pipeline is the generic pipeline concept expressed as code: a Jenkinsfile Declarative or Scripted where stages contain steps and agent decides where they run. Picking up from Jenkins Setup jenkins-setup.md , where the first smoke job went green — we now write production Jenkinsfiles: Declarative structure, multibranch, and the full CI→CD arc. 1. Concept → Jenkins Mapping Generic Jenkins --------- --------- Pipeline pipeline { ... } in Jenkinsfile Stage stage 'Build' { ... } Job A Jenkins item Pipeline job / Multibranch wrapping the Jenkinsfile run Step sh , echo , git , plugin steps Runner agent directive label, docker, any, none Artifact archiveArtifacts / pushed image 2. Declarative vs Scripted Declarative default Scripted --- --- --- Syntax Opinionated pipeline { agent stages steps post } Full Groovy node { stage ... { ... } } Validation Syntax-checked pre-run Fails at runtime Use when 95% of pipelines Dynamic stage generation, advanced control flow The Language: Groovy - Base language: Apache Groovy JVM, Java-like syntax — Jenkins pipelines are Groovy scripts executed by the controller. - Declarative restricts Groovy to the pipeline { agent stages steps post } skeleton; most logic lives in sh steps, keeping Groovy surface tiny. - Scripted is raw Groovy: loops, functions, try/catch, dynamic stage generation via node { stage ... { ... } } . - Pipeline DSL steps sh , echo , git , junit , withCredentials , plugin steps are Jenkins-provided Groovy methods, documented in the built-in Pipeline Syntax snippet generator <jenkins /pipeline-syntax . - Sandbox: repo-committed scripts run in the Groovy sandbox — only allowlisted methods execute; anything else needs In-process Script Approval see troubleshooting jenkins-troubleshooting.md . 3. Canonical Jenkinsfile 4. Multibranch Pipelines A Multibranch Pipeline job auto-discovers branches/PRs containing a Jenkinsfile and builds each independently — this is the Jenkins-native PR gate pairs with web"
+ },
+ {
+  "id": "groovy",
+  "title": "Groovy Cheatsheet",
+  "desc": "Only the Groovy Jenkinsfiles need: strings, closures, idioms, sandbox rules.",
+  "cat": "Jenkins",
+  "dif": "Intermediate",
+  "tags": [
+   "groovy",
+   "jenkinsfile"
+  ],
+  "time": 20,
+  "sections": [
+   "Cover — GROOVYCHEATSHEET",
+   "1 Basics",
+   "1.1 01 / Strings, Collections, Conditionals",
+   "2 Power",
+   "2.1 02 / Dynamic Stages, Safe Nulls, Maps",
+   "3 Idioms",
+   "3.1 03 / Jenkinsfile Idioms",
+   "3.2 04 / Sandbox Gotchas"
+  ],
+  "body": "Groovy Cheatsheet Jenkins Subset Only the Groovy you need for Jenkinsfiles. Full language reference: groovy-lang.org https://groovy-lang.org/documentation.html . Picking up from Jenkins Pipelines jenkins-pipelines.md , where Declarative skeletons met Scripted power — this is the Groovy subset both run on. Next, give those pipelines somewhere to run: Jenkins Agents jenkins-agents.md . Variables & Strings Collections Conditionals Loops & Dynamic Stages Scripted Functions Maps Options, Config Safe Navigation & Elvis Null-Proof Pipelines Jenkinsfile Idioms Sandbox Gotchas Code Problem Fix ------ --------- ----- new File '/x' .text Filesystem access blocked Use readFile step System.getenv 'X' Blocked Use env.X .execute on strings Process launch blocked Use sh step Static methods/imports Often not allowlisted In-process Script Approval , or restructure with steps Rule: if Groovy fights you, push the logic into sh shell and keep Groovy as glue — Declarative + shell covers 95% of pipelines. Interview Notes - Sandbox vs Script Approval: why new File dies in sandbox and which step replaces it. - env.X vs System.getenv — the one-line difference between working and blocked. - When logic belongs in sh instead of Groovy, and what \"Groovy as glue\" costs you in testability. Related Topics - Jenkins Pipelines jenkins-pipelines.md - Jenkins Troubleshooting jenkins-troubleshooting.md"
+ },
+ {
+  "id": "jenkins-agents",
+  "title": "Jenkins Agents",
+  "desc": "Labels select them, executors run on them: permanent, Docker, Kubernetes.",
+  "cat": "Jenkins",
+  "dif": "Intermediate",
+  "tags": [
+   "jenkins",
+   "agents"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — JENKINSAGENTS",
+   "1 Fleet",
+   "1.1 01 / Three Kinds",
+   "1.2 02 / Labels &amp; Executors",
+   "2 Wiring",
+   "2.1 03 / Connection &amp; Trust",
+   "2.1.1 TRUST BOUNDARY",
+   "2.2 04 / Handoff"
+  ],
+  "body": "Jenkins Agents Agents are Jenkins's word for runners: machines offering executors to the controller, selected by labels . Prefer ephemeral agents that live only for one build. 1. Types Picking up from the Groovy Cheatsheet jenkins-groovy-cheatsheet.md — pipelines written, language in hand — we now provision the machines that execute them: agents, labels, executors. Type Lifecycle Best for ------ ----------- ---------- Permanent SSH/inbound Long-lived VM Special hardware, Windows/GPU builders Docker cloud Container per build, destroyed after Default Linux builds — clean env every time Kubernetes cloud Pod per build Elastic, bursty CI on existing clusters 2. Labels & Executors - Label: capability tag linux , windows , gpu , docker matched by agent { label ... } . - Executor: one build slot; a 4-core agent typically offers 2–4 executors. 3. Minimal Docker-Agent Pipeline Each run gets a pristine container — \"works on my machine\" dies here. 4. Connection Methods - Inbound agent → controller : agent initiates via WebSocket/JNLP; survives NAT, needs port 50000 or WebSocket endpoint. - SSH controller → agent : controller SSHes in; simple on flat networks, needs credential + open port 22. 5. Failure Modes - Label typo lable 'linx' → build waits forever in queue; check Build Executor Status . - Stale permanent agents tool drift → flaky builds; prefer ephemeral or reimage regularly. - Too many executors per CPU → builds starve each other; ~1 executor per 1–2 cores. 6. Interview Notes - Inbound vs SSH connection: which side initiates, and which survives NAT without opening inbound ports. - Why ephemeral agents beat permanent ones for reproducibility — what \"tool drift\" does to flaky-build rates. - Label expressions vs executor counts: what a build stuck in queue almost always means. Agents run the work — next they need secrets. Continue in Jenkins Credentials jenkins-credentials.md . Related Topics - Jenkins Architecture jenkins-architecture.md - Jenkins Pipelines jenkins-pipel"
+ },
+ {
+  "id": "jenkins-credentials",
+  "title": "Jenkins Credentials",
+  "desc": "Typed secrets, scoped storage, masked bindings. Never hardcoded.",
+  "cat": "Jenkins",
+  "dif": "Intermediate",
+  "tags": [
+   "jenkins",
+   "secrets"
+  ],
+  "time": 25,
+  "sections": [
+   "Cover — JENKINSCREDENTIALS",
+   "1 Store",
+   "1.1 01 / Kinds &amp; Scopes",
+   "2 Bindings",
+   "2.1 02 / Binding in Practice",
+   "2.2 03 / Failure Modes",
+   "2.2.1 LEAK = ROTATE",
+   "3 Handoff",
+   "3.1 04 / Handoff"
+  ],
+  "body": "Jenkins Credentials Jenkins credentials are secrets with typed kinds and scoped storage, injected into builds via bindings — never hardcoded, never echoed. 1. Kinds & Scopes Picking up from Jenkins Agents jenkins-agents.md , where executors run untrusted build code — secrets must therefore never live in Jenkinsfiles. Enter the credentials store. Kind Holds Binding step ------ ------- -------------- Secret text API token string credentialsId: ... Username + password Registry login usernamePassword ... SSH private key Git/agent SSH sshUserPrivateKey ... Secret file kubeconfig, keystore file ... Certificate mTLS client cert certificate ... Scopes: System server internals, e.g. agent SSH vs Global/Job usable in pipelines . Prefer the narrowest scope that works. 2. Usage Bindings Jenkins masks bound variables in console output automatically. 3. Rules - Create via UI Manage Jenkins → Credentials or Configuration-as-Code; rotate by replacing the entry — same ID, zero Jenkinsfile changes. - IDs are stable references registry-creds ; values never appear in Jenkinsfiles, logs, or artifacts. - credentials helper also works in environment { REG = credentials 'registry-creds' } . 4. Failure Modes - Secret echoed via sh 'echo $P' in a non-masked context or baked into an image layer — treat any leak as compromised, rotate immediately. - Wrong scope System-only cred used in pipeline → \"credentials not found\"; move it to Global. - Duplicate IDs across stores → ambiguous resolution; keep IDs unique and descriptive github-acme-app-token . 5. Interview Notes - IDs vs values: why rotation replaces the entry without touching any Jenkinsfile. - Masking limits — what Jenkins hides in logs vs what still leaks into image layers and artifacts. - Scopes System vs Global : where a \"credentials not found\" error almost always comes from. Secrets stored — but who delivers all these capabilities? Continue in Jenkins Plugins jenkins-plugins.md , where Git, Docker, and credentials bindings themselves"
+ },
+ {
+  "id": "jenkins-plugins",
+  "title": "Jenkins Plugins",
+  "desc": "How Jenkins grows: essential set, pinning, staging upgrades, pruning.",
+  "cat": "Jenkins",
+  "dif": "Beginner",
+  "tags": [
+   "jenkins",
+   "plugins"
+  ],
+  "time": 20,
+  "sections": [
+   "Cover — JENKINSPLUGINS",
+   "1 Essential Set",
+   "1.1 01 / Essential Set",
+   "2 Discipline",
+   "2.1 02 / Pin &amp; Stage Upgrades",
+   "2.2 03 / Failure Modes",
+   "2.2.1 FRIDAY RULE",
+   "3 Handoff",
+   "3.1 04 / Handoff"
+  ],
+  "body": "Jenkins Plugins Plugins are how Jenkins grows: Git integration, Docker agents, Blue Ocean UI, credentials bindings — nearly every capability beyond the core is a plugin. 1. Essential Plugin Set Picking up from Jenkins Credentials jenkins-credentials.md — whose bindings are themselves a plugin — we now survey the plugin ecosystem that makes Jenkins Jenkins. Plugin Why -------- ----- Pipeline workflow- Declarative/Scripted pipelines, stage / steps Git + GitHub / GitLab Branch Source Checkout, multibranch discovery, webhooks Credentials + Credentials Binding Secret storage + withCredentials Docker / Kubernetes Ephemeral build agents JUnit / Warnings NG Test reports, static-analysis gates Blue Ocean optional Readable pipeline visualization 2. Management Rules - Pin versions in production; upgrade in a staging Jenkins first — plugin updates, not Jenkins core, cause most outages. - Install via UI Manage Jenkins → Plugins for learning; via plugins.txt / Configuration-as-Code for anything reproducible: - Remove unused plugins — each one is attack surface + startup time + a future version conflict. 3. Failure Modes - Update-all-plugins Friday → Monday outage; update deliberately with a rollback snapshot. - Missing plugin step error No such DSL method 'docker' → the owning plugin isn't installed. - Core/plugin version skew → cryptic startup failures; keep LTS core + compatible plugin set. 4. Interview Notes - Pinning vs update-all: why plugins.txt with versions beats UI installs for reproducible controllers. - No such DSL method — which layer is actually missing and how you prove it. - Core/plugin skew: why LTS core + compatible set matters more than latest-everything. Related Topics - Jenkins Setup jenkins-setup.md - Jenkins Troubleshooting jenkins-troubleshooting.md Plugins installed — now connect the trigger wire. Continue in Jenkins Webhooks jenkins-webhooks.md , where pushes become builds in seconds."
+ },
+ {
+  "id": "jenkins-webhooks",
+  "title": "Jenkins Webhooks",
+  "desc": "Pushes become builds in seconds: webhooks, multibranch, PR gates.",
+  "cat": "Jenkins",
+  "dif": "Intermediate",
+  "tags": [
+   "jenkins",
+   "webhooks"
+  ],
+  "time": 25,
+  "sections": [
+   "Cover — JENKINSWEBHOOKS",
+   "1 Triggers",
+   "1.1 01 / Trigger Options",
+   "2 Wiring",
+   "2.1 02 / GitHub Webhook Setup",
+   "2.2 03 / Multibranch = PR Gates",
+   "3 Handoff",
+   "3.1 04 / Handoff"
+  ],
+  "body": "Jenkins Webhooks & Triggers Webhooks are Jenkins's CI triggers: GitHub notifies Jenkins on push/PR, and Jenkins builds exactly that ref. Polling is the fallback, never the plan. 1. Trigger Options Picking up from Jenkins Plugins jenkins-plugins.md , which delivered the GitHub Branch Source plugin — we now wire it: webhooks that turn pushes into builds. Method Latency Load Verdict -------- --------- ------ --------- Webhook GitHub → Jenkins Seconds Minimal Default Multibranch scan + webhook Seconds Minimal Default for PRs SCM polling H/5 Minutes Wasted polls Fallback / air-gapped Scheduled cron — — Nightly, releases Manual / upstream trigger — — Promotions, chains 2. GitHub Webhook Setup 1. Jenkins job: enable GitHub hook trigger for GITScm polling or use a Multibranch/Organization job . 2. GitHub repo → Settings → Webhooks → Add : Payload URL https://jenkins.acme.io/github-webhook/ , content type application/json , events push + pull requests . 3. Push a commit → GitHub Hook Log in Jenkins shows delivery; build starts in seconds. For private networks, the controller needs a reachable URL reverse proxy / ngrok for labs . 3. Multibranch = PR Gates Done Right A Multibranch Pipeline scans the repo, creates a sub-job per branch/PR with a Jenkinsfile, and reports status back to GitHub checks. Branch disappears → job auto-removed. This replaces hand-maintained per-branch jobs entirely. 4. Failure Modes - Webhook 403/404 → wrong URL /github-webhook/ trailing slash matters or missing GitHub plugin. - Builds not triggering → webhook received but job's trigger checkbox off; check GitHub Hook Log . - Duplicate builds webhook + polling both on → disable polling once webhooks work. - Secret mismatch → validate webhook secrets so anyone can't trigger builds with curl. 5. Interview Notes - Webhook vs polling: why push delivery beats minute-interval polling for PR feedback time. - 403/404 on delivery — URL shape vs plugin vs secret, in the order you check them. - Why duplicate build"
+ },
+ {
+  "id": "jenkins-security",
+  "title": "Jenkins Security",
+  "desc": "Auth matrix, agent distrust, secrets hygiene, patch cadence.",
+  "cat": "Jenkins",
+  "dif": "Advanced",
+  "tags": [
+   "jenkins",
+   "security"
+  ],
+  "time": 40,
+  "sections": [
+   "Cover — JENKINSSECURITY",
+   "1 Access",
+   "1.1 01 / Authentication &amp; Authorization",
+   "2 Trust",
+   "2.1 02 / Agent-to-Controller Distrust",
+   "2.2 03 / Secrets &amp; Updates",
+   "2.2.1 IF SECRETS LEAK",
+   "3 Handoff",
+   "3.1 04 / Handoff"
+  ],
+  "body": "Jenkins Security Jenkins holds production credentials and runs arbitrary build code — harden authentication, authorization, and the agent channel, or one malicious PR owns the fleet. 1. Authentication & Authorization Picking up from Jenkins Webhooks jenkins-webhooks.md , where anyone-with-curl could fire builds — we now decide who may do what: authentication, authorization, and the agent trust boundary. - Authentication who : local users for labs; SSO via OIDC/SAML plugins for teams — log in with Google/GitHub/Okta instead of a Jenkins-local password — disable open signup Enable Sign Up off . - Authorization what : Matrix-based security : Developers = Job/Build + Read; Leads = + Configure/Cancel; Admins = Overall/Administer. Start from Logged-in users can do nothing and grant upward. - Audit with the Audit Trail plugin: who triggered, configured, or canceled what. 2. Agent-to-Controller Rules Builds execute attacker-influenced code PR contents . Defaults to distrust: - Keep Agent → Controller Access Control restrictive default deny ; builds must not read controller files or other jobs' secrets. - Prefer ephemeral agents — a compromised container dies with the build. - Never run untrusted PR builds on permanent agents holding deploy credentials; route forks to isolated, credential-free agents. 3. Secrets Hygiene - All secrets in the credentials store, injected via bindings see jenkins-credentials.md jenkins-credentials.md ; set +x around manual sh handling; console masking is a backstop, not a guarantee. - Webhook secrets validated; admin over TLS only reverse proxy, no plain HTTP in production . - Rotate credentials by ID replacement; revoke ex-employees' tokens with the SSO deprovisioning flow, not by memory. 4. Update Discipline Jenkins CVEs cluster in plugins. Patch cadence: staging Jenkins validates LTS + plugin set → snapshot → production. Subscribe to the Jenkins security advisory feed. 5. Interview Notes - Matrix authorization design for a 3-role team. - Why "
+ },
+ {
+  "id": "jenkins-advanced",
+  "title": "Jenkins Advanced",
+  "desc": "Shared libraries, matrix builds, JCasC, backup, Script Console, tuning.",
+  "cat": "Jenkins",
+  "dif": "Advanced",
+  "tags": [
+   "jenkins",
+   "jcasc",
+   "matrix"
+  ],
+  "time": 45,
+  "sections": [
+   "Cover — JENKINSADVANCED",
+   "1 Reuse",
+   "1.1 01 / Shared Libraries",
+   "1.2 02 / Parallel &amp; Matrix",
+   "2 As Code",
+   "2.1 03 / Controller From YAML",
+   "2.2 04 / Backup, Console, Tuning",
+   "3 Check &amp; Handoff",
+   "3.1 05 / Interview Check",
+   "3.2 06 / Handoff"
+  ],
+  "body": "Jenkins Advanced Beyond single-team pipelines: shared libraries for reuse at scale, parallel/matrix execution, Configuration-as-Code for reproducible controllers, backup/restore, and safe administration via the Script Console. 1. Shared Libraries Don't Repeat Yourself Picking up from Jenkins Security jenkins-security.md , where trust boundaries were drawn — shared libraries run outside the sandbox, so that trust model is exactly what governs them. A Shared Library is versioned Groovy code its own repo imported by many Jenkinsfiles — the Jenkins answer to copy-pasted pipeline logic. - Version the library @1.4 , never @main — a breaking lib change must not detonate every pipeline at once. - Test library code with JenkinsPipelineUnit https://github.com/jenkinsci/JenkinsPipelineUnit before tagging. - Trust boundary: libraries run outside the sandbox — only admins approve library repos. 2. Parallel & Matrix Execution Rule: parallelize independent verification unit/lint/scan , never dependent deploys. Each parallel branch needs a free executor — size agent pools for peak fan-out, not average load. 3. Configuration as Code JCasC Controllers defined in YAML, versioned in Git, applied on boot — rebuild a controller from scratch in minutes. - Boot order: base image pinned + plugins.txt pinned + jenkins.yaml → identical controller every time. - Drift rule: UI changes are ephemeral — if it isn't in YAML, it doesn't exist after the next rebuild. 4. Backup & Restore Back up JENKINS_HOME excluding workspace/ and builds/ archives you can afford to lose or keep history — Jenkins fingerprints hash-link each artifact to the exact builds that produced and consumed it, so audit trails survive : - Must restore: jobs/ /config.xml , credentials.xml + secrets/ , global config.xml , jenkins.yaml , plugins/ . - Test restores quarterly: spin a staging controller from backup + replay the smoke pipeline. An untested backup is a rumor. - Off-site + encrypted; credentials in the backup decrypt the"
+ },
+ {
+  "id": "jenkins-troubleshooting",
+  "title": "Jenkins Troubleshooting",
+  "desc": "Queue to executor to workspace to log to config: triage table and recovery.",
+  "cat": "Jenkins",
+  "dif": "Intermediate",
+  "tags": [
+   "jenkins",
+   "troubleshooting"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — JENKINSTROUBLESHOOTING",
+   "1 Triage",
+   "1.1 01 / Triage Table",
+   "2 Logs &amp; Recovery",
+   "2.1 02 / Reading a Build Log",
+   "2.2 03 / Sandbox &amp; Recovery",
+   "2.3 04 / Handoff"
+  ],
+  "body": "Jenkins Troubleshooting Diagnose in order: queue → executor → workspace → log → plugin/config . Most Jenkins mysteries are label mismatches, full disks, or a Friday plugin update. 1. Triage Table Picking up from Jenkins Advanced jenkins-advanced.md , where shared libraries, JCasC, and tuning multiplied the moving parts — this is the diagnostic order that untangles them: queue → executor → workspace → log → plugin/config. Symptom Check Fix --------- ------- ----- Build stuck in queue Build Executor Status ; label exists? agents online? Fix label typo, bring agent online, free an executor No such DSL method Plugin providing the step installed? Install/pin the plugin command not found in sh Tool on that agent? PATH? Use matching label or Docker agent with the image Clone/auth failure Credentials ID + scope + repo URL Rebind correct Global credential; test URL Webhook not firing GitHub Hook Log , trigger checkbox Fix payload URL, enable trigger, check secret Controller slow/frozen Disk JENKINS_HOME , heap JVM memory , executor hog Discard old builds, raise heap -Xmx , e.g. -Xmx4g in JAVA_OPTS , executors=0 on controller Red after plugin update Which plugin changed Roll back plugin, restore snapshot Secrets in console Masking bypassed via interpolation set +x , bindings only, rotate leaked secret 2. Reading a Build Log 1. Console Output → first red line is usually the effect ; scroll up for the cause failing sh exit code, Groovy stack in Declarative errors . 2. Replay with Replay button edit-and-rerun for pipeline logic bugs — without pushing commits. 3. Workspace check: Workspace → wipe then rebuild distinguishes dirty-workspace flakes from real failures. 3. Groovy Sandbox Notes Untrusted/edited scripts run in the sandbox ; calls outside the allowlist need In-process Script Approval . Prefer allowlisted steps over approvals — each approval is future maintenance. 4. Recovery - Bad config change → JENKINS_HOME/config.xml or job config.xml is versioned? Restore the file, r"
+ },
+ {
+  "id": "github-actions",
+  "title": "GitHub Actions",
+  "desc": "Zero infrastructure CI/CD: workflows, runners, environments as gates, cost.",
+  "cat": "GitHub",
+  "dif": "Beginner",
+  "tags": [
+   "github",
+   "actions",
+   "runners"
+  ],
+  "time": 25,
+  "sections": [
+   "Cover — GITHUBACTIONS",
+   "1 Mapping",
+   "1.1 01 / Concept Map",
+   "2 CI + CD",
+   "2.1 02 / CI in One File",
+   "2.2 03 / CD With Gates",
+   "3 Mechanics",
+   "3.1 04 / Runners &amp; Cost",
+   "3.2 05 / Power Patterns",
+   "4 Versus &amp; Finale",
+   "4.1 06 / Actions vs Jenkins",
+   "4.2 07 / Handoff"
+  ],
+  "body": "GitHub Actions GitHub Actions is GitHub's CI/CD implementation: workflows YAML in .github/workflows/ run jobs of steps on runners — the generic pipeline concept, hosted where your code already lives. 1. Concept → Actions Map Picking up from Jenkins Troubleshooting jenkins/jenkins-troubleshooting.md , where the self-hosted domain concluded — here is the same CI/CD loop with zero infrastructure: every generic concept mapped to its Actions equivalent. Generic Concept GitHub Actions --- --- Pipeline Workflow .yml file Stage Job or a group of jobs Job jobs.<id — runs on one runner, parallel by default, needs: for sequencing Step run: command or uses: action Runner GitHub-hosted ubuntu-latest or self-hosted CI Trigger on: push, pull_request, schedule, workflow_dispatch Secrets secrets. + Environments protection rules Artifact actions/upload-artifact , packages via GHCR 2. Why It Exists Zero infrastructure: the repo, the pipeline, the secrets, and the PR checks live in one place. A workflow file in the repo is the pipeline — reviewed, versioned, and enforced as branch protection like any code. 3. Canonical Workflow CI: Build → Test → Scan 4. CD: Staging Auto, Production Gated environment: production + required reviewers reproduces the Delivery approval gate from Continuous Delivery ../07-continuous-delivery/continuous-delivery.md . 5. Core Mechanics - Triggers on: : push , pull_request , schedule cron , workflow_dispatch manual , release tags . PR triggers + required status checks = the merge gate. - Marketplace actions: reusable steps actions/checkout , docker/build-push-action . Pin to full SHAs for supply-chain safety, not floating @v4 tags, in security-sensitive repos. - Secrets: repo/org/environment levels; GITHUB_TOKEN is auto-issued per run least-privilege via permissions: . Never echo secrets — masking is automatic but layer-baking still leaks. - Caching: cache: on setup actions npm, pip, gradle + actions/cache for custom paths — the biggest free speedup. - Artifac"
+ },
+ {
+  "id": "jenkins-roadmap-2026",
+  "title": "Jenkins Roadmap 2026",
+  "desc": "Where Jenkins is headed: weekly/LTS cadence, Pipeline as YAML, Plugin Manager revamp, Tekton/JCasC, Puppet->Ansible infra, JDK 25 + Win2025.",
+  "cat": "Roadmap",
+  "dif": "Intermediate",
+  "tags": [
+   "jenkins",
+   "roadmap",
+   "2026",
+   "infrastructure"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — JENKINSROADMAP 2026",
+   "1 Orientation",
+   "1.1 01 / Release Cadence — Current Model",
+   "1.2 02 / How Horizons Work",
+   "1.2.1 READING RULE",
+   "2 Product Themes",
+   "2.1 03 / Pipeline Authoring &amp; Developer Tooling",
+   "2.2 04 / End-User Experience &amp; Interface",
+   "2.2.1 WHAT THIS MEANS IN PRACTICE",
+   "2.3 05 / Management &amp; Tool Integrations",
+   "3 Infrastructure &amp; Platform",
+   "3.1 06 / Jenkins on Cloud Platforms",
+   "3.2 07 / Packaging &amp; Platform Support",
+   "3.3 08 / Project Internals — Infra Team 2026 Focus",
+   "4 Horizon Map",
+   "4.1 09 / Full Horizon Table (September 2026 snapshot)"
+  ],
+  "body": "CI/CD Engineering — PDF 40: Jenkins Roadmap 2026 CI/CD SYSTEMS  ·  ENGINEERING MANUAL  ·  PDF 40 JENKINS ROADMAP 2026 Volunteer-driven modernization — what shipped, what's next, what to trust WEEKLY · LTS EVERY 4 WEEKS · SECURITY AS NEEDED JAVA 21+ · SPRING 7 · 1,800+ PLUGINS INFRA: PUPPET → ANSIBLE · JDK 25 RELEASE CADENCE weekly · LTS · advisories PIPELINE AUTHORING YAML · JTE 2.0 · IDE UX & PLUGIN MANAGER 2.552 preview → rollout CLOUD & PACKAGING CloudEvents · Temurin · images INFRA 2026 Ansible · JDK 25 · MSI cert 01 / 06 · ROADMAPS & STRATEGY Nabawy CI/CD Systems   Chapter 40 Orientation Horizons · Cadence · How to read this roadmap 40 THE ROADMAP Jenkins ships on cadence, not calendar — every week a new release, every four weeks a stabilized LTS, security fixes whenever they are needed. The 2026 roadmap is organized into horizons , not hard dates, because contributor bandwidth decides when an initiative ships. 01 / Release Cadence — Current Model Unlike vendor-driven products, Jenkins never announces a \"Jenkins 3.0.\" It evolves as a rolling train of weekly releases; the LTS line is a curated snapshot for conservative upgraders. Track Rhythm Who should follow Weekly Every week (2.545 → 2.566+ in 2026) Teams that want features fastest; accept more churn LTS Cut every ~4 weeks + backports Most production controllers — stable, patched Security As needed via jenkinsci-advisories Everyone — apply out-of-band when CVE drops 2026 SHIPPED — 2.545 (Jan) Java 21+ required on controller · 2.552 (Feb) experimental Plugin Manager UI + revamped Clouds page · 2.554 (Mar) script console adapted for new UI · 2.556 (Mar) Spring Security 7 + Spring Framework 7 · LTS 2.541.1 (Jan) unified RPM repo, new GPG key for RPM/DEB. 02 / How Horizons Work RELEASED PREVIEW CURRENT NEAR TERM FUTURE Released is done. Preview is usable but still changing. Current is under active development. Near Term is next up once bandwidth allows. Future has consensus but no active work. Treat Near/Future a"
+ },
+ {
+  "id": "github-actions-roadmap-2026",
+  "title": "GitHub Actions Roadmap 2026",
+  "desc": "Securing the supply chain: dependency locking, scoped secrets, ruleset protections, S3/Event Hub data stream, L7 egress firewall, Arm64 & Immutable Releases.",
+  "cat": "Roadmap",
+  "dif": "Intermediate",
+  "tags": [
+   "github",
+   "actions",
+   "roadmap",
+   "supply-chain",
+   "2026"
+  ],
+  "time": 35,
+  "sections": [
+   "Cover — GITHUB ACTIONSSECURITY ROADMAP 2026",
+   "1 Context",
+   "1.1 01 / Incidents That Drove the Roadmap",
+   "1.1.1 THE PATTERN",
+   "1.2 02 / Roadmap Pillars",
+   "2 Pillars A &amp; B",
+   "2.1 03 / A — Locking Workflow Dependencies",
+   "2.2 04 / B — Scoped Secrets",
+   "3 Pillars C &amp; D",
+   "3.1 05 / C — Policy-Driven Workflow Execution Protections",
+   "3.1.1 DIRECTLY TARGETS \"COMMENT-AND-CONTROL\"",
+   "3.2 06 / D — Endpoint Monitoring &amp; Control",
+   "4 Platform &amp; Timeline",
+   "4.1 07 / Platform &amp; Runner Improvements — Shipped 2026",
+   "4.1.1 IMMUTABLE RELEASES — THE QUIET FIX",
+   "4.2 08 / Adjacent Trend — AI / Agentic Workflows"
+  ],
+  "body": "CI/CD Engineering — PDF 41: GitHub Actions Roadmap 2026 CI/CD SYSTEMS  ·  ENGINEERING MANUAL  ·  PDF 41 GITHUB ACTIONS SECURITY ROADMAP 2026 From implicit trust to verifiable, scoped, policy-gated execution DEPENDENCY LOCKING · SCOPED SECRETS POLICY PROTECTIONS · EGRESS FIREWALL ARM64 GA · IMMUTABLE RELEASES DEPENDENCY LOCKING SHA + hash, transitive — go.sum for Actions SCOPED SECRETS repo · branch · env · trusted workflow POLICY PROTECTIONS rulesets for who/what triggers DATA STREAM & FIREWALL S3/Event Hub · L7 egress control RUNNERS GA Arm64 Linux/Windows · Immutable Releases 02 / 06 · ROADMAPS & STRATEGY Nabawy CI/CD Systems   Chapter 41 Context Why GitHub built a security roadmap 41 THE ATTACK SURFACE In 2025–26 a pattern emerged: compromise a trusted Action → execute inside CI → exfiltrate secrets . The roadmap is GitHub's direct answer to three root causes: implicit trust in workflow dependencies , poor execution visibility , and overly broad credential exposure . 01 / Incidents That Drove the Roadmap Incident Technique What it abused tj-actions/changed-files Compromised trusted Action Unpinned uses: + transitive trust Nx build-tool compromise Supply-chain injection Shared toolchain dependency trivy-action tag poisoning 75 tags force-pushed to malicious commits Mutable tags / releases \"Clinejection\" Prompt injection via issue title → cache poisoning → exfil Untrusted event input driving agent workflows THE PATTERN Every incident follows the same pipeline: a normal-looking workflow pulls an Action at a friendly tag, that Action (or its transitive dependency) is silently retargeted, and secrets flow outward before anyone notices. SHA pinning at the top level only does not close this gap. 02 / Roadmap Pillars LOCK DEPENDENCIES Make every resolved version verifiable ↓ SCOPE SECRETS Credentials flow only where declared ↓ ENFORCE POLICY Centrally govern who/what can trigger workflows ↓ OBSERVE & CONTAIN Stream telemetry · firewall egress outside the VM CI/CD Enginee"
+ },
+ {
+  "id": "cicd-decision-guide",
+  "title": "CI/CD Decision Guide: Jenkins vs GitHub Actions",
+  "desc": "Choose (or combine) platforms: governance, cadence, extensibility, hosting, AI — with decision framework, gut-check table, and hybrid topology.",
+  "cat": "Roadmap",
+  "dif": "Intermediate",
+  "tags": [
+   "roadmap",
+   "decision",
+   "jenkins",
+   "github",
+   "platform-choice"
+  ],
+  "time": 30,
+  "sections": [
+   "Cover — CI/CDDECISION GUIDE",
+   "1 Orientation",
+   "1.1 01 / Optimization Vectors",
+   "1.2 02 / Governance Contrast",
+   "2 Side-by-Side",
+   "2.1 03 / The Two Roadmaps — Full Dimension Table",
+   "2.2 04 / Timeline Realities",
+   "2.2.1 BOTH ARE DIRECTIONAL",
+   "3 Decision Framework",
+   "3.1 05 / Choose Jenkins When",
+   "3.2 06 / Choose GitHub Actions When",
+   "3.3 07 / Consider Both Together (Common in Larger Orgs)",
+   "3.4 08 / Gut-Check Table",
+   "4 Convergence",
+   "4.1 09 / Where They Converge",
+   "4.1.1 THE TAKEAWAY"
+  ],
+  "body": "CI/CD Engineering — PDF 42: CI/CD Decision Guide 2026 CI/CD SYSTEMS  ·  ENGINEERING MANUAL  ·  PDF 42 CI/CD DECISION GUIDE Jenkins × GitHub Actions — side-by-side, then the choice TWO ROADMAPS · ONE FRAMEWORK GOVERNANCE · SECURITY · COST · HOSTING CHOOSE · COMBINE · MIGRATE JENKINS — MODERNIZE survival + debt paydown, 1,800 plugins ACTIONS — SECURE trust at scale, 20k marketplace actions SIDE-BY-SIDE governance · cadence · architecture DECISION FRAMEWORK when to choose, when to run both CONVERGENCE provenance · security-as-default · observability 03 / 06 · ROADMAPS & STRATEGY Nabawy CI/CD Systems   Chapter 42 Orientation What each roadmap optimizes for 42 THE CHOICE Neither roadmap is chasing a new pipeline paradigm. Both consolidate around what already works — but they optimize for different futures . Jenkins is paying down debt to keep an existing install base healthy; GitHub Actions is locking down trust because it already won the adoption battle. 01 / Optimization Vectors JENKINS Survival & modernization Close UX/infra gaps on a mature, volunteer-driven install base vs GITHUB ACTIONS Trust & safety at scale Make the simple YAML model secure by default at massive scale ONE SENTENCE — Jenkins reads like a deliberate open-source project managing technical debt (dark theme, Plugin Manager, Puppet→Ansible, JDK/Windows upgrades). Actions reads like a platform vendor responding to real attacks (dependency locking, scoped secrets, egress firewall). Neither is reinventing pipeline authoring — both are making the existing authoring safer and more observable. 02 / Governance Contrast Dimension Jenkins GitHub Actions Governance Community-driven, volunteer-dependent (CD Foundation); no committed dates Vendor-driven (Microsoft/GitHub); estimated windows, still no hard SLAs Headline 2026 Incremental UX + infra overhaul Supply-chain security hardening Cadence Weekly · LTS every 4 weeks · advisories as needed Continuous rollout (betas/GAs via Changelog) Architecture change None "
+ },
+ {
+  "id": "jenkins-lab-webhook",
+  "title": "Lab J-01 · Jenkins: Automated Integration Foundations",
+  "desc": "Build a reliable automated integration trigger from source change through Jenkins verification and feedback.",
+  "cat": "Labs",
+  "dif": "Intermediate",
+  "tags": [
+   "jenkins",
+   "github",
+   "webhook",
+   "lab"
+  ],
+  "time": 45,
+  "sections": [
+   "Cover — Page 1",
+   "1 01 / Automated Integration Foundations",
+   "1.0.1 WHAT",
+   "1.0.2 WHY",
+   "1.0.3 WHEN",
+   "1.0.4 WHAT CHANGES",
+   "1.0.5 WHY THIS EXISTS",
+   "2 02 / Pre-Flight Analysis",
+   "2.1 Environment Verification",
+   "2.2 Dependency Check",
+   "2.2.1 GOTCHA",
+   "3 03 / Reachability & Network Paths",
+   "3.1 Establishing the Tunnel",
+   "3.1.1 COMMAND",
+   "3.1.2 RESULT",
+   "3.1.3 INTERVIEW CHECK"
+  ],
+  "body": "CI/CD Engineering Manual - Automated Triggering CI/CD ENGINEERING From Commit to Production: Automated Triggering & Webhooks Continuous Integration Continuous Delivery Continuous Deployment Nabawy SOURCE Git repository WEBHOOK Push event delivery JENKINS Trigger received CHECKOUT Pull latest code BUILD Execute pipeline CI/CD SYSTEMS AUTOMATED TRIGGERING 01 / Automated Integration Foundations A pipeline is not magic. It is a deterministic sequence of machines making decisions about your code. However, for this sequence to be truly continuous, the transition between a developer's commit and the pipeline execution must be automatic. This is achieved through webhooks. 01 COMMIT git push origin main PASSED 02 WEBHOOK HTTP POST payload RUNNING 03 JENKINS Trigger detected WAITING 04 CHECKOUT Pull repository WAITING 05 BUILD Execute pipeline WAITING WHAT A webhook is a custom HTTP callback triggered by an event, such as a git push. When the event occurs, the source system (GitHub) sends an HTTP POST request to the target system (Jenkins). WHY Polling (Jenkins constantly asking GitHub \"any changes?\") is inefficient and introduces latency. Webhooks provide instant, event-driven execution with zero wasted resources. WHEN Whenever a change is pushed to the repository. This includes commits to main, feature branches, or tagged releases, depending on the configured filter. WHAT CHANGES The development loop tightens. Feedback on a broken commit returns in minutes, not hours. The integration of code becomes a continuous, automatic flow rather than a manual chore. WHY THIS EXISTS Without automated triggering, a developer must manually notify the CI system that new code exists. This context switch breaks flow and inevitably leads to forgotten builds and integration delays. The webhook closes the gap between intent and execution. CI/CD ENGINEERING MANUAL CH 01  |  02 / 09 CI/CD SYSTEMS CONFIGURATION PRE-FLIGHT 02 / Pre-Flight Analysis Before configuring a single setting, verify that a"
+ },
+ {
+  "id": "jenkins-lab-docker",
+  "title": "Lab J-02 · Jenkins: Container Delivery",
+  "desc": "Design, secure, and verify container delivery from build architecture through authenticated registry release.",
+  "cat": "Labs",
+  "dif": "Intermediate",
+  "tags": [
+   "jenkins",
+   "docker",
+   "dockerhub",
+   "lab"
+  ],
+  "time": 50,
+  "sections": [
+   "Cover — Page 1",
+   "1 01 / The Container Lifecycle",
+   "1.0.1 WHAT",
+   "1.0.2 WHY",
+   "1.0.3 WHEN",
+   "1.0.4 WHAT CHANGES",
+   "1.0.5 WHY THIS EXISTS",
+   "2 02 / Build Architecture & Pre-Flight",
+   "2.1 Execution Architecture",
+   "2.2 Pre-Flight Verification",
+   "2.2.1 GOTCHA",
+   "3 03 / Registry Authentication",
+   "3.1 Credential Configuration",
+   "3.1.1 PIPELINE SNIPPET",
+   "3.1.2 EXECUTION RESULT",
+   "3.1.3 GOTCHA"
+  ],
+  "body": "CI/CD Engineering Manual - Container Delivery CI/CD ENGINEERING Container Artifacts & Delivery: From Source to Registry Continuous Integration Container Delivery Simulated Deployment Nabawy SOURCE Github repository BUILD Docker image TAG build-123 PUSH Docker hub registry DEPLOY Floci simulation CI/CD SYSTEMS CONTAINER DELIVERY 01 / The Container Lifecycle Moving from source code to a running application requires a deterministic path. The code must be compiled, packaged with its dependencies, and shipped as an immutable artifact. In modern CI/CD, this artifact is a Docker image. 01 SOURCE Git checkout PASSED 02 BUILD docker build RUNNING 03 ARTIFACT Image tagged PUSHING 04 REGISTRY Docker Hub WAITING 05 DEPLOY FLOCI Env WAITING WHAT A pipeline that pulls source code, builds a Docker image, tags it with a unique build identifier, pushes it to a central registry, and optionally deploys it to a target environment. WHY Containerizing the application ensures environment parity. The exact artifact that passed CI is the one deployed, eliminating \"it works on my machine\" discrepancies. WHEN On every commit or merge to the main branch. The pipeline triggers automatically via webhook, executing the build and push sequence. WHAT CHANGES The release unit shifts from raw source code to a versioned, immutable container image. The registry becomes the source of truth for deployable software. WHY THIS EXISTS Without a standardized packaging format, deployment scripts must understand the application's dependency tree. A Docker image bundles the OS, libraries, and code into a single, static unit, radically simplifying the deployment target. CI/CD ENGINEERING MANUAL CH 02  |  02 / 08 CI/CD SYSTEMS BUILD ARCHITECTURE 02 / Build Architecture & Pre-Flight The pipeline requires specific tools to be available on the Jenkins agent before execution. Verifying these dependencies upfront prevents silent failures during the Docker build or push stages. Execution Architecture GITHUB SOURCE JENKI"
+ },
+ {
+  "id": "jenkins-lab-multibranch",
+  "title": "Lab J-03 · Jenkins: Multibranch Foundations",
+  "desc": "Create a branch-aware Jenkins flow that discovers branches, applies filters, and verifies isolated pipeline behavior.",
+  "cat": "Labs",
+  "dif": "Intermediate",
+  "tags": [
+   "jenkins",
+   "git",
+   "multibranch",
+   "lab"
+  ],
+  "time": 45,
+  "sections": [
+   "Cover — Page 1",
+   "1 01 / Multibranch Foundations",
+   "1.0.1 WHAT",
+   "1.0.2 WHY",
+   "1.0.3 WHEN",
+   "1.0.4 WHAT CHANGES",
+   "1.0.5 WHY THIS EXISTS",
+   "2 02 / Architecture & Pre-Flight",
+   "2.1 Execution Architecture",
+   "2.2 Pre-Flight Verification",
+   "2.2.1 GOTCHA",
+   "3 03 / Discovery & Filtering",
+   "3.1 Branch Source Configuration",
+   "3.1.1 GOTCHA",
+   "4 04 / Conditional Execution",
+   "4.1 Execution Lanes by Branch"
+  ],
+  "body": "CI/CD Engineering Manual - Multibranch Pipelines CI/CD ENGINEERING Multibranch Pipelines: Automatic Branch Discovery Git Integration Branch Scanning Conditional Execution Nabawy GIT REPO main, dev, stg JENKINS SCAN Periodic trigger DISCOVER Locate Jenkinsfile CONDITIONAL when: branch == 'stg' EXECUTE Per-branch job CI/CD SYSTEMS MULTIBRANCH PIPELINES 01 / Multibranch Foundations A standard pipeline executes a single predefined script. A Multibranch Pipeline is structurally different: it is a folder of individual pipeline jobs, one per discovered branch. Jenkins scans the repository, finds branches, and looks for a Jenkinsfile to build with. 01 SCAN REPO Periodic or manual PASSED 02 DISCOVER Filter: main dev stg PASSED 03 JENKINSFILE Locate in branch root RUNNING 04 EXECUTE Create sub-job WAITING 05 ORPHAN Cleanup deleted SKIPPED WHAT A Jenkins job type that automatically creates a sub-job for every branch in a Git repository containing a Jenkinsfile. WHY It eliminates the need to manually create and configure a new Jenkins job every time a developer creates a new branch. WHEN On a periodic schedule (e.g., every 5 minutes) or manually triggered. This task deliberately ignores webhooks to simulate an air-gapped environment. WHAT CHANGES The relationship between source code and CI inverts. The repository defines the jobs, not Jenkins. Branch deletion leads to job orphaning. WHY THIS EXISTS In dynamic environments with feature branches, manually managing Jenkins jobs is impossible. Multibranch pipelines push job creation down into the repository itself, making the CI configuration version-controlled and branch-specific. CI/CD ENGINEERING MANUAL CH 03  |  02 / 08 CI/CD SYSTEMS SCAN ARCHITECTURE 02 / Architecture & Pre-Flight The Multibranch Pipeline relies on the plain Git branch source, not GitHub-specific integration. This ensures compatibility with any Git provider and works perfectly in air-gapped or firewall-restricted networks where inbound webhooks are blocked. Ex"
+ },
+ {
+  "id": "jenkins-lab-shared-library",
+  "title": "Lab J-04 · Jenkins: Reusable Pipeline Logic",
+  "desc": "Design, register, version, and consume reusable Jenkins pipeline logic as a shared library.",
+  "cat": "Labs",
+  "dif": "Advanced",
+  "tags": [
+   "jenkins",
+   "groovy",
+   "shared-library",
+   "lab"
+  ],
+  "time": 55,
+  "sections": [
+   "Cover — Page 1",
+   "1 01 / Reusable Pipeline Logic",
+   "1.0.1 WHAT",
+   "1.0.2 WHY",
+   "1.0.3 WHEN",
+   "1.0.4 WHAT CHANGES",
+   "1.0.5 WHY THIS EXISTS",
+   "2 02 / Repository Architecture",
+   "2.1 Directory Structure",
+   "2.2 Class Definition: UatInput.groovy",
+   "2.3 Execution Architecture",
+   "2.3.1 GOTCHA",
+   "3 03 / Jenkins Registration",
+   "3.1 System Configuration",
+   "3.1.1 GOTCHA",
+   "3.1.2 INTERVIEW CHECK"
+  ],
+  "body": "CI/CD Engineering Manual - Shared Libraries CI/CD ENGINEERING Shared Libraries: Versioned Groovy Logic Code Reusability Global Pipeline Libraries Conditional Execution Nabawy SOURCE Groovy class repo REGISTER Jenkins global lib IMPORT @Library annotation EVALUATE Check approved.txt EXECUTE Conditional build CI/CD SYSTEMS SHARED LIBRARIES 01 / Reusable Pipeline Logic As pipeline complexity grows, duplicating Groovy logic across dozens of Jenkinsfiles creates a maintenance nightmare. A Shared Library allows you to store versioned Groovy classes in a standard Git repository and import them into any pipeline. 01 SOURCE Groovy repository PASSED 02 REGISTER Jenkins Config PASSED 03 IMPORT @Library('lib') _ RUNNING 04 INSTANTIATE new UatInput() WAITING 05 EXECUTE Conditional run WAITING WHAT A Git repository containing Groovy code that Jenkins dynamically downloads and makes available to pipelines via an import statement. WHY To enforce DRY (Don't Repeat Yourself) principles in CI/CD. Updates to shared logic propagate to all pipelines without modifying individual Jenkinsfiles. WHEN When multiple pipelines share common logic: deployment steps, approval gates, metric parsing, or custom build wrappers. WHAT CHANGES Pipelines become thinner. Complex business logic is abstracted into testable Groovy classes, moving Jenkins configuration closer to standard software engineering. WHY THIS EXISTS Without shared libraries, organizations end up with hundreds of bloated Jenkinsfiles that are impossible to update. A shared library transforms CI/CD logic into a versioned, testable software dependency. CI/CD ENGINEERING MANUAL CH 04  |  02 / 08 CI/CD SYSTEMS LIBRARY STRUCTURE 02 / Repository Architecture Jenkins expects a specific directory structure for shared libraries. Groovy classes must reside in the src/ directory, following standard Java package naming conventions. Directory Structure 📁 jenkins-shared-library 📁 src └── 📁 com └── 📁 yourname └── UatInput.groovy Class Definition: Uat"
+ },
+ {
+  "id": "jenkins-lab-terraform-floci",
+  "title": "Lab J-05 · Jenkins: The Infrastructure Pipeline",
+  "desc": "Turn infrastructure changes into a gated pipeline with planning, approval, apply, and recovery evidence.",
+  "cat": "Labs",
+  "dif": "Advanced",
+  "tags": [
+   "jenkins",
+   "terraform",
+   "floci",
+   "iac",
+   "lab"
+  ],
+  "time": 60,
+  "sections": [
+   "Cover — Page 1",
+   "1 01 / The Infrastructure Pipeline",
+   "1.0.1 WHAT",
+   "1.0.2 WHY",
+   "1.0.3 WHEN",
+   "1.0.4 WHAT CHANGES",
+   "1.0.5 WHY THIS EXISTS",
+   "2 02 / Architecture & Pre-Flight",
+   "2.1 Execution Architecture",
+   "2.2 Pre-Flight Verification",
+   "2.2.1 GOTCHA",
+   "3 03 / Workspace Isolation",
+   "3.1 Environment Tracks",
+   "3.2 Workspace Selection Logic",
+   "3.2.1 INTERVIEW CHECK",
+   "4 04 / The Approval Gate"
+  ],
+  "body": "CI/CD Engineering Manual - Infrastructure Automation CI/CD ENGINEERING Infrastructure Automation: Terraform & Simulated Cloud Jenkins Pipelines Terraform Workflows Simulated AWS (FLOCI) Nabawy SOURCE Github Webhook INIT terraform init PLAN Generate execution APPROVE Manual Gate APPLY FLOCI Provisioning CI/CD SYSTEMS INFRASTRUCTURE PIPELINE 01 / The Infrastructure Pipeline Infrastructure as Code (IaC) requires the same rigorous CI/CD practices as application code. However, unlike application deployments, infrastructure changes can cause immediate, irreversible state shifts. The pipeline must therefore include strict validation and manual approval gates before applying changes. 01 CHECKOUT Git SCM pull PASSED 02 INIT Provider download PASSED 03 PLAN State diff PASSED 04 APPROVE Human review WAITING 05 APPLY Provision FLOCI IDLE WHAT A Jenkins pipeline that executes Terraform commands against a simulated AWS environment (FLOCI) to provision VPCs, subnets, and compute resources. WHY To practice infrastructure automation safely. FLOCI mimics the AWS API without incurring real costs, allowing teams to test CI/CD workflows aggressively. WHEN Triggered automatically by a GitHub webhook on push, but pauses for manual approval before the destructive apply stage. WHAT CHANGES Infrastructure moves from manual CLI execution to a versioned, peer-reviewed, automated pipeline. State shifts become deliberate, logged events. WHY THIS EXISTS Without a pipeline, infrastructure drifts. Engineers apply changes locally, state files diverge, and recovery becomes impossible. A pipeline enforces a single, auditable path from code to cloud. CI/CD ENGINEERING MANUAL CH 05  |  02 / 08 CI/CD SYSTEMS PROVISIONING ARCHITECTURE 02 / Architecture & Pre-Flight The pipeline bridges GitHub, Jenkins, and FLOCI. The critical integration point is the Provider.tf file, which redirects standard AWS API calls to the FLOCI simulation endpoint. Execution Architecture GITHUB REPO JENKINS CI FLOCI SIMULATION TER"
+ },
+ {
+  "id": "jenkins-labs",
+  "title": "Jenkins Labs: Complete Sequence",
+  "desc": "Consolidated Jenkins lab sequence covering webhooks, Docker, multibranch, shared libraries, and Terraform on FLOCI.",
+  "cat": "Labs",
+  "dif": "Advanced",
+  "tags": [
+   "jenkins",
+   "labs",
+   "docker",
+   "terraform",
+   "github"
+  ],
+  "time": 180,
+  "sections": [
+   "Cover — JENKINSLABS",
+   "1 Contents & Control Room",
+   "1.1 01 / Contents",
+   "1.2 02 / Lab Format — Observe · Execute · Verify · Explain",
+   "1.2.1 PRE-FLIGHT RULE",
+   "1.2.2 PRINTING THIS BOOK",
+   "1.2.3 CONTINUITY",
+   "2 Lab 01",
+   "2.1 01 / What This Lab Proves",
+   "2.2 02 / Architecture",
+   "3 Pre-Flight & Setup",
+   "3.1 03 / Step 0 — Pre-Flight (before Step 1)",
+   "3.1.1 ASK IN ONE BATCH — BEFORE STEP 1",
+   "3.2 04 / Steps 1–4 — Job + Credentials + Checkout",
+   "3.2.1 01 — Pipeline job",
+   "3.2.2 02 — Repository URL"
+  ],
+  "body": "CI/CD Engineering — Jenkins Labs CI/CD SYSTEMS  ·  PIPELINE CONTROL ROOM  ·  JENKINS LABS JENKINS LABS Five hands-on labs — webhooks to multibranch to shared libraries to Docker & Terraform on FLOCI. Every push verified, every artifact tagged, every stage observable. WEBHOOK TRIGGER · DOCKER BUILD & PUSH · MULTIBRANCH · SHARED LIBRARY · TERRAFORM + FLOCI SOURCE → TRIGGER GitHub webhook · GITScm polling BUILD → REGISTRY docker build · tag · push to Docker Hub BRANCH → PIPELINE multibranch discovery · env.BRANCH_NAME REUSE → LIBRARY vars/ & src/ · @Library version pin PLAN → APPLY init · workspace · plan · approve · apply · FLOCI 05 LABS · 05 FLOWS · ONE CONTROL ROOM Nabawy CI/CD Systems   Jenkins Labs Contents & Control Room Lifecycle · How to use this book 01 SOURCE Git push 02 TRIGGER webhook / scan 03 BUILD agent + stages 04 ARTIFACT image · plan 05 DEPLOY registry · FLOCI 06 OBSERVE logs · checks 01 / Contents Lab 01 — GitHub Webhook Trigger p. 03 — push → webhook → Jenkins build Lab 02 — Docker Build, Tag & Push p. 06 — Jenkinsfile → Docker Hub → FLOCI deploy Lab 03 — Multibranch Pipeline p. 09 — main / dev / stg · one Jenkinsfile · when Lab 04 — Shared Library p. 12 — Global Library · UatInput · scripted + declarative Lab 05 — Terraform on FLOCI p. 15 — init → workspace → plan → approve → apply Appendix — Proofs & Troubleshooting p. 18 — what green proves · failure map 02 / Lab Format — Observe · Execute · Verify · Explain Every lab follows the control-room loop: OBSERVE what is currently happening, EXECUTE a precise action, VERIFY via logs/console/registry/scan log, EXPLAIN why. Each lab ends with PROOF — what the experiment demonstrates about the system. PRE-FLIGHT RULE Step 0 of every lab gathers tools, credentials, repo state, and user inputs before any mutation. No mid-flow surprises. PRINTING THIS BOOK Open in browser → Ctrl/Cmd+P → Save as PDF → Background graphics ON → A4 . Colors carry state and survive grayscale because every state pairs color + symbo"
+ }
+]
