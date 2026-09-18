@@ -280,6 +280,9 @@ table.gloss .upd{color:var(--brand);font-weight:700;font-size:11px;white-space:n
 .az a{background:var(--card)}
 .az span.dim{opacity:.3}
 table.gloss tr{scroll-margin-top:150px}
+table.gloss tbody tr:hover td{background:color-mix(in srgb,var(--brand) 6%,transparent)}
+table.gloss tr:target td{background:color-mix(in srgb,var(--brand) 12%,transparent)}
+.gtbar .az a:hover{border-color:var(--brand);color:var(--brand)}
 @media(max-width:600px){table.gloss,table.gloss tbody{display:block;width:100%;overflow:visible}table.gloss tr:first-child{display:none}table.gloss tr{display:block;background:var(--card);border:1px solid var(--line-soft);border-radius:12px;margin:0 0 10px;padding:12px 14px}table.gloss td{display:block;border:none;padding:3px 0}table.gloss td:first-child{font-size:16px}table.gloss td:last-child a{display:inline-block;padding:10px 16px;border:1px solid var(--line);border-radius:9999px}.gtbar input{min-height:44px;font-size:16px}.az a,.az span.dim{min-width:44px;height:44px}}
 /* P0: sepia theme + light leak guards + covers + filters + a11y */
 [data-theme=sepia]{--bg:#F6F1E7;--bg2:#EDE3CC;--card:#FFFBF0;--ink:#3B2F1E;--mut:#6F665A;--line:rgba(59,47,30,.16);--line-soft:rgba(59,47,30,.09);--acc:#0B9B68;--acc-soft:rgba(11,155,104,.11);--brand:#0B9B68;--shadow:rgba(59,47,30,.08) 0px 2px 8px;--shadow-btn:rgba(59,47,30,.10) 0px 1px 3px;--shadow-lift:rgba(59,47,30,.16) 0px 16px 32px -10px}
