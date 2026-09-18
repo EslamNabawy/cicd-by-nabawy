@@ -49,8 +49,7 @@ header.top .reader-nav{display:flex;align-items:center;gap:8px}
 .hero .stats{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap;justify-content:center}
 .hero .stats span{font-size:13px;font-weight:500;color:var(--mut);background:var(--card);border:1px solid var(--line-soft);border-radius:9999px;padding:5px 14px}
 .hero .stats b{color:var(--ink);font-weight:600;font-family:var(--mono);font-size:12px}
-#resume{position:fixed;right:20px;bottom:20px;z-index:40;background:var(--ink);color:var(--bg);border-radius:9999px;padding:10px 22px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lift);max-width:min(420px,80vw);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#resume:hover{opacity:.85;color:var(--bg)}
+#resume{display:none !important}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
 .card{position:relative;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);padding:22px 24px 24px;display:flex;flex-direction:column;gap:9px;box-shadow:var(--shadow);overflow:hidden;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
 .card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--cat,var(--brand))}
@@ -483,8 +482,75 @@ body[data-font=serif] .readbody code,body[data-font=serif] .readbody pre,body[da
 .map-icon svg{width:28px;height:28px;display:block}
 .map-pill{font-family:var(--mono);font-size:11px;font-weight:600;padding:3px 9px;border-radius:9999px;background:color-mix(in srgb,var(--cat) 8%,var(--bg2));border:1px solid color-mix(in srgb,var(--cat) 14%,var(--line-soft));color:var(--mut)}
 .map-pill b{color:var(--ink)}
+@media(max-width:768px){
+.wrap{padding:16px}
+.hm-hero{padding:24px 18px 20px;margin:14px 0 6px;border-radius:14px}
+.hm-hero h1{font-size:32px}
+.hm-hero .hm-sub{font-size:15px}
+.hm-hero .hm-about{font-size:13px}
+.hm-series-shelf{grid-template-columns:1fr}
+.toolgrid{grid-template-columns:1fr}
+.stackgrid{grid-template-columns:1fr}
+.projgrid{grid-template-columns:1fr}
+.pathgrid{grid-template-columns:1fr}
+.thread-grid{grid-template-columns:1fr}
+.fgrid{grid-template-columns:1fr}
+.readbody{padding:16px}
+.readbody .page{padding:18px}
+.searchwrap input{font-size:16px}
+}
 @media(max-width:600px){
+.hm-row{padding:12px 10px;gap:10px;align-items:flex-start}
+.hm-row .hm-num{width:22px;font-size:11px}
+.hm-row .hm-ico{width:36px;height:36px;flex:none}
+.hm-row .hm-ico svg{width:20px;height:20px}
+.hm-cat{font-size:15px}
+.hm-desc{font-size:12px;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hm-pills{display:flex;gap:5px;margin-top:4px}
+.hm-pills .map-pill{font-size:10px;padding:2px 7px}
+.hm-go{opacity:1;font-size:16px}
+.hm-series-shelf{gap:8px}
+.series-card{padding:12px 14px}
+.toolcard{padding:14px}
+.stackcard{padding:14px}
+.projcard{padding:14px}
+.pathcard-head{padding:16px 14px 0}
+.pathdesc{padding:6px 14px 0;font-size:12px}
+.pathsteps{padding:2px 14px 0}
+.pathfoot{padding:10px 14px 14px}
+.thread-card{padding:12px 14px}
+.fcard{perspective:none}
+.fcard-inner{height:auto;min-height:140px}
+.fcard-front,.fcard-back{position:relative;inset:auto;transform:none !important;height:auto;min-height:140px}
+.fcard.flipped .fcard-inner{transform:none}
+.fcard-back{transform:none;display:none}
+.fcard.flipped .fcard-front{display:none}
+.fcard.flipped .fcard-back{display:flex}
+.gtbar{top:52px;padding:8px 0 6px}
+.gtbar input{min-height:44px;font-size:16px}
+.az{padding:6px 0 2px;gap:3px}
+.az a,.az span.dim{min-width:40px;height:40px;font-size:12px}
+.qcard{margin:14px auto;padding:18px}
+.qcard .opts .btn{flex:1 1 100%;min-height:44px;font-size:14px}
+.tcard{padding:14px}
+.stack-icons .stack-icon{width:36px;height:36px}
+.stack-icons .stack-icon img{width:22px;height:22px}
+.proj-icons .stack-icon.sm{width:32px;height:32px}
+.wrap{padding:14px}
+footer .wrap{flex-direction:column;gap:8px;text-align:center}
+.searchwrap{width:100%}
+}
+@media(max-width:380px){
+.hm-hero h1{font-size:28px;letter-spacing:-0.8px}
+.hm-hero .hm-kick{font-size:10px;letter-spacing:.2em}
+.hm-cat{font-size:14px}
+.hm-num{display:none}
+.wrap{padding:12px}
+header.top .wrap{padding:6px 8px}
+.fgrid{grid-template-columns:1fr;gap:10px}
+.toolgrid{gap:10px}
 }
 @media(prefers-reduced-motion:reduce){
+*{animation:none !important;transition:none !important;scroll-behavior:auto !important}
 }
 .lab-index{max-width:920px;margin:0 auto;padding:54px 24px 90px}.lab-index h1{font-size:42px;margin:12px 0}.lab-index p{color:var(--mut);font-size:17px;max-width:680px;line-height:1.6}.lab-index ul{list-style:none;padding:0;margin:34px 0;display:grid;gap:10px}.lab-index li{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:18px 20px;background:var(--card);border:1px solid var(--line-soft);border-radius:12px}.lab-index li span{color:var(--mut);font-size:13px}@media(max-width:600px){.lab-index{padding:34px 14px}.lab-index h1{font-size:32px}.lab-index li{display:block}.lab-index li span{display:block;margin-top:6px}}</style></head><body><header class="top"><div class="wrap"><a class="logo" href="../index.html" style="color:inherit">CICD<span> BY Nabawy</span></a><a class="btn" href="../index.html">Home</a></div></header><main class="lab-index"><span class="eyebrow">HANDS-ON LABS</span><h1>Practice the pipeline.</h1><p>One hands-on handbook from the first green check through Jenkins recovery and DR drills. Each lab includes setup, execution, verification, failure scenarios, and cleanup.</p><ul><li><a href="labs-handbook.html">Labs Handbook</a><span>675 min · GitHub + Jenkins + Docker</span></li></ul></main></body></html>
