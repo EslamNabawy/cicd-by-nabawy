@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI/CD Engineering Manual - Artifacts & Deployment</title>
+    <style>
+        :root {
+            --paper: #f5f6f4;
+            --white: #ffffff;
+            --ink: #161a19;
+            --muted: #68706d;
+            --line: #d5dad7;
+            --panel: #111614;
+            --panel-2: #1a201d;
+            --text-light: #e8eeeb;
+            --text-muted: #9ca8a3;
+            --accent: #00b87c;
+            --accent-dark: #008f61;
+            --blue: #4387ff;
+            --amber: #d99a24;
+            --red: #d94b4b;
+            --artifact: #8b6cff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: #333;
+            color: var(--ink);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            line-height: 1.5;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 16mm 16mm 19mm;
+            margin: 8mm auto;
+            position: relative;
+            background: var(--paper);
+            page-break-after: always;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .page:last-child { page-break-after: auto; }
+
+        /* HEADER & FOOTER */
+        .page-header {
+            display: flex;
+            align-items: center;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+        }
+        .h-chip { font-weight: 700; color: var(--ink); }
+        .h-rule { flex: 1; height: 1px; background: var(--line); margin: 0 12px; }
+        .h-title { font-weight: 500; }
+
+        .page-footer {
+            position: absolute;
+            bottom: 10mm;
+            left: 16mm;
+            right: 16mm;
+            display: flex;
+            align-items: center;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .f-left { font-weight: 700; color: var(--ink); }
+        .f-rule { flex: 1; height: 1px; background: var(--line); margin: 0 12px; }
+        .f-right { font-weight: 500; }
+
+        /* CONTENT */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2.section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--ink);
+            display: flex;
+            align-items: baseline;
+        }
+        h2.section-title .n {
+            font-size: 14px;
+            color: var(--artifact);
+            font-weight: 600;
+            margin-right: 8px;
+            letter-spacing: 1px;
+        }
+        h3.sub-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            margin-top: 10px;
+            color: var(--ink);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        p { font-size: 11.5px; color: var(--ink); margin-bottom: 10px; line-height: 1.6; }
+        strong { font-weight: 600; }
+        code { font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace; background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 3px; font-size: 10.5px; }
+        
+        /* COVER */
+        .cover {
+            background: var(--panel);
+            color: var(--text-light);
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+        }
+        .cover-left { padding: 30mm 25mm; display: flex; flex-direction: column; justify-content: space-between; }
+        .cover-right { background: var(--panel-2); display: flex; align-items: center; justify-content: center; border-left: 1px solid #2a2f2d; padding: 40mm 20mm; }
+
+        .cover-title { font-size: 48px; font-weight: 700; line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 15px; }
+        .cover-sub { font-size: 18px; color: var(--text-muted); font-weight: 400; margin-bottom: 40px; line-height: 1.4; }
+        .cover-meta { font-size: 10px; letter-spacing: 3px; color: var(--artifact); text-transform: uppercase; font-weight: 600; border-top: 1px solid #2a2f2d; padding-top: 15px; }
+        .cover-footer { display: flex; justify-content: flex-end; align-items: center; }
+
+        .sig {
+            font-family: "Brush Script MT", "Segoe Script", "Snell Roundhand", cursive;
+            font-size: 32px; 
+            color: var(--accent); 
+            transform: rotate(-4deg);
+            text-shadow: 0 0 14px rgba(0,184,124,.45); 
+            white-space: nowrap;
+            margin-top: 20px;
+        }
+
+        /* VERTICAL PIPELINE (COVER) */
+        .v-pipeline {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+            width: 100%;
+        }
+        .v-stage {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 14px 20px;
+            width: 100%;
+            position: relative;
+        }
+        .v-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--artifact);
+            box-shadow: 0 0 12px var(--artifact);
+            flex-shrink: 0;
+        }
+        .v-stage.idle .v-dot { background: var(--muted); box-shadow: none; }
+        .v-stage.running .v-dot { background: var(--blue); box-shadow: 0 0 12px var(--blue); }
+        .v-stage.amber .v-dot { background: var(--amber); box-shadow: 0 0 12px var(--amber); }
+        .v-info strong { display: block; color: var(--text-light); font-size: 14px; font-weight: 600; letter-spacing: 1px; }
+        .v-info small { display: block; color: var(--text-muted); font-size: 10px; }
+        .v-line {
+            width: 2px; height: 24px; background: var(--text-muted); margin-left: 24px;
+            opacity: 0.3;
+        }
+
+        /* HORIZONTAL PIPELINE */
+        .pipeline {
+            display: flex;
+            align-items: stretch;
+            margin: 20px 0;
+            width: 100%;
+        }
+        .stage {
+            flex: 1;
+            background: var(--white);
+            border: 1px solid var(--line);
+            padding: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border-left-width: 3px;
+        }
+        .stage-no { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .stage strong { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink); }
+        .stage small { font-size: 10px; color: var(--muted); display: block; margin-bottom: 4px; }
+        
+        .stage.passed { border-left-color: var(--accent); }
+        .stage.passed .stage-no { color: var(--accent-dark); }
+        .stage.running { border-left-color: var(--blue); }
+        .stage.running .stage-no { color: var(--blue); }
+        .stage.failed { border-left-color: var(--red); }
+        .stage.failed .stage-no { color: var(--red); }
+        .stage.waiting { border-left-color: var(--amber); }
+        .stage.waiting .stage-no { color: var(--amber); }
+        .stage.artifact { border-left-color: var(--artifact); }
+        .stage.artifact .stage-no { color: var(--artifact); }
+        .stage.skipped { border-left-color: var(--muted); opacity: 0.6; }
+        .stage.skipped .stage-no { color: var(--muted); }
+
+        .connector {
+            width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .connector::before {
+            content: '';
+            width: 100%;
+            height: 2px;
+            background: var(--line);
+        }
+        .connector::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            width: 0; height: 0;
+            border-left: 6px solid var(--line);
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+
+        .status-pill {
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: auto;
+            align-self: flex-start;
+        }
+        .status-pill.passed { background: rgba(0,184,124,0.15); color: var(--accent-dark); }
+        .status-pill.running { background: rgba(67,135,255,0.15); color: var(--blue); }
+        .status-pill.waiting { background: rgba(217,154,36,0.15); color: var(--amber); }
+        .status-pill.failed { background: rgba(217,75,75,0.15); color: var(--red); }
+        .status-pill.skipped { background: rgba(104,112,109,0.15); color: var(--muted); }
+
+        /* TERMINAL */
+        .terminal {
+            background: var(--panel);
+            color: var(--text-light);
+            border-radius: 6px;
+            padding: 14px 16px;
+            font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+            font-size: 10.5px;
+            line-height: 1.65;
+            margin: 10px 0;
+            border: 1px solid #2a2f2d;
+        }
+        .term-line { display: block; }
+        .term-prompt { color: var(--accent); }
+        .term-out { color: var(--text-muted); }
+        .term-ok { color: var(--accent); }
+        .term-warn { color: var(--amber); }
+        .term-err { color: var(--red); }
+        .term-blue { color: var(--blue); }
+        .term-artifact { color: var(--artifact); }
+
+        /* COMMAND + RESULT */
+        .cmdres {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .cmdres > div { display: flex; flex-direction: column; }
+        .cmdres h4 { font-size: 9px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; font-weight: 700; letter-spacing: 1px; }
+        .cmdres .term-box {
+            border: 1px solid var(--line);
+            padding: 10px;
+            background: var(--panel);
+            color: var(--text-light);
+            font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+            font-size: 10px;
+            flex: 1;
+            border-radius: 4px;
+        }
+
+        /* CONCEPT GRID */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        .concept-block h4 { font-size: 10px; text-transform: uppercase; color: var(--artifact); margin-bottom: 6px; font-weight: 700; letter-spacing: 1px; }
+        .concept-block p { font-size: 11px; line-height: 1.5; color: var(--ink); }
+
+        /* CALLOUTS */
+        .callout {
+            border-left: 3px solid var(--accent);
+            background: rgba(0, 184, 124, 0.05);
+            padding: 12px 16px;
+            margin: 15px 0;
+        }
+        .callout h4 { font-size: 10px; text-transform: uppercase; color: var(--accent-dark); margin-bottom: 4px; font-weight: 700; letter-spacing: 1px; }
+        .callout p { font-size: 11.5px; color: var(--ink); line-height: 1.5; margin: 0; }
+
+        .gotcha { border-left-color: var(--amber); background: rgba(217, 154, 36, 0.05); }
+        .gotcha h4 { color: var(--amber); }
+        
+        .interview { border-left-color: var(--blue); background: rgba(67, 135, 255, 0.05); }
+        .interview h4 { color: var(--blue); }
+        .interview p { margin-bottom: 5px; }
+        .interview strong { color: var(--ink); }
+
+        /* DECISION DIAGRAM */
+        .dec-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 11px;
+        }
+        .dec-q { 
+            border: 1px solid var(--ink); 
+            padding: 8px 20px; 
+            font-weight: 600; 
+            text-transform: uppercase;
+            background: var(--white);
+            position: relative;
+        }
+        .dec-q::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background: var(--ink);
+        }
+        .dec-branches {
+            display: flex;
+            justify-content: space-around;
+            width: 80%;
+            margin-top: 20px;
+            position: relative;
+        }
+        .dec-branches::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 10%;
+            width: 80%;
+            height: 20px;
+            border-top: 2px solid var(--ink);
+            border-left: 2px solid var(--ink);
+            border-right: 2px solid var(--ink);
+        }
+        .dec-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .dec-label { font-weight: 700; text-transform: uppercase; font-size: 10px; }
+        .dec-branch.yes .dec-label { color: var(--accent-dark); }
+        .dec-branch.no .dec-label { color: var(--red); }
+        .dec-val { 
+            border: 1px dashed var(--muted); 
+            padding: 8px 12px; 
+            text-align: center; 
+            background: var(--white);
+            font-size: 10px;
+            line-height: 1.4;
+        }
+        .dec-val span { display: block; font-family: monospace; color: var(--blue); margin-top: 4px; }
+
+        /* LAB FORMAT */
+        .lab-step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--line);
+        }
+        .lab-step:last-child { border-bottom: none; }
+        .step-no { 
+            font-size: 10px; 
+            font-weight: 700; 
+            color: var(--artifact); 
+            text-transform: uppercase; 
+            width: 70px; 
+            flex-shrink: 0; 
+            letter-spacing: 1px;
+            padding-top: 2px;
+        }
+        .lab-content p { margin: 0; font-size: 11.5px; }
+        .lab-checklist { list-style: none; margin: 10px 0; }
+        .lab-checklist li { font-size: 11px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .lab-checklist li::before { content: '☐'; font-size: 14px; color: var(--muted); }
+
+        /* ENVIRONMENT LANES */
+        .lanes { margin: 20px 0; }
+        .lane {
+            border: 1px solid var(--line);
+            margin-bottom: 10px;
+            background: var(--white);
+            display: flex;
+            align-items: stretch;
+        }
+        .lane-header { 
+            background: var(--panel-2); 
+            color: var(--text-light); 
+            padding: 10px 15px; 
+            font-size: 10px; 
+            text-transform: uppercase; 
+            font-weight: 700; 
+            letter-spacing: 1px; 
+            width: 100px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            text-align: center;
+        }
+        .lane-body { 
+            padding: 10px 15px; 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            font-size: 11px;
+        }
+        .lane-status { margin-left: auto; font-size: 9px; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; }
+
+        /* TABLES */
+        table.cmp {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin: 15px 0;
+            background: var(--white);
+        }
+        table.cmp th, table.cmp td {
+            border: 1px solid var(--line);
+            padding: 8px 10px;
+            text-align: left;
+        }
+        table.cmp th {
+            background: var(--panel-2);
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
+        table.cmp td:first-child { font-weight: 600; color: var(--muted); }
+
+        /* SYSTEM MAP */
+        .sys-map {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin: 20px 0;
+        }
+        .map-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        .map-box {
+            border: 1px solid var(--ink);
+            padding: 12px 20px;
+            background: var(--white);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            min-width: 140px;
+        }
+        .map-box.artifact { border-color: var(--artifact); color: var(--artifact); }
+        .map-box.blue { border-color: var(--blue); color: var(--blue); }
+        .map-box.green { border-color: var(--accent); color: var(--accent-dark); }
+        .map-arr { color: var(--muted); font-size: 14px; }
+        .map-line { width: 2px; height: 15px; background: var(--line); margin: 0 auto; }
+        .map-feedback {
+            border: 1px dashed var(--accent);
+            padding: 10px;
+            color: var(--accent-dark);
+            font-size: 10px;
+            text-align: center;
+            margin-top: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* m-reflow: screen-only mobile reflow; print unaffected */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0 auto;padding:16px 14px 20px}.section-title{font-size:19px}.cover h1{font-size:32px}.terminal{font-size:11px;overflow-x:auto}
+@media print {
+            body { background: none; }
+            .page { margin: 0; box-shadow: none; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- COVER PAGE -->
+    <div class="page cover">
+        <div class="cover-left">
+            <div>
+                <div class="cover-title">CI/CD<br>ENGINEERING</div>
+                <div class="cover-sub">Artifacts & Delivery: Promotion Paths</div>
+            </div>
+            <div class="cover-meta">
+                Immutable Artifacts<br>
+                Environment Promotion<br>
+                Approval Gates
+            </div>
+            <div class="cover-footer">
+                <span class="sig">Nabawy</span>
+            </div>
+        </div>
+        <div class="cover-right">
+            <div class="v-pipeline">
+                <div class="v-stage idle">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>BUILD</strong>
+                        <small>Docker image</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage running">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>TAG SHA</strong>
+                        <small>Immutable identity</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>REGISTRY</strong>
+                        <small>Push to GHCR</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>STAGING</strong>
+                        <small>Auto-deploy</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage amber">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>PRODUCTION</strong>
+                        <small>Manual gate</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 2: LAB 03 INTRO -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD LABS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">LAB 03: ARTIFACTS</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">01 /</span> Artifact Immutability</h2>
+            <p>Build a Docker image once, tag it by commit SHA, push it to GitHub Container Registry (GHCR), and attach a Software Bill of Materials (SBOM). The objective is to establish a single, immutable deployable identity that flows through all environments.</p>
+            
+            <div class="pipeline">
+                <div class="stage passed">
+                    <span class="stage-no">01</span>
+                    <strong>MERGE</strong>
+                    <small>main branch</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage passed">
+                    <span class="stage-no">02</span>
+                    <strong>BUILD</strong>
+                    <small>Multi-stage</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage running">
+                    <span class="stage-no">03</span>
+                    <strong>TAG</strong>
+                    <small>sha-&lt;short&gt;</small>
+                    <span class="status-pill running">RUNNING</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage artifact">
+                    <span class="stage-no">04</span>
+                    <strong>PUSH</strong>
+                    <small>Github GHCR</small>
+                    <span class="status-pill waiting">WAITING</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage waiting">
+                    <span class="stage-no">05</span>
+                    <strong>SBOM</strong>
+                    <small>Generate list</small>
+                    <span class="status-pill waiting">WAITING</span>
+                </div>
+            </div>
+
+            <div class="concept-grid">
+                <div class="concept-block">
+                    <h4>OBJECTIVE</h4>
+                    <p>Create an immutable artifact tagged by commit SHA, push it to a registry, and attach an SBOM. Prove that staging and production would run the exact same digest.</p>
+                </div>
+                <div class="concept-block">
+                    <h4>IMMUTABILITY</h4>
+                    <p>A tag like <code>:latest</code> is mutable; it can point to different bytes over time. A SHA tag (<code>sha-a1b2c3d</code>) and the underlying digest are permanent. The digest is the true deployable identity.</p>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Step 1: Build Once, Tag SHA</h3>
+            <p>The workflow uses GitHub Actions to build the image, log into GHCR using the built-in <code>GITHUB_TOKEN</code>, tag the image with the commit SHA, and push it.</p>
+
+            <div class="terminal">
+                <span class="term-line"><span class="term-artifact">jobs</span>:</span>
+                <span class="term-line">  <span class="term-artifact">image</span>:</span>
+                <span class="term-line">    <span class="term-artifact">runs-on</span>: ubuntu-latest</span>
+                <span class="term-line">    <span class="term-artifact">permissions</span>: { packages: write }</span>
+                <span class="term-line">    <span class="term-artifact">steps</span>:</span>
+                <span class="term-line">      - <span class="term-artifact">uses</span>: actions/checkout@v4</span>
+                <span class="term-line">      - <span class="term-artifact">uses</span>: docker/login-action@v3</span>
+                <span class="term-line">        <span class="term-artifact">with</span>: { registry: ghcr.io, username: ${{ github.actor }}, password: ${{ secrets.GITHUB_TOKEN }} }</span>
+                <span class="term-line">      - <span class="term-artifact">uses</span>: docker/metadata-action@v5</span>
+                <span class="term-line">        <span class="term-artifact">id</span>: meta</span>
+                <span class="term-line">        <span class="term-artifact">with</span>:</span>
+                <span class="term-line">          <span class="term-artifact">images</span>: ghcr.io/${{ github.repository }}</span>
+                <span class="term-line">          <span class="term-artifact">tags</span>: type=sha,prefix=sha-</span>
+                <span class="term-line">      - <span class="term-artifact">uses</span>: docker/build-push-action@v6</span>
+                <span class="term-line">        <span class="term-artifact">with</span>: { push: true, tags: ${{ steps.meta.outputs.tags }} }</span>
+            </div>
+
+            <div class="callout">
+                <h4>EXPECTED RESULT</h4>
+                <p>GHCR shows the <code>sha-&lt;short&gt;</code> tag. The GitHub Actions logs print the immutable image digest, which will be used for deployment.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">LAB 03 &nbsp;|&nbsp; 02 / 07</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 3: LAB 03 SBOM -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD LABS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">SBOM & VERIFICATION</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">02 /</span> Software Bill of Materials</h2>
+            <p>An artifact is a black box. An SBOM (Software Bill of Materials) is the ingredient list. It makes the next CVE answerable in minutes, not days, by explicitly listing every package and dependency baked into the image.</p>
+
+            <h3 class="sub-title">Step 2: Attach SBOM</h3>
+            <p>Add the <code>anchore/sbom-action</code> to the workflow immediately after the image is pushed. This action scans the image and attaches the resulting SBOM as a workflow artifact.</p>
+
+            <div class="cmdres">
+                <div class="cmd-block">
+                    <h4>COMMAND</h4>
+                    <div class="term-box">
+                        <span class="term-line"><span class="term-prompt">-</span> uses: anchore/sbom-action@v0</span>
+                        <span class="term-line">  with:</span>
+                        <span class="term-line">    image: ghcr.io/${{ github.repository }}:sha-${{ github.sha }}</span>
+                        <span class="term-line">    format: spdx-json</span>
+                    </div>
+                </div>
+                <div class="res-block">
+                    <h4>RESULT</h4>
+                    <div class="term-box">
+                        <span class="term-line term-out">[Pipeline] stage</span>
+                        <span class="term-line term-ok">SBOM generated successfully.</span>
+                        <span class="term-line term-out">Artifact: sbom-spdx.json</span>
+                        <span class="term-line term-out">Packages scanned: 142</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Verification &amp; Failure Scenarios</h3>
+            <ul class="lab-checklist">
+                <li>GHCR holds an immutable SHA tag.</li>
+                <li>Same digest referenced twice equals same bytes.</li>
+                <li>SBOM artifact present in the workflow run.</li>
+            </ul>
+
+            <div class="callout gotcha">
+                <h4>GOTCHA</h4>
+                <p>If the push fails with a <code>403 Forbidden</code> error, the workflow is missing the <code>packages: write</code> permission. GitHub Actions tokens are least-privilege by default; you must explicitly grant write access to packages.</p>
+            </div>
+
+            <div class="callout interview">
+                <h4>INTERVIEW CHECK</h4>
+                <p><strong>Q: Digest vs tag: why is redeploying <code>:latest</code> dangerous?</strong></p>
+                <p>A: A tag is a pointer. If you deploy <code>:latest</code>, you are deploying whatever bytes the registry currently points to. If someone pushes a new image to <code>:latest</code>, your deployment silently changes. Pinning the digest (<code>sha256:...</code>) guarantees the exact bytes.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">LAB 03 &nbsp;|&nbsp; 03 / 07</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 4: LAB 04 INTRO -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD LABS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">LAB 04: DEPLOYMENT</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">03 /</span> Environment Promotion</h2>
+            <p>Continuous Delivery means the software is always releasable, but release is a human decision. Promote Lab 03's immutable digest through staging to production with an explicit approval gate. Same digest, two environments.</p>
+
+            <div class="lanes">
+                <div class="lane">
+                    <div class="lane-header" style="background: var(--accent-dark);">STAGING</div>
+                    <div class="lane-body">
+                        <span>Auto-deploy on merge</span>
+                        <span class="lane-status" style="background: rgba(0,184,124,0.15); color: var(--accent-dark);">ACTIVE</span>
+                    </div>
+                </div>
+                <div class="lane">
+                    <div class="lane-header" style="background: var(--amber);">PRODUCTION</div>
+                    <div class="lane-body">
+                        <span>Manual approval required</span>
+                        <span class="lane-status" style="background: rgba(217,154,36,0.15); color: var(--amber);">GATED</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Step 1: Staging Auto-Deploys</h3>
+            <p>The staging deployment is fully automated. It depends on the <code>image</code> job from Lab 03 and deploys the specific digest output by that job.</p>
+
+            <div class="terminal">
+                <span class="term-line"><span class="term-artifact">deploy-staging</span>:</span>
+                <span class="term-line">  <span class="term-artifact">needs</span>: image</span>
+                <span class="term-line">  <span class="term-artifact">environment</span>: staging</span>
+                <span class="term-line">  <span class="term-artifact">runs-on</span>: ubuntu-latest</span>
+                <span class="term-line">  <span class="term-artifact">steps</span>:</span>
+                <span class="term-line">    - <span class="term-artifact">run</span>: echo "deploy ${{ needs.image.outputs.digest }} to staging"</span>
+            </div>
+
+            <div class="callout">
+                <h4>WHY IT MATTERS</h4>
+                <p>Staging proves the artifact continuously. Automation here is safe because users never see it. If the artifact fails in staging, the pipeline halts before reaching the production gate.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">LAB 04 &nbsp;|&nbsp; 04 / 07</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 5: LAB 04 APPROVAL GATE -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD LABS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">THE PRODUCTION GATE</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">04 /</span> The Production Gate</h2>
+            <p>Production deployment requires a human decision. By utilizing GitHub Environments and required reviewers, the pipeline pauses automatically, waiting for approval before applying the same digest to production.</p>
+
+            <div class="dec-container">
+                <div class="dec-q">APPROVE PRODUCTION DEPLOYMENT?</div>
+                <div class="dec-branches">
+                    <div class="dec-branch yes">
+                        <div class="dec-label">APPROVE</div>
+                        <div class="dec-val">
+                            EXECUTE PROD DEPLOY
+                            <span>terraform apply / kubectl apply</span>
+                        </div>
+                    </div>
+                    <div class="dec-branch no">
+                        <div class="dec-label">REJECT</div>
+                        <div class="dec-val">
+                            HALT PIPELINE
+                            <span>Staging remains active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Step 2: Production Needs a Human</h3>
+            <div class="terminal">
+                <span class="term-line"><span class="term-artifact">deploy-prod</span>:</span>
+                <span class="term-line">  <span class="term-artifact">needs</span>: [deploy-staging]</span>
+                <span class="term-line">  <span class="term-artifact">environment</span>: production</span>
+                <span class="term-line">  <span class="term-artifact">runs-on</span>: ubuntu-latest</span>
+                <span class="term-line">  <span class="term-artifact">steps</span>:</span>
+                <span class="term-line">    - <span class="term-artifact">run</span>: echo "deploy ${{ needs.image.outputs.digest }} to prod"</span>
+            </div>
+
+            <ul class="lab-checklist">
+                <li>Staging deploys on every merge, no clicks.</li>
+                <li>Production blocks until approved by a reviewer.</li>
+                <li>Both environments ran the identical image digest.</li>
+            </ul>
+
+            <div class="callout gotcha">
+                <h4>GOTCHA</h4>
+                <p>If digests differ between environments, the pipeline passed a tag (like <code>:latest</code> or <code>main</code>) instead of the explicit digest. Always pass <code>${{ needs.image.outputs.digest }}</code> explicitly to guarantee byte-for-byte parity.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">LAB 04 &nbsp;|&nbsp; 05 / 07</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 6: SYSTEM MAP -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD LABS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">SYSTEM MAP</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">05 /</span> System Map & Troubleshooting</h2>
+            <p>The promotion path from source to production relies on strict immutability and environment isolation. Failures here usually stem from mutable tags or missing permissions.</p>
+
+            <div class="sys-map">
+                <div class="map-row">
+                    <div class="map-box">SOURCE</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box blue">BUILD</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box artifact">REGISTRY</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box green">STAGING</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box">PROD</div>
+                </div>
+                <div class="map-feedback">FEEDBACK: IMMUTABLE DIGEST PROMOTION & ENVIRONMENT GATES</div>
+            </div>
+
+            <h3 class="sub-title">Troubleshooting Flow</h3>
+            <table class="cmp">
+                <thead>
+                    <tr>
+                        <th>Symptom</th>
+                        <th>Root Cause</th>
+                        <th>Recovery</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="color: var(--red);">403 on push to GHCR</td>
+                        <td>Missing permissions</td>
+                        <td>Add <code>permissions: { packages: write }</code> to job</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--red);">Prod deployed wrong code</td>
+                        <td>Promoted a mutable tag</td>
+                        <td>Pass <code>outputs.digest</code> explicitly</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--red);">Approval never arrives</td>
+                        <td>Missing environment config</td>
+                        <td>Set required reviewers in GitHub Env settings</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--amber);">SBOM generation fails</td>
+                        <td>Image inaccessible</td>
+                        <td>Ensure SBOM action runs after image is pushed</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout interview">
+                <h4>INTERVIEW CHECK</h4>
+                <p><strong>Q: What does the production approval gate actually block?</strong></p>
+                <p>A: It blocks the execution of the <code>deploy-prod</code> job. The artifact is already in the registry; the gate prevents the deployment command (e.g., <code>kubectl apply</code>) from running until a human clicks "Approve".</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">SUMMARY &nbsp;|&nbsp; 06 / 07</span>
+        </footer>
+    </div>
+
+</body>
+</html>

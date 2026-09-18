@@ -1,0 +1,557 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>2026 Roadmaps &amp; Platform Choice</title><style>
+.readbody{--paper:#f5f6f4;--white:#fff;--ink:#161a19;--muted:#68706d;--line:#d5dad7;--panel:#111614;--panel-2:#1a201d;--text-light:#e8eeeb;--text-muted:#9ca8a3;--accent:#00b87c;--accent-dark:#008f61;--blue:#4387ff;--amber:#d99a24;--red:#d94b4b;--artifact:#8b6cff}
+*{box-sizing:border-box;margin:0;padding:0}
+.readbody{font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+@page{size:A4;margin:0}
+.page{width:210mm;min-height:297mm;padding:16mm 16mm 19mm;margin:8mm auto;position:relative;background:var(--paper);page-break-after:always;overflow:hidden;display:flex;flex-direction:column}
+@media print{.readbody{}.page{margin:0;box-shadow:none}h3.sec,.phead h2{break-after:avoid}table.cmp,.qa,.kv,.callout,.terminal,.vflow{break-inside:avoid}}
+.phead{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.phead .ch{color:var(--accent-dark);font-weight:700}
+.phead h2{font-size:22px;letter-spacing:1px;color:var(--ink);margin:2px 0 6px;text-transform:uppercase}
+.phead hr{border:none;border-top:1.5px solid var(--ink);margin-bottom:10px}
+.pfoot{margin-top:auto;padding-top:8px;font-size:9px;color:var(--muted);display:flex;justify-content:space-between;border-top:1px solid var(--line);letter-spacing:1px}
+h3.sec{font-size:18px;margin:14px 0 8px;text-transform:uppercase;letter-spacing:.5px;break-after:avoid}
+h3.sec .n{color:var(--accent-dark);font-family:"Cascadia Code",Consolas,monospace;font-size:13px;margin-right:8px}
+p.body{font-size:13px;line-height:1.65;margin:7px 0}
+p.small{font-size:12px;line-height:1.6;color:var(--muted);margin:6px 0}
+code,.mono{font-family:"SFMono-Regular","Cascadia Code",Consolas,monospace}
+.cover{background:var(--panel);color:var(--text-light);justify-content:center}
+.cover .brand{font-size:10px;letter-spacing:4px;color:var(--text-muted)}
+.cover h1{font-size:42px;line-height:1.05;margin:10px 0 4px;letter-spacing:1px}
+.cover h1 span{color:var(--red)}
+.cover .sub{font-size:14px;color:var(--text-muted);margin-bottom:16px}
+.cover .tri{font-size:10px;letter-spacing:2.5px;color:var(--text-muted);margin-bottom:22px;line-height:1.9}
+.vpipe{display:flex;flex-direction:column;margin:6px 0 26px}
+.vnode{display:flex;align-items:center;gap:12px}
+.vnode .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--red);box-shadow:0 0 10px rgba(217,75,75,.5);flex:none}
+.vnode.g .dot{border-color:var(--accent);box-shadow:0 0 10px rgba(0,184,124,.55)}
+.vnode.b .dot{border-color:var(--blue);box-shadow:0 0 10px rgba(67,135,255,.45)}
+.vnode.am .dot{border-color:var(--amber);box-shadow:0 0 10px rgba(217,154,36,.45)}
+.vnode.p .dot{border-color:var(--artifact);box-shadow:0 0 10px rgba(139,108,255,.45)}
+
+.cover .vnode img{filter:drop-shadow(0 0 0.9px #18E299) drop-shadow(0 0 4px rgba(24,226,153,.22));}
+.cover .vnode img[src*="github"]{background:none;border-radius:0;padding:0;box-shadow:none;filter:drop-shadow(0 0 0.9px #18E299) drop-shadow(0 0 5px rgba(24,226,153,.28));}
+.cover .vnode img[src*="github"]{background:none;border-radius:0;padding:0;box-shadow:none;filter:drop-shadow(1px 0 0 white) drop-shadow(-1px 0 0 white) drop-shadow(0 1px 0 white) drop-shadow(0 -1px 0 white) drop-shadow(0.7px 0.7px 0 white) drop-shadow(-0.7px -0.7px 0 white) drop-shadow(-0.7px 0.7px 0 white) drop-shadow(0.7px -0.7px 0 white);}
+/* icon: github white on dark, black on light — no halo */
+.cover .vnode img[src*="github"]{filter:invert(1) brightness(1.05);background:none;box-shadow:none;border-radius:0;padding:0;}
+.cover .vnode img:not([src*="github"]){filter:none;}
+/* icon: outline/black icons white on dark covers */
+.cover .vnode img[src*="github"], .cover .vnode img[src*="workflow"], .cover .vnode img[src*="hammer"], .cover .vnode img[src*="package"], .cover .vnode img[src*="database"], .cover .vnode img[src*="puzzle"], .cover .vnode img[src*="server"], .cover .vnode img[src*="terminal"], .cover .vnode img[src*="shield"], .cover .vnode img[src*="activity"], .cover .vnode img[src*="webhook"], .cover .vnode img[src*="wrench"], .cover .vnode img[src*="flask"], .cover .vnode img[src*="rocket"]{filter:invert(1) brightness(1.05);}
+.vnode img{width:24px;height:24px;flex:none}
+.vnode b{font-size:11px;letter-spacing:2px}
+.vnode small{font-size:10px;color:var(--text-muted)}
+.vline{width:2px;height:14px;background:#2c3531;margin-left:6px}
+.cover .foot{font-size:9px;color:var(--text-muted);letter-spacing:2px;margin-top:auto;padding-top:20px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.cover .sig{font-family:"Brush Script MT","Segoe Script","Snell Roundhand",cursive;font-size:26px;color:var(--accent);transform:rotate(-4deg);text-shadow:0 0 14px rgba(0,184,124,.45);white-space:nowrap}
+.opener .bignum{font-size:64px;font-weight:800;line-height:1}
+.opener .ctitle{font-size:30px;letter-spacing:3px;margin:2px 0 12px}
+.opener .lede{font-size:15px;line-height:1.6;max-width:155mm;margin:8px 0}
+.opener .lede em{color:var(--accent-dark);font-style:normal;font-weight:700}
+table.cmp{width:100%;border-collapse:collapse;font-size:11.5px;margin:10px 0}
+table.cmp th{background:var(--panel);color:var(--text-light);font-size:9px;letter-spacing:1px;padding:7px 8px;text-align:left}
+table.cmp td{border:1px solid var(--line);padding:7px 8px;background:var(--white);line-height:1.5}
+table.cmp td:first-child{font-weight:700;background:#eef0ee}
+.callout{border-left:3px solid var(--red);background:var(--white);padding:10px 12px;margin:10px 0}
+.callout.green{border-left-color:var(--accent)}
+.callout.amber{border-left-color:var(--amber)}
+.callout.blue{border-left-color:var(--blue)}
+.callout h4{font-size:10px;letter-spacing:1.5px;margin-bottom:4px}
+.callout.red h4{color:var(--red)}.callout.green h4{color:var(--accent-dark)}.callout.amber h4{color:var(--amber)}.callout.blue h4{color:var(--blue)}
+.callout p{font-size:12px;line-height:1.6}
+.terminal{background:var(--panel);color:var(--text-light);border-radius:8px;padding:14px 16px;font-family:"Cascadia Code",Consolas,monospace;font-size:11px;line-height:1.6;margin:10px 0;white-space:pre-wrap}
+.terminal .g{color:var(--accent)}.terminal .c{color:var(--text-muted)}.terminal .a{color:var(--amber)}.terminal .b{color:var(--blue)}
+.vflow{margin:10px 0}
+.fnode{background:var(--white);border:1px solid var(--line);padding:10px 14px;font-size:12px;display:flex;align-items:center;gap:10px}
+.fnode img{width:22px;height:22px;flex:none}
+.fnode b{letter-spacing:1px;font-size:11px}
+.fnode small{color:var(--muted);font-size:11px}
+.farrow{text-align:center;color:var(--accent-dark);font-weight:700;line-height:1.1;padding:2px 0}
+.kv{background:var(--white);border:1px solid var(--line);padding:10px 12px;margin:8px 0;font-size:12px;line-height:1.6}
+.kv b{color:var(--accent-dark)}
+ul.tight{font-size:12.5px;line-height:1.65;margin:7px 0 7px 18px}
+ul.tight li{margin-bottom:4px}
+.qa{background:var(--white);border:1px solid var(--line);padding:10px 14px;margin:8px 0;font-size:12px;line-height:1.6}
+.qa .qq{font-weight:700}.qa .aa{color:var(--accent-dark);font-weight:700}
+.badge{display:inline-block;font-size:9px;letter-spacing:1px;padding:2px 6px;border-radius:4px;font-weight:700;color:#fff;margin-left:6px}
+.badge-rel{background:var(--accent)}.badge-prev{background:var(--blue)}.badge-cur{background:var(--amber);color:#111}.badge-near{background:#6b7a77}.badge-fut{background:var(--artifact)}
+.timeline{display:flex;gap:6px;margin:8px 0}
+.timeline .tseg{flex:1;text-align:center;padding:6px 4px;border-radius:6px;font-size:9px;letter-spacing:1px;font-weight:700;color:#fff;line-height:1.4}
+.tseg.rel{background:var(--accent)}.tseg.prev{background:var(--blue)}.tseg.cur{background:var(--amber);color:#111}.tseg.near{background:#6b7a77}.tseg.fut{background:var(--artifact)}
+.printnote{font-size:9px;color:var(--muted);border:1px dashed var(--line);padding:10px 12px;margin-top:12px;line-height:1.6}
+/* m-reflow: screen-only mobile reflow; print unaffected */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0 auto;padding:16px 14px 20px}h3.sec{font-size:16px}.opener .bignum{font-size:48px}.cover h1{font-size:30px}.cover .tri{font-size:9px}table.cmp{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}.terminal{font-size:10.5px}.vnode b,.fnode b{font-size:10px}.phead h2{font-size:18px}}
+</style></head><body><div class="page cover">
+<div class="brand">CI/CD SYSTEMS &nbsp;·&nbsp; ENGINEERING MANUAL &nbsp;·&nbsp; PDF 40</div>
+<h1>JENKINS<br><span>ROADMAP 2026</span></h1>
+<div class="sub">Volunteer-driven modernization — what shipped, what's next, what to trust</div>
+<div class="tri">WEEKLY · LTS EVERY 4 WEEKS · SECURITY AS NEEDED<br>JAVA 21+ · SPRING 7 · 1,800+ PLUGINS<br>INFRA: PUPPET → ANSIBLE · JDK 25</div>
+<div class="vpipe">
+<div class="vnode g"><span class="dot"></span><img src="../assets/icons/jenkins/jenkins.svg" alt="Cadence"><b>RELEASE CADENCE</b><small>weekly · LTS · advisories</small></div><div class="vline"></div>
+<div class="vnode b"><span class="dot"></span><img src="../assets/icons/ci-cd/workflow.svg" alt="Pipeline"><b>PIPELINE AUTHORING</b><small>YAML · JTE 2.0 · IDE</small></div><div class="vline"></div>
+<div class="vnode am"><span class="dot"></span><img src="../assets/icons/general/puzzle.svg" alt="UX"><b>UX &amp; PLUGIN MANAGER</b><small>2.552 preview → rollout</small></div><div class="vline"></div>
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/general/server.svg" alt="Cloud"><b>CLOUD &amp; PACKAGING</b><small>CloudEvents · Temurin · images</small></div><div class="vline"></div>
+<div class="vnode p"><span class="dot"></span><img src="../assets/icons/general/terminal.svg" alt="Infra"><b>INFRA 2026</b><small>Ansible · JDK 25 · MSI cert</small></div>
+</div>
+<div class="foot"><span>01 / 06 · ROADMAPS &amp; STRATEGY</span><span class="sig">Nabawy</span></div>
+</div><div class="page opener">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 40<hr><h2>Orientation</h2>Horizons · Cadence · How to read this roadmap</div>
+<div class="bignum">40</div>
+<div class="ctitle">THE ROADMAP</div>
+<p class="lede">Jenkins ships on <em>cadence, not calendar</em> — every week a new release, every four weeks a stabilized LTS, security fixes whenever they are needed. The 2026 roadmap is organized into <em>horizons</em>, not hard dates, because contributor bandwidth decides when an initiative ships.</p>
+
+<h3 class="sec"><span class="n">01 /</span> Release Cadence — Current Model</h3>
+<p class="body">Unlike vendor-driven products, Jenkins never announces a "Jenkins 3.0." It evolves as a rolling train of weekly releases; the LTS line is a curated snapshot for conservative upgraders.</p>
+<table class="cmp"><tr><th>Track</th><th>Rhythm</th><th>Who should follow</th></tr>
+<tr><td>Weekly</td><td>Every week (2.545 → 2.566+ in 2026)</td><td>Teams that want features fastest; accept more churn</td></tr>
+<tr><td>LTS</td><td>Cut every ~4 weeks + backports</td><td>Most production controllers — stable, patched</td></tr>
+<tr><td>Security</td><td>As needed via <span class="mono">jenkinsci-advisories</span></td><td>Everyone — apply out-of-band when CVE drops</td></tr>
+</table>
+<div class="kv"><b>2026 SHIPPED —</b> <b>2.545</b> (Jan) Java 21+ required on controller · <b>2.552</b> (Feb) experimental Plugin Manager UI + revamped Clouds page · <b>2.554</b> (Mar) script console adapted for new UI · <b>2.556</b> (Mar) Spring Security 7 + Spring Framework 7 · <b>LTS 2.541.1</b> (Jan) unified RPM repo, new GPG key for RPM/DEB.</div>
+
+<h3 class="sec"><span class="n">02 /</span> How Horizons Work</h3>
+<div class="timeline"><div class="tseg rel">RELEASED</div><div class="tseg prev">PREVIEW</div><div class="tseg cur">CURRENT</div><div class="tseg near">NEAR TERM</div><div class="tseg fut">FUTURE</div></div>
+<p class="small"><b>Released</b> is done. <b>Preview</b> is usable but still changing. <b>Current</b> is under active development. <b>Near Term</b> is next up once bandwidth allows. <b>Future</b> has consensus but no active work. Treat Near/Future as directional priorities — the Jenkins project explicitly warns they are not committed dates.</p>
+<div class="callout amber"><h4>READING RULE</h4><p>Jenkins does not commit to delivery dates — all initiatives depend on volunteer/contributor availability. Track progress via the live <span class="mono">roadmap.yml</span> on GitHub, not via this snapshot.</p></div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 40</span><span>02 / 06</span></div>
+</div><div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 40<hr><h2>Product Themes</h2>Authoring · Integrations · Experience · Admin</div>
+
+<h3 class="sec"><span class="n">03 /</span> Pipeline Authoring &amp; Developer Tooling</h3>
+<table class="cmp"><tr><th>Initiative</th><th>Horizon</th><th>What changes for you</th></tr>
+<tr><td>Pipeline as YAML <span class="badge badge-prev">PREVIEW</span></td><td>Preview</td><td>Define Pipelines in YAML natively — no extra shared-library shim. Simpler for teams that prefer YAML over Groovy.</td></tr>
+<tr><td>Jenkins Templating Engine 2.0 <span class="badge badge-rel">RELEASED</span></td><td>Released + iterating</td><td>Tool-agnostic pipeline templates; reuse pipeline logic across repos.</td></tr>
+<tr><td>IDE pipeline dev (debug, visual editor) <span class="badge badge-fut">FUTURE</span></td><td>Future</td><td>No active dev yet — design intent only. Wiring live debug + visual editors into IDE plugins.</td></tr>
+<tr><td>Expanded Pipeline reference docs <span class="badge badge-fut">FUTURE</span></td><td>Future</td><td>Completeness pass on DSL/step docs.</td></tr>
+</table>
+
+<h3 class="sec"><span class="n">04 /</span> End-User Experience &amp; Interface</h3>
+<ul class="tight">
+<li><b>Plugin Manager UI revamp</b> <span class="mono">— Preview → shipping incrementally.</span> Experimental UI landed in 2.552; full rollout is staged across weeklies. Expect iterative polish, not a flag day.</li>
+<li><b>Look &amp; Feel updates</b> <span class="mono">— Current.</span> Systematic styling modernization across the web UI.</li>
+<li><b>Accessibility</b> <span class="mono">— Near Term.</span> A11y pass after the style layer stabilizes.</li>
+<li><b>Full interface rework</b> <span class="mono">— Future.</span> Larger overhaul; community consensus exists, no active implementation yet.</li>
+<li><b>Already released:</b> Dark Theme, Configuration UI (tables → divs), Theme Manager plugin.</li>
+</ul>
+<div class="callout green"><h4>WHAT THIS MEANS IN PRACTICE</h4><p>If you maintain internal Jenkins docs/screenshots, budget for UI drift through 2026. The Plugin Manager and Clouds pages have already changed shape — automation (Puppet/JCasC) that screen-scrapes the UI will need updates.</p></div>
+
+<h3 class="sec"><span class="n">05 /</span> Management &amp; Tool Integrations</h3>
+<table class="cmp"><tr><th>Area</th><th>Item</th><th>Horizon</th></tr>
+<tr><td>Integrations</td><td>GitHub Checks API + GitHub App auth</td><td><span class="badge badge-rel">RELEASED</span></td></tr>
+<tr><td>Integrations</td><td>OpenAPI spec for core + plugins (client generation)</td><td><span class="badge badge-fut">FUTURE</span></td></tr>
+<tr><td>Admin</td><td>Script Security — granular approve/deny/revoke (replaces all-or-nothing)</td><td><span class="badge badge-cur">CURRENT</span></td></tr>
+<tr><td>Admin</td><td>Windows Services: YAML config support</td><td><span class="badge badge-cur">CURRENT</span></td></tr>
+<tr><td>Admin</td><td>JCasC: pluggable external config (Git, S3, K8s CRDs)</td><td><span class="badge badge-fut">FUTURE</span></td></tr>
+<tr><td>Admin</td><td>Better Remoting monitoring (Prometheus/Grafana for controller↔agent)</td><td><span class="badge badge-fut">FUTURE</span></td></tr>
+</table>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 40</span><span>03 / 06</span></div>
+</div><div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 40<hr><h2>Infrastructure &amp; Platform</h2>Cloud · Packaging · Infra roadmap</div>
+
+<h3 class="sec"><span class="n">06 /</span> Jenkins on Cloud Platforms</h3>
+<table class="cmp"><tr><th>Initiative</th><th>Horizon</th><th>Intent</th></tr>
+<tr><td>CloudEvents support <span class="badge badge-cur">CURRENT</span></td><td>Current</td><td>Standard eventing for interoperability (Tekton, Knative, external notifiers).</td></tr>
+<tr><td>Jenkinsfile Runner 1.0 · Tekton build steps · Pluggable log/storage <span class="badge badge-prev">PREVIEW</span></td><td>Preview</td><td>Run Jenkinsfiles without a full controller; store logs/results externally.</td></tr>
+<tr><td>Tekton as alt execution engine · FaaS capability · Fully pluggable storage <span class="badge badge-fut">FUTURE</span></td><td>Future</td><td>Longer bets on alternate runtimes and decoupled storage.</td></tr>
+</table>
+
+<h3 class="sec"><span class="n">07 /</span> Packaging &amp; Platform Support</h3>
+<div class="kv"><b>SHIPPED —</b> Eclipse Temurin JDK migration, Windows installer rework, multi-arch Docker images. <b>FUTURE —</b> Cloud-native Java (GraalVM/Quarkus) for smaller/faster images. <b>DEV TOOLING SHIPPED —</b> JEP-229 (Continuous Delivery of Plugins), plugin BOMs, automated dependency management. <b>PREVIEW —</b> Expanded static analysis for security (Find Security Bugs coverage).</div>
+
+<h3 class="sec"><span class="n">08 /</span> Project Internals — Infra Team 2026 Focus</h3>
+<p class="body">Tracked weekly by the Infra team. Small team, real budget (~$5–6k/mo Azure sponsorship), steady burn-down:</p>
+<div class="vflow">
+<div class="fnode"><img src="../assets/icons/general/terminal.svg" alt="Ansible"><b>PUPPET → ANSIBLE</b><small>Current, in progress — Puppet flagged strategic risk (Feb 2025)</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/general/server.svg" alt="Platform"><b>WINDOWS 2025 + JDK 25</b><small>Near term — deprecate Win2019, switch infra to JDK 25</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/security/shield.svg" alt="Signing"><b>SIGN MSI WITH LF CERT</b><small>Top priority — DigiCert expiry May 2026; LF cert replacement</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/monitoring/activity.svg" alt="Stats"><b>STATS + ACCOUNTS MODERNIZATION</b><small>Resume stats.jenkins.io; modernize accounts.jenkins.io (LDAP) — future</small></div>
+</div>
+<ul class="tight">
+<li>Ongoing: Terraform/Helm/<span class="mono">jq</span> bumps, Playwright browser packaging, credential rotation, budget stewardship.</li>
+<li><b>Governance:</b> JEP-14 (public roadmap process) + JEP-15 (crowdfunding) — <span class="badge badge-rel">RELEASED</span>; <b>Technical Steering Committee</b> — <span class="badge badge-fut">FUTURE</span>.</li>
+</ul>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 40</span><span>04 / 06</span></div>
+</div><div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 40<hr><h2>Horizon Map</h2>Full table · Community · How to track</div>
+
+<h3 class="sec"><span class="n">09 /</span> Full Horizon Table (September 2026 snapshot)</h3>
+<table class="cmp"><tr><th>Theme</th><th>Item</th><th>Horizon</th></tr>
+<tr><td>Pipeline</td><td>Pipeline as YAML</td><td><span class="badge badge-prev">PREVIEW</span></td></tr>
+<tr><td>Pipeline</td><td>JTE 2.0</td><td><span class="badge badge-rel">RELEASED</span></td></tr>
+<tr><td>Pipeline</td><td>IDE debugging / visual editor</td><td><span class="badge badge-fut">FUTURE</span></td></tr>
+<tr><td>UX</td><td>Plugin Manager UI revamp</td><td><span class="badge badge-prev">PREVIEW</span></td></tr>
+<tr><td>UX</td><td>Look &amp; Feel updates</td><td><span class="badge badge-cur">CURRENT</span></td></tr>
+<tr><td>UX</td><td>Accessibility</td><td><span class="badge badge-near">NEAR TERM</span></td></tr>
+<tr><td>Admin</td><td>Script Security granular approvals</td><td><span class="badge badge-cur">CURRENT</span></td></tr>
+<tr><td>Admin</td><td>JCasC pluggable config sources</td><td><span class="badge badge-fut">FUTURE</span></td></tr>
+<tr><td>Cloud</td><td>CloudEvents</td><td><span class="badge badge-cur">CURRENT</span></td></tr>
+<tr><td>Cloud</td><td>Jenkinsfile Runner / Tekton steps</td><td><span class="badge badge-prev">PREVIEW</span></td></tr>
+<tr><td>Infra</td><td>Puppet → Ansible</td><td><span class="badge badge-cur">CURRENT</span></td></tr>
+<tr><td>Infra</td><td>JDK 25 + Win2025 + MSI LF cert</td><td><span class="badge badge-near">NEAR TERM</span></td></tr>
+<tr><td>Gov</td><td>Technical Steering Committee</td><td><span class="badge badge-fut">FUTURE</span></td></tr>
+</table>
+
+<h3 class="sec"><span class="n">10 /</span> Community &amp; Program Highlights — 2026</h3>
+<ul class="tight">
+<li><b>Google Summer of Code 2026</b> — Jenkins as mentoring org; ~300+ proposals, 8 ideas, focus on <b>docs site retooling</b> (migration to Docusaurus incl. Chinese site) and <b>Contributor Spotlight / Success Stories</b> retooling (Gatsby → Vite).</li>
+<li><b>Jenkins Awards 2026</b> — nominations open: Most Valuable Contributor, Security MVP, Most Valuable Advocate.</li>
+<li>Continuous <b>security advisories</b> (e.g., stored XSS in node offline-cause descriptions; plugin CVEs).</li>
+</ul>
+
+<h3 class="sec"><span class="n">11 /</span> How to Track Progress</h3>
+<div class="terminal"><span class="c"># live data — always verify against the repo, not this PDF</span>
+<span class="g">roadmap.yml</span>  <span class="b">→</span> github.com/jenkins-infra/jenkins.io/content/_data/roadmap/roadmap.yml
+<span class="g">archive.yml</span>  <span class="b">→</span> .../roadmap/archive.yml  <span class="c"># completed / withdrawn</span>
+<span class="g">JEP-14</span>      <span class="b">→</span> github.com/jenkinsci/jep/tree/master/jep/14  <span class="c"># roadmap process</span>
+<span class="g">infra notes</span> <span class="b">→</span> community.jenkins.io  <span class="c"># Infra team meeting threads (weekly)</span>
+<span class="c"># suggest an item via JEP-14 — anyone can propose</span></div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 40</span><span>05 / 06</span></div>
+</div><div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 40<hr><h2>Failures &amp; Handoff</h2>Misreadings · Checklist · Next</div>
+
+<h3 class="sec"><span class="n">12 /</span> Failure Modes — Roadmap Edition</h3>
+<div class="callout red"><h4>TREATING NEAR TERM AS A COMMITMENT</h4><p>The most common misread. Near/Future are priorities ordered by contributor interest, not sprint commitments. A "Near Term" label is not a quarter promise — it means "next up when someone can staff it." Plan adoption as <em>if/when</em>, not <em>when</em>.</p></div>
+<ul class="tight">
+<li><b>Pinning automation to weekly UI screenshots</b> — UI/UX is actively churning (Plugin Manager, Look &amp; Feel). Gate UI automation behind CSS selectors and cache-busting, or prefer JCasC/Groovy init over scraping.</li>
+<li><b>Ignoring the cert window</b> — MSI DigiCert expiry May 2026 is the infra team's top priority; Windows install flows that verify publisher certs can break if you lag the migration.</li>
+<li><b>Staying on Puppet assumptions</b> — Puppet → Ansible is in progress. If you contribute infra or mirror infra patterns internally, expect playbook drift.</li>
+<li><b>Assuming "Pipeline as YAML" replaces Groovy tomorrow</b> — it's Preview. Groovy <span class="mono">Jenkinsfile</span> and JTE remain the production path; YAML is additive.</li>
+</ul>
+
+<h3 class="sec"><span class="n">13 /</span> Operator Checklist</h3>
+<div class="kv"><b>ADOPT —</b> LTS line + advisories; track <span class="mono">roadmap.yml</span> weekly if you depend on Preview items. <b>PLAN —</b> Java 21 now mandatory; qualify JDK 25 early; Windows Server 2025 qualification path. <b>HARDEN —</b> Script Security granular approvals available now — move off blanket approvals. <b>PREP —</b> CloudEvents and pluggable log/storage for Tekton-interop experiments.</div>
+<div class="qa"><span class="qq">Q:</span> Should we wait for the "full UI rework" before upgrading Jenkins?<br><span class="aa">A:</span> No. That rework has consensus but no active development. Upgrade on the LTS cadence; the incremental UI improvements (dark theme, Plugin Manager) ship steadily regardless.</div>
+
+<h3 class="sec"><span class="n">14 /</span> Handoff</h3>
+<p class="body">Jenkins is moderning its <em>house</em> — UX, plugin trust, and infra debt — not reinventing the pipeline. Next, see <b>PDF 41 · GitHub Actions Roadmap 2026</b> for the platform optimizing hardest for supply-chain trust, then <b>PDF 42</b> for the decision frame that holds both roadmaps side by side.</p>
+<div class="printnote"><b>SOURCE:</b> <span class="mono">jenkins-roadmap.md</span> (Sept 2026 research summary) · Compiled from <span class="mono">jenkins.io/project/roadmap</span>, infra meeting notes, CD Foundation reports. Live data: <span class="mono">jenkins-infra/jenkins.io — roadmap.yml / archive.yml</span>, JEP-14. Print: Ctrl/Cmd+P → Save as PDF → Background graphics on → A4.</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 40</span><span>06 / 06</span></div>
+</div><div class="page cover">
+<div class="brand">CI/CD SYSTEMS &nbsp;·&nbsp; ENGINEERING MANUAL &nbsp;·&nbsp; PDF 41</div>
+<h1>GITHUB ACTIONS<br><span>SECURITY ROADMAP 2026</span></h1>
+<div class="sub">From implicit trust to verifiable, scoped, policy-gated execution</div>
+<div class="tri">DEPENDENCY LOCKING · SCOPED SECRETS<br>POLICY PROTECTIONS · EGRESS FIREWALL<br>ARM64 GA · IMMUTABLE RELEASES</div>
+<div class="vpipe">
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/security/shield.svg" alt="Lock"><b>DEPENDENCY LOCKING</b><small>SHA + hash, transitive — go.sum for Actions</small></div><div class="vline"></div>
+<div class="vnode am"><span class="dot"></span><img src="../assets/icons/general/database.svg" alt="Secrets"><b>SCOPED SECRETS</b><small>repo · branch · env · trusted workflow</small></div><div class="vline"></div>
+<div class="vnode g"><span class="dot"></span><img src="../assets/icons/ci-cd/workflow.svg" alt="Policy"><b>POLICY PROTECTIONS</b><small>rulesets for who/what triggers</small></div><div class="vline"></div>
+<div class="vnode p"><span class="dot"></span><img src="../assets/icons/general/server.svg" alt="Egress"><b>DATA STREAM &amp; FIREWALL</b><small>S3/Event Hub · L7 egress control</small></div><div class="vline"></div>
+<div class="vnode"><span class="dot"></span><img src="../assets/icons/docker/docker.svg" alt="Runners"><b>RUNNERS GA</b><small>Arm64 Linux/Windows · Immutable Releases</small></div>
+</div>
+<div class="foot"><span>02 / 06 · ROADMAPS &amp; STRATEGY</span><span class="sig">Nabawy</span></div>
+</div><div class="page opener">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 41<hr><h2>Context</h2>Why GitHub built a security roadmap</div>
+<div class="bignum">41</div>
+<div class="ctitle">THE ATTACK SURFACE</div>
+<p class="lede">In 2025–26 a pattern emerged: <em>compromise a trusted Action → execute inside CI → exfiltrate secrets</em>. The roadmap is GitHub's direct answer to three root causes: <em>implicit trust in workflow dependencies</em>, <em>poor execution visibility</em>, and <em>overly broad credential exposure</em>.</p>
+
+<h3 class="sec"><span class="n">01 /</span> Incidents That Drove the Roadmap</h3>
+<table class="cmp"><tr><th>Incident</th><th>Technique</th><th>What it abused</th></tr>
+<tr><td><span class="mono">tj-actions/changed-files</span></td><td>Compromised trusted Action</td><td>Unpinned <span class="mono">uses:</span> + transitive trust</td></tr>
+<tr><td>Nx build-tool compromise</td><td>Supply-chain injection</td><td>Shared toolchain dependency</td></tr>
+<tr><td><span class="mono">trivy-action</span> tag poisoning</td><td>75 tags force-pushed to malicious commits</td><td>Mutable tags / releases</td></tr>
+<tr><td>"Clinejection"</td><td>Prompt injection via issue title → cache poisoning → exfil</td><td>Untrusted event input driving agent workflows</td></tr>
+</table>
+<div class="callout red"><h4>THE PATTERN</h4><p>Every incident follows the same pipeline: a normal-looking workflow pulls an Action at a friendly tag, that Action (or its transitive dependency) is silently retargeted, and secrets flow outward before anyone notices. SHA pinning <em>at the top level only</em> does not close this gap.</p></div>
+
+<h3 class="sec"><span class="n">02 /</span> Roadmap Pillars</h3>
+<div class="vflow">
+<div class="fnode"><img src="../assets/icons/security/shield.svg" alt="Lock"><b>LOCK DEPENDENCIES</b><small>Make every resolved version verifiable</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/general/database.svg" alt="Scope"><b>SCOPE SECRETS</b><small>Credentials flow only where declared</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/ci-cd/workflow.svg" alt="Policy"><b>ENFORCE POLICY</b><small>Centrally govern who/what can trigger workflows</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/general/server.svg" alt="Monitor"><b>OBSERVE &amp; CONTAIN</b><small>Stream telemetry · firewall egress outside the VM</small></div>
+</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 41</span><span>02 / 06</span></div>
+</div><div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 41<hr><h2>Pillars A &amp; B</h2>Dependency locking · Scoped secrets</div>
+
+<h3 class="sec"><span class="n">03 /</span> A — Locking Workflow Dependencies</h3>
+<p class="body">A new <span class="mono">dependencies:</span> section in workflow YAML. Works like <span class="mono">go.sum</span> / <span class="mono">Cargo.lock</span> — but for Actions. GitHub will resolve and lock <b>direct and transitive</b> Action dependencies via commit SHA + cryptographic hash verification.</p>
+<div class="terminal"><span class="b">name:</span> ci
+<span class="b">on:</span> pull_request
+<span class="b">dependencies:</span>          <span class="c"># NEW — lockfile for Actions</span>
+  <span class="b">actions/checkout:</span> sha256:abc123…  <span class="c"># SHA + hash, verified</span>
+  <span class="b">my-org/composite-action:</span> sha256:def456…  <span class="c"># transitive deps locked too</span>
+<span class="b">jobs:</span>
+  <span class="b">build:</span>
+    <span class="b">runs-on:</span> ubuntu-latest
+    <span class="b">steps:</span>
+      - <span class="b">uses:</span> actions/checkout@abc123  <span class="c"># deterministic, diffable</span></div>
+<div class="kv"><b>WHY THIS MATTERS —</b> Today's SHA pinning only covers top-level <span class="mono">uses:</span> lines, not what a composite Action calls internally. Locking closes that gap: <b>deterministic execution</b>, <b>visible dependency diffs in PRs</b>, and <b>tamper detection even when a SHA looks correct</b> (hash mismatch fails the run). Paired with <b>immutable releases</b> and stricter publishing rules for maintainers.</div>
+<table class="cmp"><tr><th></th><th>Before</th><th>After (locking)</th></tr>
+<tr><td>Scope</td><td>Top-level <span class="mono">uses:</span> only</td><td>Transitive closure (composite Actions included)</td></tr>
+<tr><td>Verification</td><td>SHA equality</td><td>SHA + cryptographic hash</td></tr>
+<tr><td>PR visibility</td><td>No dependency diff</td><td>Lockfile diff surfaces version drift</td></tr>
+</table>
+
+<h3 class="sec"><span class="n">04 /</span> B — Scoped Secrets</h3>
+<p class="body">Secrets will be bindable to a narrower scope instead of flowing broadly by default — and will no longer auto-inherit into reusable workflows.</p>
+<table class="cmp"><tr><th>Scope</th><th>Secret is available only when</th></tr>
+<tr><td>Repository</td><td>Workflow runs inside that specific repo</td></tr>
+<tr><td>Branch</td><td>Workflow runs targeting that branch</td></tr>
+<tr><td>Environment</td><td>Job targets the environment (e.g., <span class="mono">production</span>)</td></tr>
+<tr><td>Trusted workflow</td><td>Only an explicitly approved reusable workflow calls it</td></tr>
+</table>
+<div class="terminal"><span class="c"># BEFORE — secrets auto-inherit</span>
+<span class="b">jobs:</span>
+  <span class="b">deploy:</span>
+    <span class="b">uses:</span> org/central-deploy@v2
+    <span class="b">secrets:</span> inherit               <span class="r"># ← broad, implicit</span>
+
+<span class="c"># AFTER — explicit per-secret binding</span>
+<span class="b">jobs:</span>
+  <span class="b">deploy:</span>
+    <span class="b">uses:</span> org/central-deploy@v2
+    <span class="b">secrets:</span>
+      <span class="b">NPM_TOKEN:</span> ${{ secrets.NPM_TOKEN }}  <span class="c"># scoped to trusted workflow + env</span></div>
+<div class="kv"><b>PERMISSION CHANGE —</b> Repository write access will no longer automatically grant secret-management rights. That moves to custom/delegated roles (separation of duties). Treat <span class="mono">secrets: inherit</span> as deprecated — audit for it now.</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 41</span><span>03 / 06</span></div>
+</div><div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 41<hr><h2>Pillars C &amp; D</h2>Policy protections · Data stream &amp; Firewall</div>
+
+<h3 class="sec"><span class="n">05 /</span> C — Policy-Driven Workflow Execution Protections</h3>
+<p class="body">Extends the existing <b>rulesets</b> framework to centrally govern workflow execution — replacing scattered <span class="mono">if: github.actor != 'dependabot[bot]'</span> guards spread across individual workflow files.</p>
+<table class="cmp"><tr><th>Rule type</th><th>Purpose</th><th>Example</th></tr>
+<tr><td>Actor rules</td><td>Who/what can trigger workflows</td><td>Only <span class="mono">humans</span>, <span class="mono">Dependabot</span>, or a specific GitHub App can fire <span class="mono">deploy.yml</span></td></tr>
+<tr><td>Event rules</td><td>Which events can trigger runs</td><td><span class="mono">push</span> allowed; <span class="mono">issue_comment</span> blocked unless from maintainer</td></tr>
+</table>
+<div class="callout amber"><h4>DIRECTLY TARGETS "COMMENT-AND-CONTROL"</h4><p>Untrusted contributors trigger agent/automation workflows via issue or PR comments, injecting instructions into AI-assisted runs. Central policy prevents the trigger from ever reaching the runner — no per-workflow patching needed. <b>Status:</b> Public preview shipped <b>June 18, 2026</b>.</p></div>
+<div class="terminal"><span class="c"># org-level ruleset (conceptual)</span>
+<span class="b">ruleset:</span> workflow-execution
+  <span class="b">target:</span> workflows
+  <span class="b">conditions:</span>
+    <span class="b">actor:</span> [human, dependabot[bot], my-deploy-app]
+    <span class="b">event:</span> [push, pull_request, workflow_dispatch]
+  <span class="c"># issue_comment / discussion events require actor allow-list</span></div>
+
+<h3 class="sec"><span class="n">06 /</span> D — Endpoint Monitoring &amp; Control</h3>
+<p class="body"><b>Actions data stream</b> — near-real-time telemetry for workflow runs, streamed to <span class="mono">Amazon S3</span> or <span class="mono">Azure Event Hub / Data Explorer</span>. Designed for SIEM/SOC consumption.</p>
+<ul class="tight">
+<li>Workflow execution metadata — status, duration, runner type</li>
+<li>Dependency-resolution detail — which Action resolved to which version</li>
+<li>Network activity — planned; feeds the firewall policy workflow</li>
+</ul>
+<p class="body"><b>Native egress firewall (Layer 7)</b> — runs <em>outside</em> the GitHub-hosted runner VM, so code inside the runner cannot bypass it.</p>
+<table class="cmp"><tr><th>Mode</th><th>Behavior</th><th>Use when</th></tr>
+<tr><td>Monitoring</td><td>Logs all outbound traffic</td><td>Building your allow-list without breakage</td></tr>
+<tr><td>Enforcement</td><td>Blocks requests outside the allow-list</td><td>After allow-list is validated in monitoring</td></tr>
+</table>
+<div class="kv"><b>ROLLOUT DESIGN —</b> Two-mode rollout is intentional: run in Monitoring to discover destinations, cut to Enforcement only when vetted. This is how GitHub avoids "enforcement day breaks every CI" — mirror the same staged adoption inside your org.</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 41</span><span>04 / 06</span></div>
+</div><div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 41<hr><h2>Platform &amp; Timeline</h2>Runners · Provenance · When things ship</div>
+
+<h3 class="sec"><span class="n">07 /</span> Platform &amp; Runner Improvements — Shipped 2026</h3>
+<table class="cmp"><tr><th>Capability</th><th>Status</th><th>Why it matters</th></tr>
+<tr><td>Arm64 Linux + Windows runners (GitHub-hosted)</td><td><span style="color:var(--accent-dark);font-weight:700">GA — Sept 2026</span></td><td>Performance/cost/sustainability (real cases: 30 min x86 → ~4 min Arm64); Team + Enterprise Cloud</td></tr>
+<tr><td>Arm64 labels <span class="mono">ubuntu-22.04-arm</span>, <span class="mono">ubuntu-24.04-arm</span>, <span class="mono">windows-11-arm</span></td><td>GA incl. private repos</td><td>Native ARM without virtualization; public repos free</td></tr>
+<tr><td>Immutable Releases</td><td><span style="color:var(--accent-dark);font-weight:700">GA — all orgs/repos</span></td><td>Closes tag-mutability gap (the <span class="mono">trivy-action</span> attack vector)</td></tr>
+<tr><td>Build provenance / SBOM attestations (<span class="mono">actions/attest-build-provenance</span>)</td><td>Maturing as standard</td><td>SLSA-style provenance for release hardening</td></tr>
+</table>
+<div class="callout green"><h4>IMMUTABLE RELEASES — THE QUIET FIX</h4><p>Git tags (and therefore Releases) were historically mutable — an attacker could silently retarget a tag that workflows pinned. Immutable Releases makes that retarget detectable/blocked. Enable it at the org level; pair with dependency locking for end-to-end provenance.</p></div>
+
+<h3 class="sec"><span class="n">08 /</span> Adjacent Trend — AI / Agentic Workflows</h3>
+<p class="body">Copilot coding agent and custom agentic workflows now trigger directly from Actions (PR review agents, release-notes automation, "agent-of-day" patterns). This trend is <em>driving</em> the security roadmap — agent-triggered workflows responding to <span class="mono">issue</span> / <span class="mono">pull_request</span> / <span class="mono">discussion</span> events are exactly the attack surface that Workflow Execution Protections + scoped secrets are designed to contain. Community tooling (e.g., <span class="mono">gh-aw</span>) is fast-moving but outside GitHub's core roadmap.</p>
+
+<h3 class="sec"><span class="n">09 /</span> Summary Timeline (GitHub's announced windows)</h3>
+<table class="cmp"><tr><th>Feature</th><th>Public Preview</th><th>GA</th></tr>
+<tr><td>Workflow dependency locking</td><td>3–6 months from announcement</td><td>+6 months after preview</td></tr>
+<tr><td>Scoped secrets</td><td>3–6 months</td><td>+6 months</td></tr>
+<tr><td>Secret permission model (delegated roles)</td><td>3–6 months</td><td>TBD</td></tr>
+<tr><td>Workflow Execution Protections (rulesets)</td><td style="color:var(--accent-dark);font-weight:700">Shipped — Jun 18, 2026</td><td>TBD</td></tr>
+<tr><td>Actions data stream (S3/Event Hub)</td><td>3–6 months</td><td>+6–9 months</td></tr>
+<tr><td>Native egress firewall (L7)</td><td>6–9 months</td><td>TBD</td></tr>
+</table>
+<p class="small">Timelines are GitHub's "X to Y months" estimates as of the initial roadmap announcement (Feb–Mar 2026). GitHub does not publish hard SLAs — re-verify via the Changelog.</p>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 41</span><span>05 / 06</span></div>
+</div><div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 41<hr><h2>Failures &amp; Handoff</h2>Anti-patterns · Track progress · Next</div>
+
+<h3 class="sec"><span class="n">10 /</span> Architecture — How the Pillars Compose</h3>
+<div class="vflow">
+<div class="fnode"><img src="../assets/icons/git/github.svg" alt="Workflow"><b>WORKFLOW YAML + DEPENDENCIES LOCKFILE</b><small>Every Action pinned to SHA+hash — transitive closure verified at queue time</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/ci-cd/workflow.svg" alt="Policy"><b>RULESET GATE — ACTOR + EVENT</b><small>Org ruleset decides: can this actor fire this event on this workflow?</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/general/database.svg" alt="Secrets"><b>SCOPED SECRET INJECTION</b><small>Only branch/env/trusted-workflow-scoped secrets enter the job</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/general/server.svg" alt="Runner"><b>RUNNER (OUT-OF-VM FIREWALL)</b><small>L7 egress enforcement outside the VM · streams telemetry to S3/Event Hub</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/general/package.svg" alt="Artifact"><b>ARTIFACT + ATTESTATION</b><small>Immutable release · SLSA provenance · SBOM</small></div>
+</div>
+
+<h3 class="sec"><span class="n">11 /</span> Failure Modes</h3>
+<ul class="tight">
+<li><b>Enforcing the firewall without a monitoring phase</b> — you will deny legitimate package registries and prod endpoints. Always run Monitoring → validate allow-list → Enforcement.</li>
+<li><b>Keeping <span class="mono">secrets: inherit</span></b> — broad inheritance defeats scoped secrets. Grep org for <span class="mono">inherit</span> and convert to per-secret passing.</li>
+<li><b>Pinning top-level only</b> — transitive Actions remain unpinned until locking ships GA. Until then, vendor composite Actions or audit their inner <span class="mono">uses:</span>.</li>
+<li><b>Tag-pinning without Immutable Releases</b> — a tag can still be retargeted. Immutable Releases + SHA+hash locking are the pair.</li>
+<li><b>Leaving <span class="mono">issue_comment</span> triggers unrestricted</span></b> — with agentic workflows, this is a prompt-injection channel. Gate it with Workflow Execution Protections immediately (already in preview).</li>
+</ul>
+<div class="qa"><span class="qq">Q:</span> Which pillar should we adopt first?<br><span class="aa">A:</span> Workflow Execution Protections (already in preview) + enable Immutable Releases today. Scoped secrets and dependency locking in preview next — enroll early. Firewall last, after a monitoring window.</div>
+
+<h3 class="sec"><span class="n">12 /</span> How to Track Progress</h3>
+<div class="terminal"><span class="c"># verify timelines — roadmaps are directional, Changelog is ground truth</span>
+<span class="b">roadmap</span>   → github.com/github/roadmap  <span class="c"># filter label:actions; stages: planned/beta/GA</span>
+<span class="b">changelog</span> → github.blog/changelog      <span class="c"># actual ship dates: Arm64 GA, Immutable GA, etc.</span>
+<span class="b">feedback</span>  → GitHub Public Feedback Discussions  <span class="c"># input on roadmap items</span></div>
+<div class="callout blue"><h4>WHEN TO ADOPT</h4><p>Preview features are for non-production evaluation and telemetry pipelines; gate production rollouts on GA + your own egress allow-list validation. The 3–6 month windows in the timeline table are GitHub's estimates, not commitments.</p></div>
+
+<h3 class="sec"><span class="n">13 /</span> Handoff</h3>
+<p class="body">GitHub's roadmap is not chasing a new pipeline syntax — it is making the existing YAML model's defaults trustworthy. Pair this with <b>PDF 40 (Jenkins)</b> to understand the maturing self-hosted alternative, then continue to <b>PDF 42 · CI/CD Decision Guide</b> for the side-by-side framework you can apply in your own org.</p>
+<div class="printnote"><b>SOURCE:</b> <span class="mono">github-actions-roadmap.md</span> (Sept 2026 research summary) · Compiled from GitHub's 2026 Actions Security Roadmap (announced ~Mar 2026), GitHub Changelog, and <span class="mono">github/roadmap</span>. Timeline windows are GitHub estimates at announcement — verify GA via Changelog. Print: Ctrl/Cmd+P → Save as PDF → Background graphics on → A4.</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 41</span><span>06 / 06</span></div>
+</div><div class="page cover">
+<div class="brand">CI/CD SYSTEMS &nbsp;·&nbsp; ENGINEERING MANUAL &nbsp;·&nbsp; PDF 42</div>
+<h1>CI/CD<br><span>DECISION GUIDE</span></h1>
+<div class="sub">Jenkins × GitHub Actions — side-by-side, then the choice</div>
+<div class="tri">TWO ROADMAPS · ONE FRAMEWORK<br>GOVERNANCE · SECURITY · COST · HOSTING<br>CHOOSE · COMBINE · MIGRATE</div>
+<div class="vpipe">
+<div class="vnode r"><span class="dot"></span><img src="../assets/icons/jenkins/jenkins.svg" alt="Jenkins"><b>JENKINS — MODERNIZE</b><small>survival + debt paydown, 1,800 plugins</small></div><div class="vline"></div>
+<div class="vnode b"><span class="dot"></span><img src="../assets/icons/git/github.svg" alt="Actions"><b>ACTIONS — SECURE</b><small>trust at scale, 20k marketplace actions</small></div><div class="vline"></div>
+<div class="vnode am"><span class="dot"></span><img src="../assets/icons/ci-cd/workflow.svg" alt="Compare"><b>SIDE-BY-SIDE</b><small>governance · cadence · architecture</small></div><div class="vline"></div>
+<div class="vnode g"><span class="dot"></span><img src="../assets/icons/general/puzzle.svg" alt="Decision"><b>DECISION FRAMEWORK</b><small>when to choose, when to run both</small></div><div class="vline"></div>
+<div class="vnode p"><span class="dot"></span><img src="../assets/icons/security/shield.svg" alt="Converge"><b>CONVERGENCE</b><small>provenance · security-as-default · observability</small></div>
+</div>
+<div class="foot"><span>03 / 06 · ROADMAPS &amp; STRATEGY</span><span class="sig">Nabawy</span></div>
+</div><div class="page opener">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 42<hr><h2>Orientation</h2>What each roadmap optimizes for</div>
+<div class="bignum">42</div>
+<div class="ctitle">THE CHOICE</div>
+<p class="lede">Neither roadmap is chasing a new pipeline paradigm. Both consolidate around what already works — but they optimize for <em>different futures</em>. <em>Jenkins</em> is paying down debt to keep an existing install base healthy; <em>GitHub Actions</em> is locking down trust because it already won the adoption battle.</p>
+
+<h3 class="sec"><span class="n">01 /</span> Optimization Vectors</h3>
+<div class="versus">
+<div class="vcard j"><b style="color:var(--red)">JENKINS</b><p><em>Survival &amp; modernization</em><br>Close UX/infra gaps on a mature, volunteer-driven install base</p></div>
+<div class="vmid">vs</div>
+<div class="vcard g"><b style="color:var(--blue)">GITHUB ACTIONS</b><p><em>Trust &amp; safety at scale</em><br>Make the simple YAML model secure by default at massive scale</p></div>
+</div>
+<div class="kv"><b>ONE SENTENCE —</b> Jenkins reads like a deliberate open-source project <em>managing technical debt</em> (dark theme, Plugin Manager, Puppet→Ansible, JDK/Windows upgrades). Actions reads like a platform vendor <em>responding to real attacks</em> (dependency locking, scoped secrets, egress firewall). Neither is reinventing pipeline authoring — both are making the existing authoring safer and more observable.</div>
+
+<h3 class="sec"><span class="n">02 /</span> Governance Contrast</h3>
+<table class="cmp"><tr><th>Dimension</th><th>Jenkins</th><th>GitHub Actions</th></tr>
+<tr><td>Governance</td><td>Community-driven, volunteer-dependent (CD Foundation); no committed dates</td><td>Vendor-driven (Microsoft/GitHub); estimated windows, still no hard SLAs</td></tr>
+<tr><td>Headline 2026</td><td>Incremental UX + infra overhaul</td><td>Supply-chain security hardening</td></tr>
+<tr><td>Cadence</td><td>Weekly · LTS every 4 weeks · advisories as needed</td><td>Continuous rollout (betas/GAs via Changelog)</td></tr>
+<tr><td>Architecture change</td><td>None planned — controller/agent, Groovy DSL stays</td><td>None planned — YAML + new <span class="mono">dependencies:</span> lockfile</td></tr>
+</table>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 42</span><span>02 / 06</span></div>
+</div><div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 42<hr><h2>Side-by-Side</h2>Dimensions · Risks · Unlocks</div>
+
+<h3 class="sec"><span class="n">03 /</span> The Two Roadmaps — Full Dimension Table</h3>
+<table class="cmp"><tr><th>Dimension</th><th>Jenkins</th><th>GitHub Actions</th></tr>
+<tr><td>Biggest near-term unlock</td><td>Plugin Manager UI (exp.), UI/UX modernization, Puppet→Ansible</td><td>Arm64 GA, Immutable Releases GA, Execution Protections (rulesets)</td></tr>
+<tr><td>Biggest risk addressed</td><td>Aging UI/plugin ecosystem, infra debt (Puppet, expiring MSI cert)</td><td>Supply-chain compromise of third-party Actions</td></tr>
+<tr><td>Extensibility</td><td>~1,800 plugins — huge, uneven maintenance</td><td>~20k Marketplace Actions — huge, same trust problem being solved</td></tr>
+<tr><td>Hosting</td><td>Self-hosted only (no official SaaS)</td><td>GitHub-hosted (SaaS) + self-hosted runners</td></tr>
+<tr><td>AI / agentic</td><td>Not a current roadmap theme</td><td>Active — Copilot agents + security controls to contain them</td></tr>
+<tr><td>Release model</td><td>Train (weekly/LTS)</td><td>Platform rollout (beta → GA)</td></tr>
+<tr><td>Plugin/Action provenance</td><td>Manager UX revamp</td><td>Dependency locking + Immutable Releases + attestations</td></tr>
+<tr><td>Security posture</td><td>Hardening via Script Security, JCasC</td><td>Hardening via scoped secrets, egress firewall</td></tr>
+</table>
+
+<h3 class="sec"><span class="n">04 /</span> Timeline Realities</h3>
+<div class="terminal"><span class="c"># Jenkins horizons — read as priorities, not quarters</span>
+Released  <span class="g">●</span> Dark theme, tables→divs, JEP-229, Temurin, multi-arch images
+Preview   <span class="b">●</span> Plugin Manager UI (2.552+), Pipeline-as-YAML, Jenkinsfile Runner
+Current   <span class="a">●</span> Look &amp; Feel, Script Security approvals, CloudEvents, Puppet→Ansible
+Near term <span class="c">●</span> A11y, JDK 25, Win2025, LF MSI cert (May 2026 expiry)
+Future    <span class="c">●</span> Full UI rework, JCasC pluggable config, GraalVM/Quarkus
+
+<span class="c"># GitHub Actions windows — verify via Changelog (no hard SLAs)</span>
+Preview shipped  <span class="g">●</span> Workflow Execution Protections (Jun 18 2026)
+GA shipped      <span class="g">●</span> Arm64 runners, Immutable Releases
+Preview 3–6 mo  <span class="b">●</span> Dependency locking, scoped secrets, data stream
+Preview 6–9 mo  <span class="b">●</span> Native egress firewall (monitoring → enforcement)</div>
+<div class="callout amber"><h4>BOTH ARE DIRECTIONAL</h4><p>Jenkins warns that Near/Future depend on contributor bandwidth; GitHub publishes "3–6 months" estimates, not commitments. Treat every non-GA date as a <em>sequencing hint</em> and re-verify against <span class="mono">roadmap.yml</span> and the GitHub Changelog before you plan migrations around them.</p></div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 42</span><span>03 / 06</span></div>
+</div><div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 42<hr><h2>Decision Framework</h2>Choose Jenkins · Choose Actions · Run both</div>
+
+<h3 class="sec"><span class="n">05 /</span> Choose Jenkins When</h3>
+<ul class="tight">
+<li>You need <b>on-prem / air-gapped</b> execution (regulated, government, no egress).</li>
+<li>Build/deploy logic is highly <b>custom, heterogeneous, or legacy</b> — multiple SCMs, mixed Windows/Linux/mainframe, non-GitHub source.</li>
+<li>You have deep <b>Jenkins/Groovy expertise</b> and migration cost outweighs benefit.</li>
+<li>You need <b>very fine-grained control</b> over execution engine, distributed builds, custom scheduling.</li>
+<li>Cost model must be <b>zero marginal cost per build minute</b> (owned hardware).</li>
+</ul>
+
+<h3 class="sec"><span class="n">06 /</span> Choose GitHub Actions When</h3>
+<ul class="tight">
+<li>Source already lives on <b>GitHub</b> — single strongest signal; PR/Issues/Checks integration is hard to replicate.</li>
+<li>You want <b>low-maintenance SaaS CI</b> with minimal infra ownership.</li>
+<li>You value a large, fresh <b>Marketplace ecosystem</b> and fast onboarding (YAML simpler than Groovy for most teams).</li>
+<li>You want the <b>newest supply-chain security defaults</b> (locking, scoped secrets, egress firewall) as they roll out in 2026.</li>
+<li>You are building <b>agentic / Copilot-assisted</b> workflows and want native platform support.</li>
+</ul>
+
+<h3 class="sec"><span class="n">07 /</span> Consider Both Together (Common in Larger Orgs)</h3>
+<div class="kv"><b>MIGRATING</b> — Run legacy jobs on Jenkins while new services onboard to Actions. <b>SPECIALIZED</b> — Jenkins for on-prem workloads (hardware-in-the-loop, mainframe) while Actions handles standard app CI. <b>ORCHESTRATED</b> — Actions as the trigger/orchestration layer (PR gating, release tagging) calling Jenkins as a specialized executor via webhook/API.</div>
+<div class="terminal"><span class="c"># hybrid topology (conceptual)</span>
+<span class="b">PR / push</span> → <span class="b">GitHub Actions</span> (lint, test, gate) → <span class="a">if specialized</span> →
+  webhook → <span class="r">Jenkins controller</span> (hardware-in-the-loop, mainframe, air-gapped build)
+        ↘ <span class="a">else</span> → <span class="b">Actions runners</span> (build, SBOM, deploy to cloud)
+<span class="c"># two systems, one lifecycle: SOURCE → PIPELINE → VALIDATION → ARTIFACT → RELEASE</span></div>
+
+<h3 class="sec"><span class="n">08 /</span> Gut-Check Table</h3>
+<table class="cmp"><tr><th>If your priority is…</th><th>Lean toward</th></tr>
+<tr><td>Regulatory / air-gapped compliance</td><td style="color:var(--red);font-weight:700">Jenkins</td></tr>
+<tr><td>Fastest time-to-first-pipeline</td><td style="color:var(--blue);font-weight:700">GitHub Actions</td></tr>
+<tr><td>Total control over build infra</td><td style="color:var(--red);font-weight:700">Jenkins</td></tr>
+<tr><td>Minimal ops overhead</td><td style="color:var(--blue);font-weight:700">GitHub Actions</td></tr>
+<tr><td>Legacy toolchain (SVN, Perforce, mainframe)</td><td style="color:var(--red);font-weight:700">Jenkins</td></tr>
+<tr><td>Native GitHub PR/Issue/Copilot integration</td><td style="color:var(--blue);font-weight:700">GitHub Actions</td></tr>
+<tr><td>Zero per-minute cost at high volume (owned hardware)</td><td style="color:var(--red);font-weight:700">Jenkins</td></tr>
+<tr><td>Best-in-class supply-chain security defaults (2026)</td><td style="color:var(--blue);font-weight:700">GitHub Actions</td></tr>
+<tr><td>Absolute plugin count (breadth, older)</td><td>Jenkins (~1,800)</td></tr>
+<tr><td>Freshest, best-maintained integrations</td><td>GitHub Actions (~20k Marketplace)</td></tr>
+</table>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 42</span><span>04 / 06</span></div>
+</div><div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 42<hr><h2>Convergence</h2>Where the roadmaps meet · Shared future</div>
+
+<h3 class="sec"><span class="n">09 /</span> Where They Converge</h3>
+<p class="body">Three shared directions — regardless of which platform you pick today, expect the ecosystem to keep tightening along these axes through 2026–27:</p>
+<div class="vflow">
+<div class="fnode"><img src="../assets/icons/security/shield.svg" alt="Security"><b>SECURITY-AS-DEFAULT</b><small>Jenkins: Script Security approvals, JCasC · Actions: scoped secrets, egress firewall — both tightening default trust</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/general/package.svg" alt="Provenance"><b>PROVENANCE &amp; TRUST</b><small>Jenkins: Plugin Manager UX revamp · Actions: dependency locking, Immutable Releases, SBOM attestations — same problem, different architectures</small></div><div class="farrow">↓</div>
+<div class="fnode"><img src="../assets/icons/monitoring/activity.svg" alt="Observe"><b>OBSERVABILITY OVER REINVENTION</b><small>Neither platform replaces YAML/Groovy; both make the existing authoring model safer and more observable rather than inventing new syntax</small></div>
+</div>
+<div class="callout green"><h4>THE TAKEAWAY</h4><p>If you choose Jenkins, budget for steady modernization (UI, infra, JDK) and harden Script Security now. If you choose Actions, enroll early in Execution Protections and Immutable Releases, and plan a staged rollout for scoped secrets + egress firewall. If you run both, use Actions to <em>gate</em> and Jenkins to <em>execute</em> the jobs only Jenkins can run.</p></div>
+
+<h3 class="sec"><span class="n">10 /</span> Suggested Adoption Sequence</h3>
+<table class="cmp"><tr><th>Quarter (illustrative)</th><th>Jenkins track</th><th>Actions track</th></tr>
+<tr><td>Now</td><td>LTS upgrades; qualify Java 21 mandatory; adopt Script Security granular approvals</td><td>Enable Immutable Releases (org); enable Execution Protections preview; audit <span class="mono">secrets: inherit</span></td></tr>
+<tr><td>Next</td><td>Watch Plugin Manager UI deltas; qualify JDK 25 + Win2025</td><td>Enroll dependency locking + scoped secrets previews; start data-stream SIEM plumbing</td></tr>
+<tr><td>Later</td><td>Evaluate Pipeline-as-YAML (Preview) for new repos</td><td>Run egress firewall in <b>Monitoring</b>, validate allow-list, then <b>Enforcement</b></td></tr>
+</table>
+<p class="small">Sequencing is guidance only — calendar it against your own risk + change windows, not against the roadmap's directional estimates.</p>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 42</span><span>05 / 06</span></div>
+</div><div class="page">
+<div class="phead"><span class="ch">CI/CD Systems</span> &nbsp; Chapter 42<hr><h2>Failures &amp; Handoff</h2>Anti-patterns · Checklist · Sources · Next</div>
+
+<h3 class="sec"><span class="n">11 /</span> Failure Modes — Decision Edition</h3>
+<div class="callout red"><h4>MIGRATING FOR THE ROADMAP INSTEAD OF YOUR CONSTRAINTS</h4><p>The most expensive mistake: moving a working Jenkins estate to Actions (or vice versa) because a roadmap looks shinier, without scoring your actual constraints — air-gap, legacy SCM, secret posture, team skill, cost at volume. Score the gut-check table first; only migrate where the signal is clear.</p></div>
+<ul class="tight">
+<li><b>Treating Marketplace/plugin counts as quality</b> — ~1,800 Jenkins plugins and ~20k Actions both include unmaintained entries. Evaluate <em>specific</em> plugins/Actions for ownership, provenance, and update freshness — especially the ones that will touch secrets or deploys.</li>
+<li><b>Adopting egress firewall in Enforcement without a monitoring phase</b> — you will deny real registries. Monitoring first is not optional.</li>
+<li><b>Leaving <span class="mono">if: actor != '...'</span> sprawl instead of rulesets</b> — central policy is the durable fix for Comment-and-Control; per-workflow <span class="mono">if:</span> guards rot.</li>
+<li><b>Assuming "Pipeline as YAML" means Groovy is deprecated</b> — it's additive and still in Preview; don't gate adoption on a horizon labeled Future.</li>
+</ul>
+<div class="qa"><span class="qq">Q:</span> We already run Jenkins well — should we add Actions?<br><span class="aa">A:</span> Only if you score high on the Actions signals (code on GitHub, SaaS desire, supply-chain defaults, agentic work) <em>or</em> need a hybrid split (Actions gates standard app CI, Jenkins keeps specialized builds). Otherwise, invest in the Jenkins modernization path — LTS hygiene, JCasC, Script Security.</div>
+
+<h3 class="sec"><span class="n">12 /</span> Checklist — Before You Choose</h3>
+<div class="kv"><b>SCORE —</b> Fill the gut-check table with your stakeholders; require agreement on 3+ rows before choosing. <b>PROVE —</b> Run a one-repo pilot on the non-incumbent platform before org-wide commitment. <b>VERIFY —</b> Check live roadmaps (<span class="mono">roadmap.yml</span> + Changelog) the week you decide — not this PDF's snapshot. <b>HYBRID GATE —</b> If both, define the boundary contract early: which system gates, which executes, and how provenance flows across the boundary.</div>
+
+<h3 class="sec"><span class="n">13 /</span> Sources &amp; How to Stay Current</h3>
+<div class="terminal"><span class="c"># Jenkins (live)</span>
+<span class="b">roadmap.yml</span>  → github.com/jenkins-infra/jenkins.io/content/_data/roadmap/roadmap.yml
+<span class="b">archive.yml</span>  → .../roadmap/archive.yml  <span class="c"># completed/withdrawn</span>
+<span class="b">JEP-14</span>       → github.com/jenkinsci/jep/tree/master/jep/14
+<span class="c"># GitHub Actions (live)</span>
+<span class="b">roadmap</span>    → github.com/github/roadmap  <span class="c"># label:actions</span>
+<span class="b">changelog</span>  → github.blog/changelog  <span class="c"># ship dates</span>
+<span class="b">feedback</span>   → GitHub Public Feedback Discussions</div>
+
+<h3 class="sec"><span class="n">14 /</span> Handoff</h3>
+<p class="body">The roadmaps close the "strategy" arc — you now hold the 2026 context for both platforms and a framework for choosing between them. For implementation, return to the preceding PDFs: <b>PDF 40–41</b> for platform detail, or jump to the <b>Lab series (PDF 28–35, Jenkins Labs)</b> to build and gate a real pipeline. The decision is yours; the verification is continuous.</p>
+<div class="printnote"><b>SOURCE:</b> <span class="mono">cicd-combined-roadmap.md</span> (Sept 2026 synthesis) · Synthesizes <span class="mono">jenkins-roadmap.md</span> + <span class="mono">github-actions-roadmap.md</span>; primary sources: <span class="mono">jenkins.io/project/roadmap</span>, infra meeting notes, CD Foundation reports, GitHub 2026 Actions Security Roadmap + Changelog. Market-positioning context from 2026 CI/CD roundups (DeployHQ/PkgPulse/ToolRadar/DEV Community). Re-verify timelines against live Changelog/roadmap.yml. Print: Ctrl/Cmd+P → Save as PDF → Background graphics on → A4.</div>
+<div class="pfoot"><span>CI/CD Engineering Manual</span><span>CH 42</span><span>06 / 06</span></div>
+</div></body></html>

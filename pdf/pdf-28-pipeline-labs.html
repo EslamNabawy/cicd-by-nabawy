@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI/CD Engineering Manual - Pipeline Labs</title>
+    <style>
+        :root {
+            --paper: #f5f6f4;
+            --white: #ffffff;
+            --ink: #161a19;
+            --muted: #68706d;
+            --line: #d5dad7;
+            --panel: #111614;
+            --panel-2: #1a201d;
+            --text-light: #e8eeeb;
+            --text-muted: #9ca8a3;
+            --accent: #00b87c;
+            --accent-dark: #008f61;
+            --blue: #4387ff;
+            --amber: #d99a24;
+            --red: #d94b4b;
+            --artifact: #8b6cff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: #333;
+            color: var(--ink);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            line-height: 1.5;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 16mm 16mm 19mm;
+            margin: 8mm auto;
+            position: relative;
+            background: var(--paper);
+            page-break-after: always;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .page:last-child { page-break-after: auto; }
+
+        /* HEADER & FOOTER */
+        .page-header {
+            display: flex;
+            align-items: center;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+        }
+        .h-chip { font-weight: 700; color: var(--ink); }
+        .h-rule { flex: 1; height: 1px; background: var(--line); margin: 0 12px; }
+        .h-title { font-weight: 500; }
+
+        .page-footer {
+            position: absolute;
+            bottom: 10mm;
+            left: 16mm;
+            right: 16mm;
+            display: flex;
+            align-items: center;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .f-left { font-weight: 700; color: var(--ink); }
+        .f-rule { flex: 1; height: 1px; background: var(--line); margin: 0 12px; }
+        .f-right { font-weight: 500; }
+
+        /* CONTENT */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2.section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--ink);
+            display: flex;
+            align-items: baseline;
+        }
+        h2.section-title .n {
+            font-size: 14px;
+            color: var(--blue);
+            font-weight: 600;
+            margin-right: 8px;
+            letter-spacing: 1px;
+        }
+        h3.sub-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            margin-top: 10px;
+            color: var(--ink);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        p { font-size: 11.5px; color: var(--ink); margin-bottom: 10px; line-height: 1.6; }
+        strong { font-weight: 600; }
+        code { font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace; background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 3px; font-size: 10.5px; }
+        
+        /* COVER */
+        .cover {
+            background: var(--panel);
+            color: var(--text-light);
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+        }
+        .cover-left { padding: 30mm 25mm; display: flex; flex-direction: column; justify-content: space-between; }
+        .cover-right { background: var(--panel-2); display: flex; align-items: center; justify-content: center; border-left: 1px solid #2a2f2d; padding: 40mm 20mm; }
+
+        .cover-title { font-size: 48px; font-weight: 700; line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 15px; }
+        .cover-sub { font-size: 18px; color: var(--text-muted); font-weight: 400; margin-bottom: 40px; line-height: 1.4; }
+        .cover-meta { font-size: 10px; letter-spacing: 3px; color: var(--blue); text-transform: uppercase; font-weight: 600; border-top: 1px solid #2a2f2d; padding-top: 15px; }
+        .cover-footer { display: flex; justify-content: flex-end; align-items: center; }
+
+        .sig {
+            font-family: "Brush Script MT", "Segoe Script", "Snell Roundhand", cursive;
+            font-size: 32px; 
+            color: var(--accent); 
+            transform: rotate(-4deg);
+            text-shadow: 0 0 14px rgba(0,184,124,.45); 
+            white-space: nowrap;
+            margin-top: 20px;
+        }
+
+        /* VERTICAL PIPELINE (COVER) */
+        .v-pipeline {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+            width: 100%;
+        }
+        .v-stage {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 14px 20px;
+            width: 100%;
+            position: relative;
+        }
+        .v-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--blue);
+            box-shadow: 0 0 12px var(--blue);
+            flex-shrink: 0;
+        }
+        .v-stage.idle .v-dot { background: var(--muted); box-shadow: none; }
+        .v-stage.running .v-dot { background: var(--blue); box-shadow: 0 0 12px var(--blue); }
+        .v-stage.amber .v-dot { background: var(--amber); box-shadow: 0 0 12px var(--amber); }
+        .v-info strong { display: block; color: var(--text-light); font-size: 14px; font-weight: 600; letter-spacing: 1px; }
+        .v-info small { display: block; color: var(--text-muted); font-size: 10px; }
+        .v-line {
+            width: 2px; height: 24px; background: var(--text-muted); margin-left: 24px;
+            opacity: 0.3;
+        }
+
+        /* HORIZONTAL PIPELINE */
+        .pipeline {
+            display: flex;
+            align-items: stretch;
+            margin: 20px 0;
+            width: 100%;
+        }
+        .stage {
+            flex: 1;
+            background: var(--white);
+            border: 1px solid var(--line);
+            padding: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border-left-width: 3px;
+        }
+        .stage-no { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .stage strong { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink); }
+        .stage small { font-size: 10px; color: var(--muted); display: block; margin-bottom: 4px; }
+        
+        .stage.passed { border-left-color: var(--accent); }
+        .stage.passed .stage-no { color: var(--accent-dark); }
+        .stage.running { border-left-color: var(--blue); }
+        .stage.running .stage-no { color: var(--blue); }
+        .stage.failed { border-left-color: var(--red); }
+        .stage.failed .stage-no { color: var(--red); }
+        .stage.waiting { border-left-color: var(--amber); }
+        .stage.waiting .stage-no { color: var(--amber); }
+        .stage.artifact { border-left-color: var(--artifact); }
+        .stage.artifact .stage-no { color: var(--artifact); }
+        .stage.skipped { border-left-color: var(--muted); opacity: 0.6; }
+        .stage.skipped .stage-no { color: var(--muted); }
+
+        .connector {
+            width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .connector::before {
+            content: '';
+            width: 100%;
+            height: 2px;
+            background: var(--line);
+        }
+        .connector::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            width: 0; height: 0;
+            border-left: 6px solid var(--line);
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+
+        .status-pill {
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: auto;
+            align-self: flex-start;
+        }
+        .status-pill.passed { background: rgba(0,184,124,0.15); color: var(--accent-dark); }
+        .status-pill.running { background: rgba(67,135,255,0.15); color: var(--blue); }
+        .status-pill.waiting { background: rgba(217,154,36,0.15); color: var(--amber); }
+        .status-pill.failed { background: rgba(217,75,75,0.15); color: var(--red); }
+        .status-pill.skipped { background: rgba(104,112,109,0.15); color: var(--muted); }
+
+        /* TERMINAL */
+        .terminal {
+            background: var(--panel);
+            color: var(--text-light);
+            border-radius: 6px;
+            padding: 14px 16px;
+            font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+            font-size: 10.5px;
+            line-height: 1.65;
+            margin: 10px 0;
+            border: 1px solid #2a2f2d;
+        }
+        .term-line { display: block; }
+        .term-prompt { color: var(--accent); }
+        .term-out { color: var(--text-muted); }
+        .term-ok { color: var(--accent); }
+        .term-warn { color: var(--amber); }
+        .term-err { color: var(--red); }
+        .term-blue { color: var(--blue); }
+        .term-artifact { color: var(--artifact); }
+
+        /* COMMAND + RESULT */
+        .cmdres {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .cmdres > div { display: flex; flex-direction: column; }
+        .cmdres h4 { font-size: 9px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; font-weight: 700; letter-spacing: 1px; }
+        .cmdres .term-box {
+            border: 1px solid var(--line);
+            padding: 10px;
+            background: var(--panel);
+            color: var(--text-light);
+            font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+            font-size: 10px;
+            flex: 1;
+            border-radius: 4px;
+        }
+
+        /* CONCEPT GRID */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        .concept-block h4 { font-size: 10px; text-transform: uppercase; color: var(--blue); margin-bottom: 6px; font-weight: 700; letter-spacing: 1px; }
+        .concept-block p { font-size: 11px; line-height: 1.5; color: var(--ink); }
+
+        /* CALLOUTS */
+        .callout {
+            border-left: 3px solid var(--accent);
+            background: rgba(0, 184, 124, 0.05);
+            padding: 12px 16px;
+            margin: 15px 0;
+        }
+        .callout h4 { font-size: 10px; text-transform: uppercase; color: var(--accent-dark); margin-bottom: 4px; font-weight: 700; letter-spacing: 1px; }
+        .callout p { font-size: 11.5px; color: var(--ink); line-height: 1.5; margin: 0; }
+
+        .gotcha { border-left-color: var(--amber); background: rgba(217, 154, 36, 0.05); }
+        .gotcha h4 { color: var(--amber); }
+        
+        .interview { border-left-color: var(--blue); background: rgba(67, 135, 255, 0.05); }
+        .interview h4 { color: var(--blue); }
+        .interview p { margin-bottom: 5px; }
+        .interview strong { color: var(--ink); }
+
+        /* DECISION DIAGRAM */
+        .dec-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 11px;
+        }
+        .dec-q { 
+            border: 1px solid var(--ink); 
+            padding: 8px 20px; 
+            font-weight: 600; 
+            text-transform: uppercase;
+            background: var(--white);
+            position: relative;
+        }
+        .dec-q::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background: var(--ink);
+        }
+        .dec-branches {
+            display: flex;
+            justify-content: space-around;
+            width: 80%;
+            margin-top: 20px;
+            position: relative;
+        }
+        .dec-branches::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 10%;
+            width: 80%;
+            height: 20px;
+            border-top: 2px solid var(--ink);
+            border-left: 2px solid var(--ink);
+            border-right: 2px solid var(--ink);
+        }
+        .dec-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .dec-label { font-weight: 700; text-transform: uppercase; font-size: 10px; }
+        .dec-branch.yes .dec-label { color: var(--accent-dark); }
+        .dec-branch.no .dec-label { color: var(--red); }
+        .dec-val { 
+            border: 1px dashed var(--muted); 
+            padding: 8px 12px; 
+            text-align: center; 
+            background: var(--white);
+            font-size: 10px;
+            line-height: 1.4;
+        }
+        .dec-val span { display: block; font-family: monospace; color: var(--blue); margin-top: 4px; }
+
+        /* LAB FORMAT */
+        .lab-step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--line);
+        }
+        .lab-step:last-child { border-bottom: none; }
+        .step-no { 
+            font-size: 10px; 
+            font-weight: 700; 
+            color: var(--blue); 
+            text-transform: uppercase; 
+            width: 70px; 
+            flex-shrink: 0; 
+            letter-spacing: 1px;
+            padding-top: 2px;
+        }
+        .lab-content p { margin: 0; font-size: 11.5px; }
+        .lab-checklist { list-style: none; margin: 10px 0; }
+        .lab-checklist li { font-size: 11px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .lab-checklist li::before { content: '☐'; font-size: 14px; color: var(--muted); }
+
+        /* ARCHITECTURE DIAGRAM */
+        .arch-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 11px;
+        }
+        .arch-row { display: flex; justify-content: center; align-items: center; gap: 20px; }
+        .arch-node {
+            border: 1px solid var(--line);
+            padding: 10px 15px;
+            background: var(--white);
+            text-align: center;
+            width: 180px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        .arch-node.highlight { border-color: var(--accent); color: var(--accent-dark); background: rgba(0,184,124,0.05); }
+        .arch-node.blue { border-color: var(--blue); color: var(--blue); background: rgba(67,135,255,0.05); }
+        .arch-node.amber { border-color: var(--amber); color: var(--amber); background: rgba(217,154,36,0.05); }
+        .arch-node.artifact { border-color: var(--artifact); color: var(--artifact); background: rgba(139,108,255,0.05); }
+        .arch-arrow {
+            height: 24px;
+            width: 2px;
+            background: var(--line);
+            position: relative;
+        }
+        .arch-arrow::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -4px;
+            width: 0; height: 0;
+            border-top: 6px solid var(--line);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+        }
+        .arch-arrow.h { width: 40px; height: 2px; }
+        .arch-arrow.h::after {
+            top: -4px;
+            left: auto;
+            right: -4px;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 6px solid var(--line);
+            border-right: none;
+        }
+        .arch-arrow.labeled::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 10px;
+            top: 4px;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* SYSTEM MAP */
+        .sys-map {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin: 20px 0;
+        }
+        .map-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        .map-box {
+            border: 1px solid var(--ink);
+            padding: 12px 20px;
+            background: var(--white);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            min-width: 140px;
+        }
+        .map-box.artifact { border-color: var(--artifact); color: var(--artifact); }
+        .map-box.blue { border-color: var(--blue); color: var(--blue); }
+        .map-box.green { border-color: var(--accent); color: var(--accent-dark); }
+        .map-arr { color: var(--muted); font-size: 14px; }
+        .map-line { width: 2px; height: 15px; background: var(--line); margin: 0 auto; }
+        .map-feedback {
+            border: 1px dashed var(--accent);
+            padding: 10px;
+            color: var(--accent-dark);
+            font-size: 10px;
+            text-align: center;
+            margin-top: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* m-reflow: screen-only mobile reflow; print unaffected */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0 auto;padding:16px 14px 20px}.section-title{font-size:19px}.cover h1{font-size:32px}.terminal{font-size:11px;overflow-x:auto}.cmdres{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}}
+@media print {
+            body { background: none; }
+            .page { margin: 0; box-shadow: none; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- COVER PAGE -->
+    <div class="page cover">
+        <div class="cover-left">
+            <div>
+                <div class="cover-title">CI/CD<br>ENGINEERING</div>
+                <div class="cover-sub">Pipeline Labs: First Steps &amp; Build/Test DAGs</div>
+            </div>
+            <div class="cover-meta">
+                GitHub Actions<br>
+                Continuous Integration<br>
+                Branch Protection
+            </div>
+            <div class="cover-footer">
+                <span class="sig">Nabawy</span>
+            </div>
+        </div>
+        <div class="cover-right">
+            <div class="v-pipeline">
+                <div class="v-stage idle">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>SOURCE</strong>
+                        <small>Git branch push</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage running">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>RUNNER</strong>
+                        <small>ubuntu-latest</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>BUILD</strong>
+                        <small>npm ci</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>TEST</strong>
+                        <small>npm test</small>
+                    </div>
+                </div>
+                <div class="v-line"></div>
+                <div class="v-stage amber">
+                    <span class="v-dot"></span>
+                    <div class="v-info">
+                        <strong>GATE</strong>
+                        <small>PR status check</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 2: LAB 01 INTRO -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD LABS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">LAB 01: FIRST PIPELINE</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">01 /</span> First Pipeline</h2>
+            <p>Ship a green CI pipeline on GitHub Actions. The objective is to close the loop: trigger a pipeline via a push, execute a build and test sequence on a hosted runner, and surface the status as a check on the Pull Request.</p>
+            
+            <div class="pipeline">
+                <div class="stage passed">
+                    <span class="stage-no">01</span>
+                    <strong>PUSH</strong>
+                    <small>Webhook trigger</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage passed">
+                    <span class="stage-no">02</span>
+                    <strong>CHECKOUT</strong>
+                    <small>actions/checkout</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage passed">
+                    <span class="stage-no">03</span>
+                    <strong>SETUP</strong>
+                    <small>Node 20 + cache</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage passed">
+                    <span class="stage-no">04</span>
+                    <strong>CI</strong>
+                    <small>npm ci</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage running">
+                    <span class="stage-no">05</span>
+                    <strong>TEST</strong>
+                    <small>npm test</small>
+                    <span class="status-pill running">RUNNING</span>
+                </div>
+            </div>
+
+            <div class="concept-grid">
+                <div class="concept-block">
+                    <h4>OBJECTIVE</h4>
+                    <p>Establish the smallest closed loop in CI/CD: a developer pushes code, an automated system validates it, and the result is fed back to the source control platform.</p>
+                </div>
+                <div class="concept-block">
+                    <h4>ARCHITECTURE</h4>
+                    <p>Push → GitHub webhook → hosted runner (<code>ubuntu-latest</code>) → checkout → setup-node → <code>npm ci</code> → <code>npm test</code> → green check on PR.</p>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Step 1: Add the Workflow</h3>
+            <p>Create <code>.github/workflows/ci.yml</code> in the repository. This declarative YAML defines the trigger, the execution environment, and the sequence of steps.</p>
+
+            <div class="terminal">
+                <span class="term-line"><span class="term-artifact">name</span>: ci</span>
+                <span class="term-line"><span class="term-artifact">on</span>: [push, pull_request]</span>
+                <span class="term-line"><span class="term-artifact">jobs</span>:</span>
+                <span class="term-line">  <span class="term-artifact">build</span>:</span>
+                <span class="term-line">    <span class="term-artifact">runs-on</span>: ubuntu-latest</span>
+                <span class="term-line">    <span class="term-artifact">steps</span>:</span>
+                <span class="term-line">      - <span class="term-artifact">uses</span>: actions/checkout@v4</span>
+                <span class="term-line">      - <span class="term-artifact">uses</span>: actions/setup-node@v4</span>
+                <span class="term-line">        <span class="term-artifact">with</span>: { node-version: 20, cache: npm }</span>
+                <span class="term-line">      - <span class="term-artifact">run</span>: npm ci</span>
+                <span class="term-line">      - <span class="term-artifact">run</span>: npm test</span>
+            </div>
+
+            <div class="callout">
+                <h4>EXPECTED RESULT</h4>
+                <p>Push to a branch and open a PR. The Actions tab shows the run executing. The PR view displays a green checkmark indicating the status check passed.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">LAB 01 &nbsp;|&nbsp; 02 / 07</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 3: LAB 01 GATES -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD LABS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">BRANCH PROTECTION</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">02 /</span> Enforce the Gate</h2>
+            <p>An unenforced gate is decoration. A green check on a PR is meaningless if a developer can click "Merge" while the pipeline is red. Branch protection converts the CI result from a suggestion into a rule.</p>
+
+            <h3 class="sub-title">Step 2: Require the Check</h3>
+            <p>Navigate to Repo Settings → Branches → protect <code>main</code>. Require the <code>build</code> status check to pass before merging.</p>
+
+            <div class="dec-container">
+                <div class="dec-q">IS CI STATUS GREEN?</div>
+                <div class="dec-branches">
+                    <div class="dec-branch yes">
+                        <div class="dec-label">YES</div>
+                        <div class="dec-val">
+                            MERGE ALLOWED
+                            <span>main branch updated</span>
+                        </div>
+                    </div>
+                    <div class="dec-branch no">
+                        <div class="dec-label">NO</div>
+                        <div class="dec-val">
+                            MERGE BLOCKED
+                            <span>Button disabled</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Verification &amp; Failure Scenarios</h3>
+            <ul class="lab-checklist">
+                <li>PR shows green check from the workflow.</li>
+                <li>Merging to <code>main</code> without green is blocked.</li>
+                <li>Breaking the test turns the PR red.</li>
+            </ul>
+
+            <div class="callout gotcha">
+                <h4>GOTCHA</h4>
+                <p>If <code>npm ci</code> fails, it usually means the lockfile is missing or out of sync. Run <code>npm install</code> locally, commit the <code>package-lock.json</code> file, and push again. Do not use <code>npm install</code> in CI; <code>npm ci</code> enforces hermetic, reproducible builds.</p>
+            </div>
+
+            <div class="callout interview">
+                <h4>INTERVIEW CHECK</h4>
+                <p><strong>Q: What does the green check actually prove?</strong></p>
+                <p>A: It proves that the specific code at that specific commit passed the specific checks defined in the YAML. It does not prove the application is bug-free. Breaking the test on purpose is the real verification—it proves the pipeline catches failures.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">LAB 01 &nbsp;|&nbsp; 03 / 07</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 4: LAB 02 INTRO -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD LABS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">LAB 02: BUILD AND TEST</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">03 /</span> Build and Test DAG</h2>
+            <p>Split Lab 01's single job into a fast, cached PR pipeline. By separating the build and test phases into distinct jobs, we create a Directed Acyclic Graph (DAG) that optimizes execution and isolates failures.</p>
+
+            <div class="pipeline">
+                <div class="stage passed">
+                    <span class="stage-no">01</span>
+                    <strong>BUILD</strong>
+                    <small>npm ci</small>
+                    <span class="status-pill passed">PASSED</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage running">
+                    <span class="stage-no">02</span>
+                    <strong>TEST</strong>
+                    <small>needs: build</small>
+                    <span class="status-pill running">RUNNING</span>
+                </div>
+                <div class="connector"></div>
+                <div class="stage waiting">
+                    <span class="stage-no">03</span>
+                    <strong>CHECK</strong>
+                    <small>Combined status</small>
+                    <span class="status-pill waiting">WAITING</span>
+                </div>
+            </div>
+
+            <div class="concept-grid">
+                <div class="concept-block">
+                    <h4>OBJECTIVE</h4>
+                    <p>Create a hermetic build job followed by a unit test job. Total execution time should be under 10 minutes, with reruns benefiting from warm npm caches.</p>
+                </div>
+                <div class="concept-block">
+                    <h4>THE DAG EDGE</h4>
+                    <p>The <code>needs:</code> keyword in GitHub Actions defines the DAG edge. The <code>test</code> job will not execute until the <code>build</code> job completes successfully.</p>
+                </div>
+            </div>
+
+            <h3 class="sub-title">Step 1: Split and Cache</h3>
+            <div class="terminal">
+                <span class="term-line"><span class="term-artifact">jobs</span>:</span>
+                <span class="term-line">  <span class="term-artifact">build</span>:</span>
+                <span class="term-line">    <span class="term-artifact">runs-on</span>: ubuntu-latest</span>
+                <span class="term-line">    <span class="term-artifact">steps</span>:</span>
+                <span class="term-line">      - <span class="term-artifact">uses</span>: actions/checkout@v4</span>
+                <span class="term-line">      - <span class="term-artifact">uses</span>: actions/setup-node@v4</span>
+                <span class="term-line">        <span class="term-artifact">with</span>: { node-version: 20, cache: npm }</span>
+                <span class="term-line">      - <span class="term-artifact">run</span>: npm ci</span>
+                <span class="term-line">  <span class="term-artifact">test</span>:</span>
+                <span class="term-line">    <span class="term-artifact">needs</span>: build</span>
+                <span class="term-line">    <span class="term-artifact">runs-on</span>: ubuntu-latest</span>
+                <span class="term-line">    <span class="term-artifact">steps</span>:</span>
+                <span class="term-line">      - <span class="term-artifact">uses</span>: actions/checkout@v4</span>
+                <span class="term-line">      - <span class="term-artifact">uses</span>: actions/setup-node@v4</span>
+                <span class="term-line">        <span class="term-artifact">with</span>: { node-version: 20, cache: npm }</span>
+                <span class="term-line">      - <span class="term-artifact">run</span>: npm ci</span>
+                <span class="term-line">      - <span class="term-artifact">run</span>: npm test</span>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">LAB 02 &nbsp;|&nbsp; 04 / 07</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 5: HERMETICITY -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD LABS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">HERMETIC BUILDS</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">04 /</span> Hermeticity &amp; Caching</h2>
+            <p>A build is hermetic if it produces the exact same result regardless of the environment it runs in. In CI, this means the runner should not rely on ambient machine state. The lockfile is the contract.</p>
+
+            <h3 class="sub-title">Step 2: Prove Hermeticity</h3>
+            <div class="lab-step">
+                <div class="step-no">EXECUTE</div>
+                <div class="lab-content"><p>Delete <code>node_modules</code> locally. Run <code>npm ci &amp;&amp; npm test</code>. The result should be identical to the CI runner.</p></div>
+            </div>
+            <div class="lab-step">
+                <div class="step-no">VERIFY</div>
+                <div class="lab-content"><p>Two jobs visible in GitHub Actions, ordered by <code>needs</code>. Cache hit shown on rerun. Local <code>npm ci</code> reproduces CI result.</p></div>
+            </div>
+
+            <div class="callout gotcha">
+                <h4>GOTCHA</h4>
+                <p>If the cache never hits, the lockfile is likely not committed, or the key inputs have changed. The <code>actions/setup-node</code> action uses the lockfile to key the cache. If <code>package-lock.json</code> is in <code>.gitignore</code>, caching fails silently.</p>
+            </div>
+
+            <div class="cmdres">
+                <div class="cmd-block">
+                    <h4>LOCAL COMMAND</h4>
+                    <div class="term-box">
+                        <span class="term-line"><span class="term-prompt">$</span> rm -rf node_modules</span>
+                        <span class="term-line"><span class="term-prompt">$</span> npm ci</span>
+                    </div>
+                </div>
+                <div class="res-block">
+                    <h4>EXPECTED RESULT</h4>
+                    <div class="term-box">
+                        <span class="term-line term-out">added 42 packages, audited 43 packages</span>
+                        <span class="term-line term-ok">Identical to runner install</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout interview">
+                <h4>INTERVIEW CHECK</h4>
+                <p><strong>Q: What does <code>needs:</code> actually guarantee?</strong></p>
+                <p>A: It guarantees that the downstream job will not start until the upstream job completes successfully. If the <code>build</code> job fails, the <code>test</code> job is skipped, saving compute time and preventing tests from running against a broken build.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">LAB 02 &nbsp;|&nbsp; 05 / 07</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 6: SYSTEM MAP -->
+    <div class="page">
+        <header class="page-header">
+            <span class="h-chip">CI/CD LABS</span>
+            <span class="h-rule"></span>
+            <span class="h-title">SYSTEM MAP</span>
+        </header>
+        <div class="content">
+            <h2 class="section-title"><span class="n">05 /</span> Pipeline System Map</h2>
+            <p>The first two labs establish the foundational CI/CD loop. Understanding the components and their failure modes is critical before moving to artifacts and deployments.</p>
+
+            <div class="sys-map">
+                <div class="map-row">
+                    <div class="map-box">SOURCE</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box blue">TRIGGER</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box green">RUNNER</div>
+                    <div class="map-arr">→</div>
+                    <div class="map-box artifact">DAG</div>
+                </div>
+                <div class="map-feedback">FEEDBACK: PR STATUS CHECK & MERGE GATE ENFORCEMENT</div>
+            </div>
+
+            <h3 class="sub-title">Troubleshooting Flow</h3>
+            <div class="terminal">
+                <span class="term-line term-err">[ERROR] npm ci fails with 'lockfile missing'</span>
+                <span class="term-line term-out">  -> Recovery: Commit package-lock.json</span>
+                <span class="term-line term-err">[ERROR] Runner queues indefinitely</span>
+                <span class="term-line term-out">  -> Recovery: Free-tier concurrency limit; wait or reduce jobs</span>
+                <span class="term-line term-err">[ERROR] test runs before build finishes</span>
+                <span class="term-line term-out">  -> Recovery: Add 'needs: build' to test job</span>
+                <span class="term-line term-warn">[WARN] Cache never hits</span>
+                <span class="term-line term-out">  -> Recovery: Ensure lockfile exists and cache key is correct</span>
+            </div>
+
+            <div class="callout">
+                <h4>WHAT THIS PROVED</h4>
+                <p>Triggers fire pipelines, runners execute jobs, checks gate merges, and lockfiles ensure hermetic, reproducible builds. The loop is closed. Continue to Lab 03 to package this build's output into a deployable artifact.</p>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <span class="f-left">CI/CD ENGINEERING MANUAL</span>
+            <span class="f-rule"></span>
+            <span class="f-right">SUMMARY &nbsp;|&nbsp; 06 / 07</span>
+        </footer>
+    </div>
+
+</body>
+</html>

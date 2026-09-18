@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+
+<!DOCTYPE html>
+
+<!DOCTYPE html>
+
+<html><head><meta charset="utf-8"/><title>Start Here — CICD BY Nabawy</title><style>
+.readbody{
+    --paper:#f5f6f4; --white:#ffffff;
+    --ink:#161a19; --muted:#68706d; --line:#d5dad7;
+    --panel:#111614; --panel-2:#1a201d;
+    --text-light:#e8eeeb; --text-muted:#9ca8a3;
+    --accent:#00b87c; --accent-dark:#008f61;
+    --blue:#4387ff; --amber:#d99a24; --red:#d94b4b;
+    --artifact:#8b6cff;
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+
+.readbody{ font-family:Inter,"Segoe UI",Arial,sans-serif; color:var(--ink);}
+
+@page{size:A4; margin:0;}
+
+.page{
+    width:210mm; min-height:297mm; padding:16mm 16mm 19mm; margin:8mm auto;
+    position:relative; background:var(--paper); page-break-after:always; overflow:hidden;
+    display:flex; flex-direction:column;
+}
+
+@media print{
+    .readbody{}
+    .page{margin:0; box-shadow:none;}
+}
+
+/* ---------- type (11–12pt body baseline; readability over page count) ---------- */
+h3.sec{font-size:23px; margin:16px 0 8px; text-transform:uppercase; letter-spacing:.5px; break-after:avoid;}
+
+h3.sec .n{color:var(--accent-dark); font-family:"Cascadia Code",Consolas,monospace; font-size:15px; margin-right:8px;}
+
+p.body{font-size:14.5px; line-height:1.6; margin:8px 0;}
+
+.meta{font-size:10px; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase;}
+
+.cap{font-size:10.5px; color:var(--muted); margin-top:6px; line-height:1.6;}
+
+code, .mono{font-family:"SFMono-Regular","Cascadia Code",Consolas,monospace;}
+
+@media print{
+    .readbody{}
+    .page{margin:0; box-shadow:none;}
+    h3.sec, .phead h2{break-after:avoid;}
+    .pipeline,.lane,.terminal,.cmdres,.callout,.vflow,.dec,table.cmp,.qa,.kv{break-inside:avoid;}
+}
+
+.vpipe{display:flex; flex-direction:column; gap:0; margin:6px 0 26px;}
+
+.vnode{display:flex; align-items:center; gap:12px;}
+
+.vnode .dot{width:14px; height:14px; border-radius:50%; border:2px solid var(--accent);
+    box-shadow:0 0 10px rgba(0,184,124,.55); background:var(--panel); flex:none;}
+
+.vnode.purp .dot{border-color:var(--artifact); box-shadow:0 0 10px rgba(139,108,255,.55);}
+
+.vnode.amber .dot{border-color:var(--amber); box-shadow:0 0 10px rgba(217,154,36,.55);}
+
+.vnode.blue .dot{border-color:var(--blue); box-shadow:0 0 10px rgba(67,135,255,.55);}
+
+.vnode b{font-size:12px; letter-spacing:2px;}
+
+.vnode small{font-size:10px; color:var(--text-muted);}
+
+.vnode img{width:22px; height:22px; flex:none;}
+
+.vline{width:2px; height:16px; background:#2c3531; margin-left:6px;}
+
+.life{display:flex; align-items:stretch; margin:18px 0 6px;}
+
+.lnode{flex:1; background:var(--white); border:1px solid var(--line); border-top:3px solid var(--accent);
+    padding:8px 6px; text-align:center;}
+
+.lnode b{display:block; font-size:10px; letter-spacing:1px;}
+
+.lnode small{font-size:8.5px; color:var(--muted);}
+
+.lnode img{width:20px; height:20px; margin:0 auto 3px; display:block;}
+
+.lnode.art{border-top-color:var(--artifact);}
+
+.lconn{align-self:center; color:var(--accent-dark); font-weight:700; padding:0 3px; font-size:12px;}
+
+/* ---------- pipeline component ---------- */
+.pipeline{display:flex; align-items:stretch; margin:12px 0;}
+
+.stage{flex:1; background:var(--white); border:1px solid var(--line); border-left:4px solid var(--accent);
+    padding:10px 12px; position:relative;}
+
+.stage small.st{display:block; font-size:10px; color:var(--muted); letter-spacing:1px;}
+
+.stage strong{display:block; font-size:14px; letter-spacing:1px; margin:3px 0;}
+
+.stage .desc{font-size:11px; color:var(--muted); line-height:1.5;}
+
+.stage .no{position:absolute; top:8px; right:10px; font-size:10px; color:var(--muted); font-family:"Cascadia Code",Consolas,monospace;}
+
+.stage img{width:22px; height:22px; display:block; margin-bottom:2px;}
+
+.stage.run{border-left-color:var(--blue);}
+ .stage.wait{border-left-color:var(--line);}
+
+.stage.fail{border-left-color:var(--red);}
+ .stage.art{border-left-color:var(--artifact);}
+
+.connector{flex:none; width:26px; align-self:center; text-align:center; color:var(--accent-dark); font-weight:700;}
+
+/* ---------- status ---------- */
+.status{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;}
+
+.pill{font-size:11px; letter-spacing:1px; padding:6px 12px; border-radius:20px; border:1px solid var(--line);
+    background:var(--white); display:flex; align-items:center; gap:6px; font-family:"Cascadia Code",Consolas,monospace;}
+
+.pill i{width:8px; height:8px; border-radius:50%; flex:none;}
+
+.i-g{background:var(--accent);}
+ .i-b{background:var(--blue);}
+ .i-a{background:var(--amber);}
+
+.i-r{background:var(--red);}
+ .i-gr{background:#b9c1bd;}
+ .i-p{background:var(--artifact);}
+
+/* ---------- lanes ---------- */
+.lane{border:1px solid var(--line); background:var(--white); margin:8px 0;}
+
+.lane .lt{font-size:9px; letter-spacing:2px; padding:5px 10px; color:var(--white); display:flex; justify-content:space-between;}
+
+.lane.dev .lt{background:var(--blue);}
+ .lane.stg .lt{background:var(--amber);}
+ .lane.prd .lt{background:var(--accent-dark);}
+
+.lane .lb{padding:10px 12px; font-family:"Cascadia Code",Consolas,monospace; font-size:12px; line-height:1.7;}
+
+.lane .lb .ok{color:var(--accent-dark); font-weight:700;}
+ .lane .lb .wt{color:var(--muted);}
+
+.cmdres{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0;}
+
+.cmdres .col{background:var(--white); border:1px solid var(--line); padding:10px 12px;}
+
+.cmdres .col h4{font-size:10px; letter-spacing:2px; color:var(--muted); margin-bottom:6px;}
+
+.cmdres pre{font-family:"Cascadia Code",Consolas,monospace; font-size:11.5px; line-height:1.65; white-space:pre-wrap;}
+
+/* ---------- callouts ---------- */
+.callout{border-left:3px solid var(--accent); background:var(--white); padding:12px 14px; margin:12px 0;}
+
+.callout h4{font-size:11px; letter-spacing:2px; color:var(--accent-dark); margin-bottom:5px;}
+
+.callout p{font-size:13px; line-height:1.6;}
+
+.callout.warn{border-left-color:var(--amber);}
+ .callout.warn h4{color:#a5761a;}
+
+.callout.bad{border-left-color:var(--red);}
+ .callout.bad h4{color:var(--red);}
+
+/* ---------- flow (vertical) ---------- */
+.vflow{margin:10px 0;}
+
+.fnode{background:var(--white); border:1px solid var(--line); padding:10px 14px; font-size:12.5px;
+    display:flex; align-items:center; gap:10px;}
+
+.fnode img{width:24px; height:24px; flex:none;}
+
+.fnode b{letter-spacing:1px; font-size:12px;}
+
+.fnode small{color:var(--muted); font-size:11px;}
+
+.fnode.art{border-color:var(--artifact); border-left:4px solid var(--artifact);}
+
+.fnode.gate{border-color:var(--amber); border-left:4px solid var(--amber); background:#fdf8ec;}
+
+.fnode.bad{border-color:var(--red); border-left:4px solid var(--red);}
+
+.fnode.good{border-left:4px solid var(--accent);}
+
+.farrow{text-align:center; color:var(--accent-dark); font-weight:700; line-height:1.1; padding:1px 0;}
+
+.farrow.back{color:var(--accent-dark); font-size:10px; letter-spacing:1px;}
+
+/* ---------- decision ---------- */
+.dec{background:var(--white); border:1px solid var(--line); padding:14px; margin:12px 0; text-align:center;}
+
+.dec .q{display:inline-block; background:var(--panel); color:var(--text-light); font-size:12.5px;
+    letter-spacing:1px; padding:10px 18px; border-radius:4px;}
+
+.dec .fork{display:flex; gap:10px; margin-top:12px;}
+
+.dec .opt{flex:1; border:1px solid var(--line); padding:10px; font-size:12px; line-height:1.6;}
+
+.dec .opt b{display:block; font-size:10px; letter-spacing:1px; margin-bottom:2px;}
+
+.dec .opt.y b{color:var(--accent-dark);}
+ .dec .opt.n b{color:#a5761a;}
+
+/* ---------- misc ---------- */
+.two{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+
+ul.tight{font-size:13px; line-height:1.7; margin:8px 0 8px 20px;}
+
+ul.tight li{margin-bottom:4px;}
+
+.iconrow{display:flex; align-items:center; gap:8px; margin:6px 0;}
+
+.iconrow img{width:22px; height:22px;}
+
+.sysmap{font-family:"Cascadia Code",Consolas,monospace; font-size:10px; line-height:1.5;
+    background:var(--panel); color:var(--text-light); border-radius:8px; padding:12px 14px; margin:10px 0; white-space:pre;}
+
+/* m-reflow: screen-only mobile reflow; print unaffected */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0 auto;padding:16px 14px 20px}h3.sec{font-size:19px}.opener .bignum{font-size:48px}.cover h1{font-size:32px}.cover .tri{font-size:9px}table.cmp{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}.terminal{font-size:10.5px}.vnode b,.fnode b{font-size:11px}.phead h2{font-size:18px}.step{font-size:12.5px}}
+
+:root{
+  --bg:#f2f5f8; --panel:#ffffff; --panel2:#eaf0f4; --ink:#16222e; --dim:#5c6b7a;
+  --line:#dde4ea; --line2:#cbd6de;
+  --teal:#0e7490; --teal-d:#0b5c73; --teal-t:#e3f2f7;
+  --indigo:#4f46e5; --indigo-t:#eef0fd;
+  --ok:#15803d; --ok-t:#e7f5ec;
+  --warn:#b45309; --warn-t:#fdf3e0;
+  --fail:#b91c1c; --fail-t:#fdeaea;
+  --code-bg:#0f1e2b;
+  --shadow:3px 3px 0 rgba(22,34,46,.10);
+}
+*{box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+body{margin:0; background:#e2e8ee; font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif; color:var(--ink);}
+@page{size:A4; margin:0;}
+.sheet{width:210mm; height:297mm; background:var(--bg); margin:9mm auto; padding:13mm 13mm 20mm; position:relative; border:1px solid var(--line2); page-break-after:always; overflow:hidden;}
+.sheet::before{content:''; position:absolute; top:0; left:0; right:0; height:7px; background:linear-gradient(90deg,var(--teal) 0 55%,var(--indigo) 55% 100%);}
+@media print{ body{background:#fff;} .sheet{margin:0; border:none; box-shadow:none;} }
+.mono{font-family:'Consolas','SF Mono',monospace;}
+.pghead{margin:0 0 10px; border-bottom:2px solid var(--ink); padding-bottom:7px;}
+.hrow{display:flex; align-items:flex-start; gap:10px;}
+.kick{font:800 10px 'Consolas',monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--teal); margin-bottom:3px;}
+h1.t{font:800 21px/1.3 'Segoe UI',sans-serif; margin:0; border-left:5px solid var(--teal); padding-left:11px;}
+.hmeta{margin-left:auto; font:800 9.5px 'Consolas',monospace; border:2px solid var(--teal); color:#fff; background:var(--teal); border-radius:4px; padding:2px 9px; white-space:nowrap;}
+.folio{position:absolute; bottom:6mm; left:13mm; right:13mm; display:flex; align-items:center; gap:8px; font:9.5px 'Consolas',monospace; color:var(--dim);}
+.folio::before,.folio::after{content:''; flex:1; border-top:1px solid var(--line2);}
+.folio .fnum{color:var(--ink); font-weight:700;}
+.folio .by{color:var(--teal); font-weight:800;}
+a.tlink{color:var(--teal-d); font-weight:700; text-decoration:none; border-bottom:2px dotted var(--teal);}
+a.backtoc{color:var(--dim); text-decoration:none; border:1.5px solid var(--line2); border-radius:4px; padding:0 6px; font:800 9px 'Consolas',monospace; background:var(--panel);}
+a.backtoc:hover{color:var(--teal); border-color:var(--teal);}
+.taskhead{display:flex; align-items:baseline; gap:9px; font:700 13px 'Segoe UI',sans-serif; margin:11px 0 5px;}
+.taskhead::before{content:'▪'; color:var(--teal);}
+.taskhead::after{content:''; flex:1; border-bottom:2px dotted var(--line2); transform:translateY(-3px);}
+.taskhead .hst{font:400 9.5px 'Consolas',monospace; color:var(--dim);}
+.mark{border-radius:8px; border-left:4px solid; padding:7px 11px; margin:8px 0; font-size:12px; line-height:1.6; background:var(--panel);}
+.mark .tag{display:inline-block; font:800 9.5px 'Consolas',monospace; letter-spacing:.1em; margin-right:6px; color:var(--dim);}
+.m-key{border-color:var(--indigo); background:var(--indigo-t);} .m-key .tag{color:var(--indigo);}
+.m-ok{border-color:var(--ok); background:var(--ok-t);} .m-ok .tag{color:var(--ok);}
+.m-tip{border-color:var(--teal); background:var(--teal-t);} .m-tip .tag{color:var(--teal);}
+.m-warn{border-color:var(--warn); background:var(--warn-t);} .m-warn .tag{color:var(--warn);}
+.m-fail{border-color:var(--fail); background:var(--fail-t);} .m-fail .tag{color:var(--fail);}
+.m-exam{border:2px solid var(--line2); border-left:5px solid var(--teal); background:var(--panel); border-radius:8px; box-shadow:var(--shadow); padding:6px 10px; margin:8px 0; font-size:12px; line-height:1.6;}
+.m-exam .tag{display:inline-block; font:800 9.5px 'Consolas',monospace; letter-spacing:.1em; color:var(--teal); margin-right:6px;}
+.panel{background:var(--panel); border:2px solid var(--line2); border-radius:8px; box-shadow:var(--shadow); padding:9px 12px;}
+.ptitle{font:700 13.5px 'Segoe UI',sans-serif; margin:0 0 5px; color:var(--teal-d);}
+.blk{display:inline-block; border:2px solid var(--line2); border-radius:6px; padding:7px 11px; font-weight:700; font-size:11.5px; text-align:center; background:var(--panel);}
+.blk small{display:block; font-weight:500; font-size:9.5px; margin-top:2px; color:var(--dim);}
+.chipr{display:inline-flex; align-items:center; background:var(--panel); border:2px solid var(--line2); border-radius:6px; padding:3px 10px; font:700 10.5px 'Consolas',monospace; box-shadow:var(--shadow);}
+.chipr small{color:var(--dim);}
+.pill{display:inline-block; border:2px solid var(--teal); color:var(--teal-d); background:var(--teal-t); border-radius:6px; padding:2px 10px; font:700 11px 'Consolas',monospace;}
+.darr{text-align:center; color:var(--teal); font-size:12px; margin:1px 0;}
+.harrow{color:var(--teal); font-size:12px; align-self:center;}
+.frow{display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap;}
+.dnote{text-align:center; font-size:11px; color:var(--dim); margin-top:4px;}
+.zone{border:2px solid var(--line2); border-radius:10px; padding:9px 11px; background:var(--panel); box-shadow:var(--shadow);}
+.code{background:var(--code-bg); color:#dbe9f2; border:2px solid var(--line2); border-radius:8px; box-shadow:var(--shadow); padding:9px 12px; font:11px/1.6 'Consolas','SF Mono',monospace; white-space:pre; overflow-x:auto; text-align:left; max-width:100%; margin:6px 0;}
+.code .p{color:#67e8f9;} .code .g{color:#64748b;} .code .s{color:#86efac;} .code .y{color:#fcd34d;} .code .c{color:#93c5fd;}
+.code.mini{font-size:10px; padding:7px 10px; line-height:1.55; margin:4px 0;}
+.tree{background:var(--code-bg); color:#c9d8e4; border:2px solid var(--line2); border-radius:8px; box-shadow:var(--shadow); padding:10px 14px; font:11px/1.7 'Consolas',monospace; white-space:pre; overflow-x:auto; text-align:left;}
+.tree b{color:#67e8f9;} .tree u{color:#86efac; text-decoration:none;} .tree em{color:#f9a8d4; font-style:normal;} .tree i{color:#93c5fd; font-style:normal;} .tree .g{color:#64748b;}
+.tblwrap{overflow-x:auto;}
+table.tb{width:100%; border-collapse:separate; border-spacing:0; border:2px solid var(--line2); border-radius:8px; overflow:hidden; font-size:11.5px; box-shadow:var(--shadow); background:var(--panel);}
+.tb th{background:var(--ink); color:#fff; border-bottom:3px solid var(--teal); padding:6px 10px; text-align:left; font:800 10.5px 'Segoe UI',sans-serif;}
+.tb td{padding:6px 10px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.55;}
+.tb tr:nth-child(even) td{background:var(--panel2);}
+.tb tr:last-child td{border-bottom:none;}
+.tb.tight{font-size:10.8px;}
+.tb.tight td{padding:4px 9px;}
+.tb.tight th{padding:4px 9px;}
+.tb.rowh td:first-child{font-weight:800; color:var(--teal-d); background:var(--panel2); width:110px;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.grid2>*{min-width:0;}
+.grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px;}
+.grid3>*{min-width:0;}
+.grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
+.grid4>*{min-width:0;}
+h3.sec{font:700 13.5px 'Segoe UI',sans-serif; margin:11px 0 5px;}
+h3.sec .n{color:var(--teal); margin-right:5px; font-family:'Consolas',monospace;}
+p.lead{font-size:12.6px; line-height:1.7; margin:0 0 8px; color:#3d4a56;}
+p.small,li{font-size:11.8px; line-height:1.65;}
+.pillar{border:2px solid var(--line2); border-radius:10px; background:var(--panel); box-shadow:var(--shadow); padding:10px 12px; text-align:center;}
+.pillar .ico{font-size:22px; line-height:1;}
+.pillar b{display:block; font-size:13px; margin:4px 0 2px; color:var(--teal-d);}
+.pillar .q{font-size:10.5px; color:var(--dim); font-style:italic; line-height:1.4;}
+.pillar p{font-size:10.8px; line-height:1.5; margin:5px 0 0; text-align:left;}
+.stbad{display:inline-block; border:2px solid; border-radius:5px; padding:0 8px; font:800 9.5px 'Consolas',monospace;}
+.st-ok{border-color:var(--ok); color:var(--ok); background:var(--ok-t);}
+.st-chg{border-color:var(--warn); color:var(--warn); background:var(--warn-t);}
+.st-fail{border-color:var(--fail); color:var(--fail); background:var(--fail-t);}
+.tocrow{display:flex; align-items:baseline; padding:5px 2px; font-size:12.2px;}
+.tocrow .tnum{font:700 11.5px 'Consolas',monospace; color:var(--teal); width:36px; flex:none;}
+.tocrow .dots{flex:1; border-bottom:2px dotted var(--line2); margin:0 8px 4px;}
+.tocrow .tp{font-weight:800;}
+a.tocrow{color:inherit; text-decoration:none;}
+a.tocrow:hover .tp{color:var(--teal);}
+.tocgrid{display:grid; grid-template-columns:1fr 1fr; gap:0 20px;}
+.lgd{display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:6px;}
+.lgd div{display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600;}
+.dot8{width:10px; height:10px; border:2px solid var(--line2); border-radius:3px; display:inline-block; flex:none;}
+.cover{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:18mm;}
+.cover .band{width:100%; display:flex; justify-content:center; gap:4px; margin-bottom:26px;}
+.cover .bar{width:9px; border-radius:3px 3px 0 0; background:var(--teal); opacity:.85;}
+.cover .ckick{font:800 12px 'Consolas',monospace; letter-spacing:.3em; text-transform:uppercase; color:var(--teal);}
+.cover h1{font:800 44px/1.25 'Segoe UI',sans-serif; margin:12px 0 4px;}
+.cover .sub{font-size:14px; color:var(--dim); max-width:150mm; line-height:1.8;}
+.cover .byline{margin-top:18px; font:800 16px 'Consolas',monospace; color:var(--teal-d); letter-spacing:.08em;}
+.cover .byline small{display:block; font:600 10.5px 'Consolas',monospace; color:var(--dim); margin-top:3px; letter-spacing:.15em;}
+.cover .vols{display:flex; gap:12px; margin-top:22px; flex-wrap:wrap; justify-content:center;}
+.volcard{border:2px solid var(--line2); border-radius:8px; background:var(--panel); box-shadow:var(--shadow); padding:9px 16px; font:800 12.5px 'Segoe UI',sans-serif;}
+.volcard small{display:block; font-weight:600; color:var(--dim); font-size:10px; margin-top:2px;}
+.volcard.on{border-color:var(--teal); background:var(--teal); color:#fff;} .volcard.on small{color:#d3f0f7;}
+.cover .cver{position:absolute; bottom:10mm; left:0; right:0; text-align:center; font:10px 'Consolas',monospace; letter-spacing:.25em; color:var(--dim);}
+.qa{border:2px solid var(--line2); border-radius:6px; background:var(--panel); padding:6px 9px; font-size:10.8px; line-height:1.5;}
+.qa .qn{font:800 10px 'Consolas',monospace; color:var(--teal);}
+.qa .ans{color:#3d4a56;}
+.qa.star{border:2px solid var(--teal); background:var(--teal-t);}
+code{font-family:'Consolas',monospace; background:var(--panel2); border:1px solid var(--line); border-radius:4px; padding:0 5px; font-size:.9em;}
+
+
+@media(max-width:700px){.sheet{padding:10px}.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+/* converted-book compat: old structure, SIGNAL look */
+.sheet .body{font-size:14px;line-height:1.7;margin:9px 0;color:var(--ink)}
+.sheet h2.section-title{font:800 19px/1.3 'Segoe UI',sans-serif;margin:16px 0 7px;color:var(--ink)}
+.sheet h2.section-title .n{color:var(--teal);font-family:'Consolas',monospace;margin-right:6px}
+.sheet h2{font:800 19px/1.3 'Segoe UI',sans-serif;margin:16px 0 7px;color:var(--ink)}
+.sheet ul.tight,.sheet ol.tight{margin:8px 0 8px 22px}
+.sheet .tblwrap{overflow-x:auto;margin:8px 0}
+.sheet .volcard{text-decoration:none}
+.code .term-ok,.code .term-blue{color:#7dd3fc}.code .term-out,.code .term-artifact{color:#c9d8e4}
+.code .term-prompt{color:#67e8f9}.code .term-err,.code .term-fail{color:#f87171}
+@media print{.sheet{page-break-after:always}}
+:root{--teal:#5B8DEF;--teal-d:#4266ac;--teal-t:#eaf0fd}</style><style>/* print-cover-slim */@media print{.cover{padding-top:9mm}.cover .band{margin-bottom:12px}.cover h1{font-size:38px}.cover .vols{margin-top:12px}.cover .byline{margin-top:12px}}</style><style>/* trav-pills */.trav{font:700 10px Consolas,monospace;color:var(--dim);margin-top:10px}.trav a{color:var(--teal-d);text-decoration:none;border-bottom:1px dotted var(--teal)}</style></head><body><div class="sheet cover" id="s01"><div class="band"><div class="bar" style="height:14px"></div><div class="bar" style="height:30px"></div><div class="bar" style="height:52px"></div><div class="bar" style="height:38px"></div><div class="bar" style="height:64px;background:var(--indigo)"></div><div class="bar" style="height:46px"></div><div class="bar" style="height:70px"></div><div class="bar" style="height:28px"></div><div class="bar" style="height:56px"></div><div class="bar" style="height:18px"></div></div><div class="ckick">SIGNAL SERIES · START HERE</div><h1>START<br/>HERE</h1><div class="sub">Foundations, Git and CI — the ground everything stands on.</div><div class="byline">By <span class="sig">Nabawy</span><small>AUTHOR &amp; COMPILER</small></div><div class="vols"><div class="volcard on">Foundations</div><div class="volcard">Source Control</div><div class="volcard">Integration</div></div><div class="cver">V4 · 2026 · START HERE · verified 2026-09-18</div></div><div class="sheet" id="toc"><div class="pghead"><div class="hrow"><div><div class="kick">Contents</div><h1 class="t">Table of Contents</h1></div><span class="hmeta">22 sheets</span></div></div><div class="tocgrid"><a class="tocrow" href="#s02"><span class="tnum">03</span><span class="tp">🗺️ The Map — The Whole Route</span><span class="dots"></span><span>03</span></a><a class="tocrow" href="#s02n"><span class="tnum">03B</span><span class="tp">What CI/CD Actually Is</span><span class="dots"></span><span>03B</span></a><a class="tocrow" href="#s03"><span class="tnum">04</span><span class="tp">Foundations</span><span class="dots"></span><span>04</span></a><a class="tocrow" href="#s04"><span class="tnum">05</span><span class="tp">Continuous Integration</span><span class="dots"></span><span>05</span></a><a class="tocrow" href="#s05"><span class="tnum">06</span><span class="tp">CI vs CD · Delivery vs Deployment</span><span class="dots"></span><span>06</span></a><a class="tocrow" href="#s06"><span class="tnum">07</span><span class="tp">Pipeline &amp; Status</span><span class="dots"></span><span>07</span></a><a class="tocrow" href="#s07"><span class="tnum">08</span><span class="tp">Environments &amp; Flow</span><span class="dots"></span><span>08</span></a><a class="tocrow" href="#s08"><span class="tnum">09</span><span class="tp">Console</span><span class="dots"></span><span>09</span></a><a class="tocrow" href="#s09"><span class="tnum">10</span><span class="tp">Artifact &amp; Gate</span><span class="dots"></span><span>10</span></a><a class="tocrow" href="#s10"><span class="tnum">11</span><span class="tp">Failure &amp; Recovery</span><span class="dots"></span><span>11</span></a><a class="tocrow" href="#s11"><span class="tnum">12</span><span class="tp">Check &amp; Map</span><span class="dots"></span><span>12</span></a><a class="tocrow" href="#s12"><span class="tnum">13</span><span class="tp">Source Control</span><span class="dots"></span><span>13</span></a><a class="tocrow" href="#s13"><span class="tnum">14</span><span class="tp">Flow &amp; Commands</span><span class="dots"></span><span>14</span></a><a class="tocrow" href="#s14"><span class="tnum">15</span><span class="tp">Models &amp; Discipline</span><span class="dots"></span><span>15</span></a><a class="tocrow" href="#s15"><span class="tnum">16</span><span class="tp">Check &amp; Handoff</span><span class="dots"></span><span>16</span></a><a class="tocrow" href="#s16"><span class="tnum">17</span><span class="tp">Integration</span><span class="dots"></span><span>17</span></a><a class="tocrow" href="#s17"><span class="tnum">18</span><span class="tp">Gates</span><span class="dots"></span><span>18</span></a><a class="tocrow" href="#s18"><span class="tnum">19</span><span class="tp">Handoff</span><span class="dots"></span><span>19</span></a><a class="tocrow" href="#s19"><span class="tnum">20</span><span class="tp">📇 Quick Revision — Terms Table</span><span class="dots"></span><span>20</span></a><a class="tocrow" href="#s20"><span class="tnum">21</span><span class="tp">🎤 Concept Questions — Distilled Answers</span><span class="dots"></span><span>21</span></a><a class="tocrow" href="#s21"><span class="tnum">22</span><span class="tp">📌 Command Cheat Sheet</span><span class="dots"></span><span>22</span></a><a class="tocrow" href="#s22"><span class="tnum">23</span><span class="tp">🧪 Self-Quiz + Answer Key</span><span class="dots"></span><span>23</span></a></div><div class="taskhead">How to use this book <span class="hst">legend</span></div><div class="lgd"><div><span class="dot8" style="border-color:#0e7490;background:#e3f2f7"></span>NOTE · context</div><div><span class="dot8" style="border-color:#4f46e5;background:#eef0fd"></span>KEY · must retain</div><div><span class="dot8" style="border-color:#b45309;background:#fdf3e0"></span>WATCH OUT · gotcha</div><div><span class="dot8" style="border-color:#15803d;background:#e7f5ec"></span>VERIFIED · check</div></div><div class="mark m-tip"><span class="tag">NOTE</span>Read cover to cover once, then use the Contents to jump. Every chapter ends with a 🎓 EXAM box — if you can answer it cold, move on.</div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 2 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> <a class="tlink" href="#s02">Next</a></span></div></div><div class="sheet" id="s02"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">🗺️ The Map — The Whole Route</h1></div><span class="hmeta">MAP</span></div></div><p class="lead">Three chapters, one line: <a class="tlink" href="#s02">Foundations</a> draws the pipeline every merge travels; <a class="tlink" href="#s11">Source Control</a> builds the gate that guards it; <a class="tlink" href="#s15">Integration</a> turns the gate into daily discipline.</p><div class="zone"><div class="frow"><span class="chipr">FOUNDATIONS <small>lifecycle</small></span><span class="harrow">──►</span><span class="chipr">SOURCE CONTROL <small>gate</small></span><span class="harrow">──►</span><span class="chipr">INTEGRATION <small>discipline</small></span></div><div class="dnote">commit → verify → merge → repeat</div></div><div class="mark m-key"><span class="tag">KEY IDEA</span>Small merges, verified automatically, fixed immediately — that discipline feeds every pipeline downstream.</div></div><div class="sheet" id="s02n"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">What CI/CD Actually Is</h1></div><span class="hmeta">03B</span></div></div>
+<p class="lead">CI/CD is automation plus discipline: every commit verified by machines, every release decided by policy. One line: commit → CI → artifact → CD → observe.</p>
+<div class="zone"><div class="frow"><span class="chipr">COMMIT <small>push</small></span><span class="harrow">──►</span><span class="chipr">CI <small>verify</small></span><span class="harrow">──►</span><span class="chipr">ARTIFACT <small>freeze</small></span><span class="harrow">──►</span><span class="chipr">CD <small>decide</small></span><span class="harrow">──►</span><span class="chipr">OBSERVE <small>learn</small></span></div><div class="dnote">green travels forward, red stops the line, feedback flows back</div></div>
+<div class="tblwrap"><table class="tb tight"><tr><th>Practice</th><th>Question it answers</th></tr><tr><td>Continuous Integration</td><td>Does this change work — build, test, scan green?</td></tr><tr><td>Continuous Delivery</td><td>Is it releasable — staged auto, prod by approval?</td></tr><tr><td>Continuous Deployment</td><td>Did it ship — prod automatic, rollback armed?</td></tr><tr><td>GitOps</td><td>Is reality matching git — pull, drift-corrected?</td></tr></table></div>
+<div class="mark m-key"><span class="tag">KEY IDEA</span>CI answers does-it-work; Delivery keeps it releasable; Deployment ships it.</div>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Name which gate each change passed: CI gate on merge, approval gate on release, sync gate on deploy.</div>
+<p class="small">⏭️ Next: <a class="tlink" href="#s03">Foundations</a></p><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 4b —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s02">Prev</a> <a class="tlink" href="#s03">Next</a></span></div></div><div class="sheet" id="s03"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Foundations</h1></div><span class="hmeta">04</span></div></div>
+<p class="lead">A pipeline is not magic.<br/>It is a <em>deterministic sequence of machines making decisions about your code</em> — from the moment you push to the moment users feel the change.</p>
+<h3 class="sec"><span class="n">1 /</span> The CI/CD Lifecycle</h3>
+<div class="life">
+<div class="lnode"><img alt="Code" src="../assets/icons/git/git.svg"/><b>CODE</b><small>commit</small></div><div class="lconn">→</div>
+<div class="lnode"><img alt="Build" src="../assets/icons/ci-cd/hammer.svg"/><b>BUILD</b><small>compile</small></div><div class="lconn">→</div>
+<div class="lnode"><img alt="Test" src="../assets/icons/testing/flask-conical.svg"/><b>TEST</b><small>verify</small></div><div class="lconn">→</div>
+<div class="lnode art"><img alt="Artifact" src="../assets/icons/general/package.svg"/><b>ARTIFACT</b><small>freeze</small></div><div class="lconn">→</div>
+<div class="lnode"><img alt="Release" src="../assets/icons/ci-cd/workflow.svg"/><b>RELEASE</b><small>approve</small></div><div class="lconn">→</div>
+<div class="lnode"><img alt="Deploy" src="../assets/icons/deployment/rocket.svg"/><b>DEPLOY</b><small>run</small></div>
+</div>
+<div class="cap">Every chapter of this manual lives somewhere on this line. Feedback flows backward: deploy → observe → next commit.</div>
+<h3 class="sec"><span class="n">2 /</span> How to read this manual</h3>
+<p class="body">Each concept answers <b>WHAT · WHY · WHEN · HOW · WHAT CAN FAIL</b>. Green means passed, red means failed, amber means a human must decide, purple means artifact. Color always pairs with a symbol and a label — the book survives grayscale printing.</p>
+<div class="mark m-key"><span class="tag">KEY IDEA</span>DevOps is the culture of shared ownership; CI/CD is its automation — small merges verified on every push, releasable always, deployed by decision.</div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 4 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s02n">Prev</a> <a class="tlink" href="#s04">Next</a></span></div></div><div class="sheet" id="s04"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Continuous Integration</h1></div><span class="hmeta">05</span></div></div>
+<h3 class="sec"><span class="n">3 /</span> What Is Continuous Integration</h3>
+<div class="iconrow"><img alt="Git" src="../assets/icons/git/git.svg"/><p class="body"><b>Developers merge small changes into shared <span class="mono">main</span> frequently; every merge triggers an automated build + test + scan.</b> CI answers one question: <i>does this change work?</i></p></div>
+<p class="body"><b>WHEN</b> — on every push and every pull request. <b>HOW</b> — a pipeline job checks out the exact commit, builds it in a clean environment, and reports green or red back to the branch in minutes.</p>
+<div class="mark m-tip"><span class="tag">WHY THIS EXISTS </span><p>Without automated integration, a broken change travels for days before anyone discovers it. CI moves that discovery to within minutes of the commit — when the author still remembers what they did.</p></div>
+<h3 class="sec"><span class="n">4 /</span> What happens without CI/CD</h3>
+<ul class="tight">
+<li><b>Long-lived branches → merge hell.</b> Weeks of divergent work collide; untangling takes days.</li>
+<li><b>"Works on my machine" releases.</b> Testing one thing, shipping another — every deploy a gamble.</li>
+<li><b>Manual testing → bugs reach users.</b> Humans skip steps under pressure.</li>
+<li><b>Manual deploys → release fear.</b> Rare, big, traumatic events nobody runs on Friday.</li>
+<li><b>No feedback loop.</b> The same bug class ships again and again.</li>
+</ul>
+<p class="body">Integration pain is paid <b>minutes per commit</b> with CI/CD, or <b>weeks per release</b> without it.</p>
+<div class="trav"><span>Threads: </span><a href="../threads/#trunk-discipline">Trunk Discipline</a></div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 5 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s03">Prev</a> <a class="tlink" href="#s05">Next</a></span></div></div><div class="sheet" id="s05"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">CI vs CD · Delivery vs Deployment</h1></div><span class="hmeta">06</span></div></div>
+<h3 class="sec"><span class="n">5 /</span> CI vs Delivery vs Deployment</h3>
+<div class="tblwrap"><table class="tb">
+<tr><th></th><th>CI</th><th>Continuous Delivery</th><th>Continuous Deployment</th></tr>
+<tr><td>Question</td><td>Does it work?</td><td>Could we ship it?</td><td>— (ships itself)</td></tr>
+<tr><td>Trigger</td><td>Commit / merge</td><td>Validated artifact</td><td>Validated artifact</td></tr>
+<tr><td>Human gate</td><td>No</td><td>Yes — approval</td><td>No</td></tr>
+<tr><td>Output</td><td>Verified code</td><td>Releasable artifact</td><td>Production deployment</td></tr>
+</table></div>
+<div class="dec">
+<div class="q">DO YOU DEPLOY TO PRODUCTION AUTOMATICALLY?</div>
+<div class="fork">
+<div class="opt y"><b>YES → CONTINUOUS DEPLOYMENT</b>Every passing change ships. Requires progressive delivery + instant rollback.</div>
+<div class="opt n"><b>NO → CONTINUOUS DELIVERY</b>Every passing change is releasable. A human or policy decides when.</div>
+</div>
+</div>
+<div class="mark m-warn"><span class="tag">GOTCHA </span><p>A green build does not mean the application works in production. It means only the checks inside that pipeline passed.</p></div>
+<div class="trav"><span>Threads: </span><a href="../threads/#approval-gates">Approval Gates</a></div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 6 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s04">Prev</a> <a class="tlink" href="#s06">Next</a></span></div></div><div class="sheet" id="s06"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Pipeline &amp; Status</h1></div><span class="hmeta">07</span></div></div>
+<h3 class="sec"><span class="n">6 /</span> Anatomy of a Pipeline</h3>
+<div class="pipeline">
+<div class="stage"><span class="no">01</span> <img alt="Source" src="../assets/icons/git/git.svg"/><small class="st">● PASSED</small><strong>SOURCE</strong><span class="desc">Git push to main</span> </div><div class="connector">→</div>
+<div class="stage"><span class="no">02</span> <img alt="Build" src="../assets/icons/ci-cd/hammer.svg"/><small class="st">● PASSED</small><strong>BUILD</strong><span class="desc">npm ci + build</span> </div><div class="connector">→</div>
+<div class="stage run"><span class="no">03</span> <img alt="Test" src="../assets/icons/testing/flask-conical.svg"/><small class="st">● RUNNING</small><strong>TEST</strong><span class="desc">unit + integration</span> </div><div class="connector">→</div>
+<div class="stage art"><span class="no">04</span> <img alt="Artifact" src="../assets/icons/general/package.svg"/><small class="st">● WAITING</small><strong>ARTIFACT</strong><span class="desc">image:sha-9f3a</span> </div>
+</div>
+<p class="body">Stages are phases, jobs are units of work inside them, steps are single operations, runners are the machines. Progression reads left to right; a red stage blocks everything downstream.</p>
+<div class="tblwrap"><table class="tb">
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td>Pipeline</td><td>The automated workflow</td></tr>
+<tr><td>Stage</td><td>Logical phase (build, test, deploy)</td></tr>
+<tr><td>Job</td><td>Unit of executable work inside a stage</td></tr>
+<tr><td>Step</td><td>Single operation inside a job</td></tr>
+<tr><td>Runner / Agent</td><td>Execution environment running the work</td></tr>
+</table></div>
+<h3 class="sec"><span class="n">7 /</span> The Status System</h3>
+<div class="status">
+<span class="pill"><i class="i-b"></i>● RUNNING</span>
+<span class="pill"><i class="i-g"></i>● PASSED</span>
+<span class="pill"><i class="i-r"></i>● FAILED</span>
+<span class="pill"><i class="i-a"></i>● BLOCKED</span>
+<span class="pill"><i class="i-gr"></i>● WAITING</span>
+<span class="pill"><i class="i-gr"></i>● SKIPPED</span>
+</div>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 7 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s05">Prev</a> <a class="tlink" href="#s07">Next</a></span></div></div><div class="sheet" id="s07"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Environments &amp; Flow</h1></div><span class="hmeta">08</span></div></div>
+<h3 class="sec"><span class="n">8 /</span> Environment Lanes: One Artifact, Three Tracks</h3>
+<div class="lane dev"><div class="lt"><span>DEVELOPMENT</span> <span>BUILD → TEST</span> </div><div class="lb">push <span class="ok">→ build ✓ → unit tests ✓</span> <span class="wt">→ image staged</span> </div></div>
+<div class="lane stg"><div class="lt"><span>STAGING</span> <span>DEPLOY → VERIFY</span> </div><div class="lb">deploy sha-9f3a <span class="ok">→ smoke ✓ → scan ✓</span> <span class="wt">→ awaiting approval</span> </div></div>
+<div class="lane prd"><div class="lt"><span>PRODUCTION</span> <span>APPROVE → DEPLOY</span> </div><div class="lb"><span class="wt">◌ approval gate → deploy same digest → observe</span> </div></div>
+<h3 class="sec"><span class="n">9 /</span> The Deployment Loop</h3>
+<div class="vflow">
+<div class="fnode good"><img alt="Git" src="../assets/icons/git/git.svg"/><b>COMMIT</b><small>developer pushes</small></div><div class="farrow">↓</div>
+<div class="fnode good"><img alt="Pipeline" src="../assets/icons/ci-cd/workflow.svg"/><b>PIPELINE</b><small>build → test → scan</small></div><div class="farrow">↓</div>
+<div class="fnode art"><img alt="Artifact" src="../assets/icons/general/package.svg"/><b>ARTIFACT</b><small>app:sha-9f3a → registry</small></div><div class="farrow">↓</div>
+<div class="fnode gate"><b>APPROVAL</b><small>automation stops — a human decides</small></div><div class="farrow">↓</div>
+<div class="fnode good"><img alt="Deploy" src="../assets/icons/deployment/rocket.svg"/><b>DEPLOY</b><small>same digest to production</small></div><div class="farrow">↓</div>
+<div class="fnode"><img alt="Observe" src="../assets/icons/monitoring/activity.svg"/><b>OBSERVE → FEEDBACK</b><small>metrics → developer → next commit</small></div>
+</div>
+<div class="trav"><span>Threads: </span><a href="../threads/#artifact-digest">Artifact Digest</a> · <a href="../threads/#approval-gates">Approval Gates</a></div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 8 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s06">Prev</a> <a class="tlink" href="#s08">Next</a></span></div></div><div class="sheet" id="s08"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Console</h1></div><span class="hmeta">09</span></div></div>
+<h3 class="sec"><span class="n">10 /</span> From Push to Pipeline</h3>
+<pre class="code"><span class="p">$</span> git push origin main<br/><br/><span class="c">→ pipeline triggered · commit 9f3a2c1</span> <br/><br/>[01] BUILD     <span class="g">PASSED</span>   1m 12s<br/>[02] TEST      <span class="b">RUNNING</span> · 214/300<br/>[03] SCAN      <span class="w">WAITING</span> <br/>[04] ARTIFACT   <span class="w">WAITING</span> </pre>
+<h3 class="sec"><span class="n">11 /</span> Command and Result</h3>
+<div class="cmdres">
+<div class="col"><h4>COMMAND</h4><pre>$ docker build -t registry/app:sha-9f3a .
+$ docker push registry/app:sha-9f3a</pre></div>
+<div class="col"><h4>RESULT</h4><pre>Successfully built 7f91c2
+Successfully tagged sha-9f3a
+Pushed digest sha256:4d…e9</pre></div>
+</div>
+<div class="mark m-key"><span class="tag">WHY IT MATTERS </span> the pushed digest is the frozen, promotable unit. Staging and production deploy this exact hash; nothing is ever rebuilt between environments.</div>
+<div class="trav"><span>Threads: </span><a href="../threads/#artifact-digest">Artifact Digest</a></div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 9 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s07">Prev</a> <a class="tlink" href="#s09">Next</a></span></div></div><div class="sheet" id="s09"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Artifact &amp; Gate</h1></div><span class="hmeta">10</span></div></div>
+<h3 class="sec"><span class="n">12 /</span> The Artifact Identity</h3>
+<div class="vflow">
+<div class="fnode"><img alt="Source code" src="../assets/icons/git/git.svg"/><b>SOURCE CODE</b><small>repo @ 9f3a2c1</small></div><div class="farrow">↓</div>
+<div class="fnode"><img alt="Build" src="../assets/icons/ci-cd/hammer.svg"/><b>BUILD</b><small>npm ci → bundle</small></div><div class="farrow">↓</div>
+<div class="fnode art"><img alt="Artifact" src="../assets/icons/general/package.svg"/><b>ARTIFACT · app:sha-9f3a</b><small>Docker image · JAR · binary · Helm chart</small></div><div class="farrow">↓</div>
+<div class="fnode"><img alt="Registry" src="../assets/icons/general/database.svg"/><b>REGISTRY</b><small>stored, versioned, distributable</small></div><div class="farrow">↓</div>
+<div class="fnode"><img alt="Deploy" src="../assets/icons/deployment/rocket.svg"/><b>DEPLOY</b><small>same digest everywhere</small></div>
+</div>
+<h3 class="sec"><span class="n">13 /</span> The Approval Gate</h3>
+<div class="mark m-key"><span class="tag">AUTOMATED </span> build ✓ · test ✓ · scan ✓ · artifact ✓  →  <b style="color:#a5761a;">◌ APPROVAL — a human decision is required</b>  →  <b>PRODUCTION</b></div>
+<div class="mark m-tip"><span class="tag">CONTEXT — PRODUCER &amp; CONSUMER </span><p>The build pipeline <b>produces</b> the artifact; the deployment pipeline <b>consumes</b> it; the registry <b>stores</b> it. Lifecycle: build → store → promote → deploy. Anything that breaks this chain — a rebuild, a mutable tag, a skipped gate — voids every check upstream.</p></div>
+<div class="trav"><span>Threads: </span><a href="../threads/#artifact-digest">Artifact Digest</a> · <a href="../threads/#approval-gates">Approval Gates</a></div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 10 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s08">Prev</a> <a class="tlink" href="#s10">Next</a></span></div></div><div class="sheet" id="s10"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Failure &amp; Recovery</h1></div><span class="hmeta">11</span></div></div>
+<h3 class="sec"><span class="n">14 /</span> Failure as a State Transition</h3>
+<div class="vflow">
+<div class="fnode good"><img alt="Build passed" src="../assets/icons/ci-cd/hammer.svg"/><b>BUILD ✓</b><small>compiles</small></div><div class="farrow">↓</div>
+<div class="fnode good"><img alt="Tests passed" src="../assets/icons/testing/flask-conical.svg"/><b>TEST ✓</b><small>300/300 pass</small></div><div class="farrow">↓</div>
+<div class="fnode bad"><img alt="Security" src="../assets/icons/security/shield.svg"/><b>SECURITY ✕</b><small>critical CVE in base image</small></div><div class="farrow">↓</div>
+<div class="fnode bad"><img alt="Deployment blocked" src="../assets/icons/deployment/rocket.svg"/><b>DEPLOYMENT BLOCKED</b><small>promotion refused — artifact quarantined</small></div>
+</div>
+<div class="two">
+<div class="mark m-fail"><span class="tag">RECOVERY LOOP </span><p>FAILURE → LOGS → ROOT CAUSE → FIX → NEW COMMIT → PIPELINE. Every incident must land a new check, or it will recur.</p></div>
+<div class="mark m-warn"><span class="tag">GOTCHA </span><p>Never bypass a red gate with an admin override "just this once". The override becomes the process.</p></div>
+</div>
+<div class="trav"><span>Threads: </span><a href="../threads/#artifact-digest">Artifact Digest</a></div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 11 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s09">Prev</a> <a class="tlink" href="#s11">Next</a></span></div></div><div class="sheet" id="s11"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Check &amp; Map</h1></div><span class="hmeta">12</span></div></div>
+<h3 class="sec"><span class="n">15 /</span> Interview Check</h3>
+<div class="qa"><span class="qn">Q1</span> <b>Delivery vs Deployment?</b><br/><span class="ans">Delivery keeps software production-ready behind an approval; Deployment releases validated changes automatically.</span></div>
+<div class="qa"><span class="qn">Q2</span> <b>Why must staging and production share one artifact digest?</b><br/><span class="ans">Otherwise you tested one binary and shipped another — verification is void.</span></div>
+<h3 class="sec"><span class="n">16 /</span> The CI/CD System Map</h3>
+<div class="life">
+<div class="lnode"><img alt="Source" src="../assets/icons/git/git.svg"/><b>SOURCE</b><small>commit</small></div><div class="lconn">→</div>
+<div class="lnode"><img alt="CI" src="../assets/icons/ci-cd/workflow.svg"/><b>CI</b><small>build / test</small></div><div class="lconn">→</div>
+<div class="lnode art"><img alt="Artifact" src="../assets/icons/general/package.svg"/><b>ARTIFACT</b><small>digest</small></div><div class="lconn">→</div>
+<div class="lnode"><img alt="CD" src="../assets/icons/deployment/rocket.svg"/><b>CD</b><small>release</small></div>
+</div>
+<div class="two">
+<div class="mark m-key"><span class="tag">STAGING </span> → ◌ <b>APPROVAL GATE</b> → <b>PRODUCTION</b></div>
+<div class="mark m-key"><span class="tag">OBSERVE </span> → <b>FEEDBACK</b> → next commit</div>
+</div>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>CI/CD in one breath: every merge to <b>main</b> triggers a pipeline that builds, tests and scans in minutes; stages run jobs on runners and produce exactly one <b>immutable artifact digest</b>; <b>Continuous Delivery</b> keeps every change releasable behind an approval, <b>Continuous Deployment</b> ships it; staging and production deploy the <b>same digest</b>; a red gate is never bypassed.</div><p class="small">⏭️ <a class="tlink" href="#s11">⏭️ Next: Source Control</a></p><div class="trav"><span>Threads: </span><a href="../threads/#artifact-digest">Artifact Digest</a> · <a href="../threads/#approval-gates">Approval Gates</a></div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 12 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s10">Prev</a> <a class="tlink" href="#s12">Next</a></span></div></div><div class="sheet" id="s12"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Source Control</h1></div><span class="hmeta">13</span></div></div>
+<p class="lead">Picking up from <em>Foundations</em>, where a Git push triggered the lifecycle — we now examine the machinery of that trigger: <em>branches isolate work, pull requests gate it, triggers fire pipelines</em>.</p>
+<h3 class="sec"><span class="n">01 /</span> What Each Piece Is</h3>
+<div class="iconrow"><img alt="Git" src="../assets/icons/git/git.svg"/><p class="body"><b>Git</b> — distributed version control; every commit is a snapshot with author, message, parent.</p></div>
+<div class="iconrow"><img alt="Branch" src="../assets/icons/ci-cd/workflow.svg"/><p class="body"><b>Branching</b> — an independent line of work (<span class="mono">feature/login</span>) forked from <span class="mono">main</span>.</p></div>
+<div class="iconrow"><img alt="PR" src="../assets/icons/git/github.svg"/><p class="body"><b>Pull Request</b> — a merge proposal combining human review with automated status checks.</p></div>
+<div class="iconrow"><img alt="Trigger" src="../assets/icons/jenkins/webhook.svg"/><p class="body"><b>CI Trigger</b> — the event that starts a pipeline: PR opened/updated, push to <span class="mono">main</span>, schedule, manual.</p></div>
+<h3 class="sec"><span class="n">02 /</span> Why the Gate Exists</h3>
+<p class="body">Direct pushes to <span class="mono">main</span> bypass review and verification. The branch → PR → CI → merge flow makes every change <b>Reviewed, Tested, and Traceable</b> before it can break the pipeline.</p>
+<div class="trav"><span>Threads: </span><a href="../threads/#approval-gates">Approval Gates</a></div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 13 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s11">Prev</a> <a class="tlink" href="#s13">Next</a></span></div></div><div class="sheet" id="s13"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Flow &amp; Commands</h1></div><span class="hmeta">14</span></div></div>
+<h3 class="sec"><span class="n">03 /</span> How the Flow Executes</h3>
+<div class="vflow">
+<div class="fnode good"><img alt="Branch" src="../assets/icons/ci-cd/workflow.svg"/><b>BRANCH</b><small>small logical commits</small></div><div class="farrow">↓</div>
+<div class="fnode good"><img alt="PR" src="../assets/icons/git/github.svg"/><b>PULL REQUEST</b><small>trigger fires</small></div><div class="farrow">↓</div>
+<div class="fnode good"><img alt="Checks" src="../assets/icons/testing/flask-conical.svg"/><b>CHECKS</b><small>build · test · scan post back</small></div><div class="farrow">↓</div>
+<div class="fnode good"><img alt="Merge" src="../assets/icons/git/git.svg"/><b>MERGE</b><small>green + approved only</small></div>
+</div>
+<h3 class="sec"><span class="n">04 /</span> Commands</h3>
+<pre class="code"><span class="p">$</span> git checkout -b feature/login<br/><span class="p">$</span> git add -A &amp;&amp; git commit -m "feat(auth): add login validation"<br/><span class="p">$</span> git push -u origin feature/login<br/><br/><span class="c"># then open the PR — CI trigger fires automatically</span></pre>
+<pre class="code"><span class="c"># .github/workflows trigger: CI on every PR + push to main</span><br/><span class="g">on:</span><br/>  pull_request:<br/>  push:<br/>    branches: [main]</pre>
+<div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 14 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s12">Prev</a> <a class="tlink" href="#s14">Next</a></span></div></div><div class="sheet" id="s14"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Models &amp; Discipline</h1></div><span class="hmeta">15</span></div></div>
+<h3 class="sec"><span class="n">05 /</span> Branching Models</h3>
+<div class="tblwrap"><table class="tb"><tr><th>Model</th><th>Rule</th><th>Best for</th></tr>
+<tr><td>GitHub Flow</td><td>Branch → PR → main → deploy</td><td>CD teams (this series' default)</td></tr>
+<tr><td>Git Flow</td><td><span class="mono">develop</span> + <span class="mono">release/*</span> + <span class="mono">hotfix/*</span></td><td>Versioned releases</td></tr>
+<tr><td>Trunk-Based</td><td>Tiny branches, merge daily</td><td>High-velocity CI</td></tr></table></div>
+<h3 class="sec"><span class="n">06 /</span> Failure Modes &amp; Best Practices</h3>
+<ul class="tight"><li>Long-lived branches → merge hell; fix with trunk-based discipline.</li><li>Red checks ignored; fix with required status checks.</li><li>Merge-queue races; fix with merge queues, linear history.</li></ul>
+<div class="mark m-key"><span class="tag">RULES </span> one logical change per PR (&lt; ~400 lines) · green CI + 1 approval before merge · conventional commits (<span class="mono">feat:</span>, <span class="mono">fix:</span>) so changelogs automate.</div>
+<div class="mark m-warn"><span class="tag">GOTCHA </span><p>"Merging equals deploying" is false. Merging makes a change a <i>candidate</i>; Continuous Delivery decides deployment.</p></div>
+<div class="trav"><span>Threads: </span><a href="../threads/#trunk-discipline">Trunk Discipline</a> · <a href="../threads/#approval-gates">Approval Gates</a></div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 15 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s13">Prev</a> <a class="tlink" href="#s15">Next</a></span></div></div><div class="sheet" id="s15"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Check &amp; Handoff</h1></div><span class="hmeta">16</span></div></div>
+<h3 class="sec"><span class="n">07 /</span> Interview Check</h3>
+<div class="qa"><span class="qn">Q3</span> <b>Explain the PR as a quality gate.</b><br/><span class="ans">Human review (design) + automated checks (correctness) + merge policy (green + approved = mergeable).</span></div>
+<div class="qa"><span class="qn">Q4</span> <b>Map the trigger types.</b><br/><span class="ans">Push, pull request, schedule, manual dispatch, tag/release.</span></div>
+<h3 class="sec"><span class="n">08 /</span> Handoff</h3>
+<p class="body">The trigger fires — now something must execute. This workflow continues in <b>Pipelines, Build, Test &amp; Artifacts</b>, where the triggered pipeline runs build, test, and scan.</p>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Branch small → open a PR → CI verifies → merge on <b>green + approval</b>. <b>Trunk-based</b> is the default: tiny branches, daily merges, flags instead of long branches. <b>Merge queues</b> serialize busy mains; <b>linear history</b> keeps main bisectable. Merging makes a change a <b>candidate</b> — Delivery decides deployment.</div><p class="small">⏭️ <a class="tlink" href="#s15">⏭️ Next: Integration</a></p><div class="trav"><span>Threads: </span><a href="../threads/#approval-gates">Approval Gates</a> · <a href="../threads/#trunk-discipline">Trunk Discipline</a></div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 16 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s14">Prev</a> <a class="tlink" href="#s16">Next</a></span></div></div><div class="sheet" id="s16"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Integration</h1></div><span class="hmeta">17</span></div></div>
+<p class="lead">Picking up from <em>Source Control</em>, where the PR gate was built — CI is <em>the discipline that makes the gate meaningful</em>: integrate daily, verify automatically, fix immediately.</p>
+<h3 class="sec"><span class="n">01 /</span> The Three Habits</h3>
+<div class="vflow">
+<div class="fnode"><img alt="Integrate" src="../assets/icons/git/git.svg"/><b>INTEGRATE</b><small>branches live hours, never weeks</small></div><div class="farrow">↓</div>
+<div class="fnode"><img alt="Verify" src="../assets/icons/testing/flask-conical.svg"/><b>VERIFY</b><small>every merge runs the full gate</small></div><div class="farrow">↓</div>
+<div class="fnode"><img alt="Fix" src="../assets/icons/ci-cd/workflow.svg"/><b>FIX</b><small>red main = top priority, stop the line</small></div>
+</div>
+<p class="body">Integration pain grows with branch age: two-day branches merge in minutes, two-month branches in weeks.</p>
+<div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 17 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s15">Prev</a> <a class="tlink" href="#s17">Next</a></span></div></div><div class="sheet" id="s17"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Gates</h1></div><span class="hmeta">18</span></div></div>
+<h3 class="sec"><span class="n">02 /</span> PR Gates &amp; Merge Queues</h3>
+<ul class="tight"><li><b>PR gate</b> — required checks + approvals in branch protection. No green, no merge. No admin overrides.</li><li><b>Merge queue</b> — serializes merges on busy <span class="mono">main</span>: rebase onto latest green, re-verify, land. Kills the green-on-branch-red-on-main race.</li><li><b>Linear history</b> — rebase/squash keeps <span class="mono">main</span> bisectable: any commit builds and reverts cleanly.</li></ul>
+<h3 class="sec"><span class="n">03 /</span> Trunk Discipline</h3>
+<div class="mark m-key"><span class="tag">RULES </span> tiny branches, daily merges · flags hide unfinished work, not long branches · <span class="mono">main</span> always releasable · whoever breaks it fixes it first · measure merges per dev per week.</div>
+<ul class="tight"><li>Long branches → merge hell (WIP limits + flags).</li><li>Red main normalized → quality collapse (stop-the-line culture).</li><li>Flaky gates → bypassed checks (quarantine flakes, never disable gates).</li></ul>
+<div class="qa"><span class="qn">Q5</span> <b>CI practice vs CI pipeline?</b><br/><span class="ans">Discipline (merge small, verify, fix first) vs machinery (the pipeline that enforces it).</span></div>
+<div class="mark m-key"><span class="tag">DISCIPLINE DETAILS </span> preflight builds validate diffs before landing on <span class="mono">main</span> · rotating build master reverts lingering breakage on large teams · ratcheting gates fail only when warnings or duplication increase.</div>
+<div class="trav"><span>Threads: </span><a href="../threads/#trunk-discipline">Trunk Discipline</a> · <a href="../threads/#approval-gates">Approval Gates</a></div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 18 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s16">Prev</a> <a class="tlink" href="#s18">Next</a></span></div></div><div class="sheet" id="s18"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">Handoff</h1></div><span class="hmeta">19</span></div></div>
+<h3 class="sec"><span class="n">04 /</span> Handoff</h3>
+<p class="body">Small merges, verified automatically, fixed immediately — that discipline feeds every pipeline downstream. Continue in <b>Pipelines, Build, Test &amp; Artifacts</b>.</p>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>CI is <b>discipline plus machinery</b>: integrate daily, verify every merge automatically, fix a red main first. PR gates, merge queues and required checks enforce it; trunk discipline, flags and a releasable main sustain it. <b>Practice versus pipeline</b>: habits versus the automation that enforces them.</div><div class="trav"><span>Threads: </span><a href="../threads/#trunk-discipline">Trunk Discipline</a></div><div class="folio"><span>📘 Start Here · <span class="by">By Nabawy</span></span><span class="fnum">— 19 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s17">Prev</a> <a class="tlink" href="#s19">Next</a></span></div></div><div class="sheet" id="s19"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">📇 Quick Revision — Terms Table</h1></div><span class="hmeta">REF</span></div></div><div class="tblwrap"><table class="tb tight"><tr><td><b>Pipeline</b></td><td>The automated workflow from commit to production.</td></tr><tr><td><b>Stage</b></td><td>A logical phase: build, test, scan, deploy.</td></tr><tr><td><b>Job</b></td><td>A unit of executable work inside a stage.</td></tr><tr><td><b>Step</b></td><td>A single operation inside a job.</td></tr><tr><td><b>Runner</b></td><td>The machine executing jobs; agent in Jenkins.</td></tr><tr><td><b>Artifact</b></td><td>Versioned build output: image, JAR, binary.</td></tr><tr><td><b>Digest</b></td><td>Content hash pinning the exact artifact (sha-9f3a).</td></tr><tr><td><b>Registry</b></td><td>Storage and distribution for artifacts.</td></tr><tr><td><b>Promotion</b></td><td>Approving the same artifact for the next environment.</td></tr><tr><td><b>Gate / Check</b></td><td>A required verification before proceeding.</td></tr></table></div><div class="tblwrap"><table class="tb tight"><tr><td><b>Merge queue</b></td><td>Serializes merges onto latest green main.</td></tr><tr><td><b>Trunk-based</b></td><td>Tiny branches merged daily; flags hide unfinished work.</td></tr><tr><td><b>Branch</b></td><td>An independent line of work forked from main.</td></tr><tr><td><b>Pull request</b></td><td>Merge proposal coupling human review with CI checks.</td></tr><tr><td><b>Trigger</b></td><td>The event starting a pipeline: push, PR, schedule, manual.</td></tr><tr><td><b>Staging</b></td><td>Prod-like rehearsal; deploys automatic.</td></tr><tr><td><b>Production</b></td><td>Real users; deploys gated or automated.</td></tr><tr><td><b>Approval</b></td><td>The human or policy decision releasing to production.</td></tr><tr><td><b>Continuous Delivery</b></td><td>Every change releasable; deployment is a decision.</td></tr><tr><td><b>Continuous Deployment</b></td><td>Every passing change ships by itself.</td></tr></table></div><div class="mark m-key"><span class="tag">KEY IDEA</span>Cover the right column and define each term aloud. Any stumble goes back to its chapter.</div><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a> · <a href="../threads/#artifact-digest">Artifact Digest</a> · <a href="../threads/#approval-gates">Approval Gates</a></div></div><div class="sheet" id="s20"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">🎤 Concept Questions — Distilled Answers</h1></div><span class="hmeta">REF</span></div></div><div class="grid2"><div class="qa"><span class="qn">Q1</span> <b>Delivery vs Deployment?</b><br/><span class="ans">Delivery keeps software production-ready behind an approval; Deployment releases validated changes automatically.</span></div><div class="qa"><span class="qn">Q2</span> <b>Why must staging and production share one artifact digest?</b><br/><span class="ans">Otherwise you tested one binary and shipped another — verification is void.</span></div><div class="qa"><span class="qn">Q3</span> <b>Explain the PR as a quality gate.</b><br/><span class="ans">Human review for design plus automated checks for correctness plus merge policy: green and approved equals mergeable.</span></div><div class="qa"><span class="qn">Q4</span> <b>Name the trigger types.</b><br/><span class="ans">Push, pull request, schedule, manual dispatch, tag or release.</span></div><div class="qa"><span class="qn">Q5</span> <b>CI practice vs CI pipeline?</b><br/><span class="ans">Discipline — merge small, verify, fix first — versus machinery: the pipeline that enforces it.</span></div><div class="qa"><span class="qn">Q6</span> <b>What causes merge hell, and what fixes it?</b><br/><span class="ans">Long-lived divergent branches; trunk-based discipline with tiny daily merges and flags.</span></div><div class="qa"><span class="qn">Q7</span> <b>A green build passed. Does the app work in production?</b><br/><span class="ans">Not necessarily — it means only the checks inside that pipeline passed.</span></div><div class="qa"><span class="qn">Q8</span> <b>Trunk-based vs Git Flow?</b><br/><span class="ans">Trunk: branch to PR to main to deploy, for CD teams. Git Flow: develop plus release branches, for versioned releases.</span></div><div class="qa star"><span class="qn">Q9</span> <b>⭐ Tell me about a checkout that broke main. What did you change?</b><br/><span class="ans">STAR story: red main on a Friday deploy — stopped the line, reverted first, then landed a required check so the class of breakage can never merge again.</span></div></div><div class="trav"><span>Threads: </span><a href="../threads/#approval-gates">Approval Gates</a> · <a href="../threads/#trunk-discipline">Trunk Discipline</a> · <a href="../threads/#artifact-digest">Artifact Digest</a></div></div><div class="sheet" id="s21"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">📌 Command Cheat Sheet</h1></div><span class="hmeta">REF</span></div></div><div class="taskhead">Git</div><div class="tblwrap"><table class="tb tight"><tr><td><code>git checkout -b feat/x</code></td><td>short branch, merge daily</td></tr><tr><td><code>git push -u origin feat/x</code></td><td>publish + trigger CI</td></tr><tr><td><code>gh pr create --fill</code></td><td>PR with CI gate</td></tr></table></div><div class="taskhead">Docker</div><div class="tblwrap"><table class="tb tight"><tr><td><code>docker build -t registry/app:SHA .</code></td><td>versioned image</td></tr><tr><td><code>docker push registry/app:SHA</code></td><td>same digest everywhere</td></tr></table></div><div class="mark m-tip"><span class="tag">NOTE</span>Diagnostic order: red gate first — read the failing check, reproduce locally, fix, re-verify. Never bypass.</div><div class="trav"><span>Threads: </span><a href="../threads/#artifact-digest">Artifact Digest</a></div></div><div class="sheet" id="s22"><div class="pghead"><div class="hrow"><div><div class="kick">START HERE</div><h1 class="t">🧪 Self-Quiz + Answer Key</h1></div><span class="hmeta">REF</span></div></div><div class="grid2"><div class="qa"><span class="qn">Q1</span> <b>What single question does CI answer?</b></div><div class="qa"><span class="qn">Q2</span> <b>Name the six pipeline stages in order.</b></div><div class="qa"><span class="qn">Q3</span> <b>What makes an artifact promotable?</b></div><div class="qa"><span class="qn">Q4</span> <b>Green plus approved equals…</b></div><div class="qa"><span class="qn">Q5</span> <b>What does a merge queue kill?</b></div><div class="qa"><span class="qn">Q6</span> <b>Flags hide unfinished work instead of…</b></div><div class="qa"><span class="qn">Q7</span> <b>Who fixes a red main, and when?</b></div><div class="qa"><span class="qn">Q8</span> <b>Delivery vs Deployment in one line each?</b></div></div><div class="zone"><div class="taskhead">Answer key</div><ol><li>Does this change work?</li><li>Source, build, test, artifact, release, deploy.</li><li>An immutable digest stored versioned in a registry.</li><li>Mergeable.</li><li>The green-on-branch-red-on-main race.</li><li>Long branches.</li><li>Whoever broke it — first, before anything else.</li><li>Delivery: releasable behind a decision. Deployment: shipped automatically.</li></ol></div><div class="mark m-key"><span class="tag">FINAL CHECK</span>Eight for eight from memory, twice in a row — the foundations are yours. Open <b>Pipelines, Build, Test &amp; Artifacts</b> next.</div><div class="trav"><span>Threads: </span><a href="../threads/#artifact-digest">Artifact Digest</a> · <a href="../threads/#trunk-discipline">Trunk Discipline</a></div></div></body></html>

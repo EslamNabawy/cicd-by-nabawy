@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html><head><meta charset="utf-8"/><title>Command Cheatsheet — CICD BY Nabawy</title><style>
+
+:root{
+  --bg:#f2f5f8; --panel:#ffffff; --panel2:#eaf0f4; --ink:#16222e; --dim:#5c6b7a;
+  --line:#dde4ea; --line2:#cbd6de;
+  --teal:#0e7490; --teal-d:#0b5c73; --teal-t:#e3f2f7;
+  --indigo:#4f46e5; --indigo-t:#eef0fd;
+  --ok:#15803d; --ok-t:#e7f5ec;
+  --warn:#b45309; --warn-t:#fdf3e0;
+  --fail:#b91c1c; --fail-t:#fdeaea;
+  --code-bg:#0f1e2b;
+  --shadow:3px 3px 0 rgba(22,34,46,.10);
+}
+*{box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+body{margin:0; background:#e2e8ee; font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif; color:var(--ink);}
+@page{size:A4; margin:0;}
+.sheet{width:210mm; height:297mm; background:var(--bg); margin:9mm auto; padding:13mm 13mm 20mm; position:relative; border:1px solid var(--line2); page-break-after:always; overflow:hidden;}
+.sheet::before{content:''; position:absolute; top:0; left:0; right:0; height:7px; background:linear-gradient(90deg,var(--teal) 0 55%,var(--indigo) 55% 100%);}
+@media print{ body{background:#fff;} .sheet{margin:0; border:none; box-shadow:none;} }
+.mono{font-family:'Consolas','SF Mono',monospace;}
+.pghead{margin:0 0 10px; border-bottom:2px solid var(--ink); padding-bottom:7px;}
+.hrow{display:flex; align-items:flex-start; gap:10px;}
+.kick{font:800 10px 'Consolas',monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--teal); margin-bottom:3px;}
+h1.t{font:800 21px/1.3 'Segoe UI',sans-serif; margin:0; border-left:5px solid var(--teal); padding-left:11px;}
+.hmeta{margin-left:auto; font:800 9.5px 'Consolas',monospace; border:2px solid var(--teal); color:#fff; background:var(--teal); border-radius:4px; padding:2px 9px; white-space:nowrap;}
+.folio{position:absolute; bottom:6mm; left:13mm; right:13mm; display:flex; align-items:center; gap:8px; font:9.5px 'Consolas',monospace; color:var(--dim);}
+.folio::before,.folio::after{content:''; flex:1; border-top:1px solid var(--line2);}
+.folio .fnum{color:var(--ink); font-weight:700;}
+.folio .by{color:var(--teal); font-weight:800;}
+a.tlink{color:var(--teal-d); font-weight:700; text-decoration:none; border-bottom:2px dotted var(--teal);}
+a.backtoc{color:var(--dim); text-decoration:none; border:1.5px solid var(--line2); border-radius:4px; padding:0 6px; font:800 9px 'Consolas',monospace; background:var(--panel);}
+a.backtoc:hover{color:var(--teal); border-color:var(--teal);}
+.taskhead{display:flex; align-items:baseline; gap:9px; font:700 13px 'Segoe UI',sans-serif; margin:11px 0 5px;}
+.taskhead::before{content:'▪'; color:var(--teal);}
+.taskhead::after{content:''; flex:1; border-bottom:2px dotted var(--line2); transform:translateY(-3px);}
+.taskhead .hst{font:400 9.5px 'Consolas',monospace; color:var(--dim);}
+.mark{border-radius:8px; border-left:4px solid; padding:7px 11px; margin:8px 0; font-size:12px; line-height:1.6; background:var(--panel);}
+.mark .tag{display:inline-block; font:800 9.5px 'Consolas',monospace; letter-spacing:.1em; margin-right:6px; color:var(--dim);}
+.m-key{border-color:var(--indigo); background:var(--indigo-t);} .m-key .tag{color:var(--indigo);}
+.m-ok{border-color:var(--ok); background:var(--ok-t);} .m-ok .tag{color:var(--ok);}
+.m-tip{border-color:var(--teal); background:var(--teal-t);} .m-tip .tag{color:var(--teal);}
+.m-warn{border-color:var(--warn); background:var(--warn-t);} .m-warn .tag{color:var(--warn);}
+.m-fail{border-color:var(--fail); background:var(--fail-t);} .m-fail .tag{color:var(--fail);}
+.m-exam{border:2px solid var(--line2); border-left:5px solid var(--teal); background:var(--panel); border-radius:8px; box-shadow:var(--shadow); padding:6px 10px; margin:8px 0; font-size:12px; line-height:1.6;}
+.m-exam .tag{display:inline-block; font:800 9.5px 'Consolas',monospace; letter-spacing:.1em; color:var(--teal); margin-right:6px;}
+.panel{background:var(--panel); border:2px solid var(--line2); border-radius:8px; box-shadow:var(--shadow); padding:9px 12px;}
+.ptitle{font:700 13.5px 'Segoe UI',sans-serif; margin:0 0 5px; color:var(--teal-d);}
+.blk{display:inline-block; border:2px solid var(--line2); border-radius:6px; padding:7px 11px; font-weight:700; font-size:11.5px; text-align:center; background:var(--panel);}
+.blk small{display:block; font-weight:500; font-size:9.5px; margin-top:2px; color:var(--dim);}
+.chipr{display:inline-flex; align-items:center; background:var(--panel); border:2px solid var(--line2); border-radius:6px; padding:3px 10px; font:700 10.5px 'Consolas',monospace; box-shadow:var(--shadow);}
+.chipr small{color:var(--dim);}
+.pill{display:inline-block; border:2px solid var(--teal); color:var(--teal-d); background:var(--teal-t); border-radius:6px; padding:2px 10px; font:700 11px 'Consolas',monospace;}
+.darr{text-align:center; color:var(--teal); font-size:12px; margin:1px 0;}
+.harrow{color:var(--teal); font-size:12px; align-self:center;}
+.frow{display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap;}
+.dnote{text-align:center; font-size:11px; color:var(--dim); margin-top:4px;}
+.zone{border:2px solid var(--line2); border-radius:10px; padding:9px 11px; background:var(--panel); box-shadow:var(--shadow);}
+.code{background:var(--code-bg); color:#dbe9f2; border:2px solid var(--line2); border-radius:8px; box-shadow:var(--shadow); padding:9px 12px; font:11px/1.6 'Consolas','SF Mono',monospace; white-space:pre; overflow-x:auto; text-align:left; max-width:100%; margin:6px 0;}
+.code .p{color:#67e8f9;} .code .g{color:#64748b;} .code .s{color:#86efac;} .code .y{color:#fcd34d;} .code .c{color:#93c5fd;}
+.code.mini{font-size:10px; padding:7px 10px; line-height:1.55; margin:4px 0;}
+.tree{background:var(--code-bg); color:#c9d8e4; border:2px solid var(--line2); border-radius:8px; box-shadow:var(--shadow); padding:10px 14px; font:11px/1.7 'Consolas',monospace; white-space:pre; overflow-x:auto; text-align:left;}
+.tree b{color:#67e8f9;} .tree u{color:#86efac; text-decoration:none;} .tree em{color:#f9a8d4; font-style:normal;} .tree i{color:#93c5fd; font-style:normal;} .tree .g{color:#64748b;}
+.tblwrap{overflow-x:auto;}
+table.tb{width:100%; border-collapse:separate; border-spacing:0; border:2px solid var(--line2); border-radius:8px; overflow:hidden; font-size:11.5px; box-shadow:var(--shadow); background:var(--panel);}
+.tb th{background:var(--ink); color:#fff; border-bottom:3px solid var(--teal); padding:6px 10px; text-align:left; font:800 10.5px 'Segoe UI',sans-serif;}
+.tb td{padding:6px 10px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.55;}
+.tb tr:nth-child(even) td{background:var(--panel2);}
+.tb tr:last-child td{border-bottom:none;}
+.tb.tight{font-size:10.8px;}
+.tb.tight td{padding:4px 9px;}
+.tb.tight th{padding:4px 9px;}
+.tb.rowh td:first-child{font-weight:800; color:var(--teal-d); background:var(--panel2); width:110px;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.grid2>*{min-width:0;}
+.grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px;}
+.grid3>*{min-width:0;}
+.grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
+.grid4>*{min-width:0;}
+h3.sec{font:700 13.5px 'Segoe UI',sans-serif; margin:11px 0 5px;}
+h3.sec .n{color:var(--teal); margin-right:5px; font-family:'Consolas',monospace;}
+p.lead{font-size:12.6px; line-height:1.7; margin:0 0 8px; color:#3d4a56;}
+p.small,li{font-size:11.8px; line-height:1.65;}
+.pillar{border:2px solid var(--line2); border-radius:10px; background:var(--panel); box-shadow:var(--shadow); padding:10px 12px; text-align:center;}
+.pillar .ico{font-size:22px; line-height:1;}
+.pillar b{display:block; font-size:13px; margin:4px 0 2px; color:var(--teal-d);}
+.pillar .q{font-size:10.5px; color:var(--dim); font-style:italic; line-height:1.4;}
+.pillar p{font-size:10.8px; line-height:1.5; margin:5px 0 0; text-align:left;}
+.stbad{display:inline-block; border:2px solid; border-radius:5px; padding:0 8px; font:800 9.5px 'Consolas',monospace;}
+.st-ok{border-color:var(--ok); color:var(--ok); background:var(--ok-t);}
+.st-chg{border-color:var(--warn); color:var(--warn); background:var(--warn-t);}
+.st-fail{border-color:var(--fail); color:var(--fail); background:var(--fail-t);}
+.tocrow{display:flex; align-items:baseline; padding:5px 2px; font-size:12.2px;}
+.tocrow .tnum{font:700 11.5px 'Consolas',monospace; color:var(--teal); width:36px; flex:none;}
+.tocrow .dots{flex:1; border-bottom:2px dotted var(--line2); margin:0 8px 4px;}
+.tocrow .tp{font-weight:800;}
+a.tocrow{color:inherit; text-decoration:none;}
+a.tocrow:hover .tp{color:var(--teal);}
+.tocgrid{display:grid; grid-template-columns:1fr 1fr; gap:0 20px;}
+.lgd{display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:6px;}
+.lgd div{display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600;}
+.dot8{width:10px; height:10px; border:2px solid var(--line2); border-radius:3px; display:inline-block; flex:none;}
+.cover{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:18mm;}
+.cover .band{width:100%; display:flex; justify-content:center; gap:4px; margin-bottom:26px;}
+.cover .bar{width:9px; border-radius:3px 3px 0 0; background:var(--teal); opacity:.85;}
+.cover .ckick{font:800 12px 'Consolas',monospace; letter-spacing:.3em; text-transform:uppercase; color:var(--teal);}
+.cover h1{font:800 44px/1.25 'Segoe UI',sans-serif; margin:12px 0 4px;}
+.cover .sub{font-size:14px; color:var(--dim); max-width:150mm; line-height:1.8;}
+.cover .byline{margin-top:18px; font:800 16px 'Consolas',monospace; color:var(--teal-d); letter-spacing:.08em;}
+.cover .byline small{display:block; font:600 10.5px 'Consolas',monospace; color:var(--dim); margin-top:3px; letter-spacing:.15em;}
+.cover .vols{display:flex; gap:12px; margin-top:22px; flex-wrap:wrap; justify-content:center;}
+.volcard{border:2px solid var(--line2); border-radius:8px; background:var(--panel); box-shadow:var(--shadow); padding:9px 16px; font:800 12.5px 'Segoe UI',sans-serif;}
+.volcard small{display:block; font-weight:600; color:var(--dim); font-size:10px; margin-top:2px;}
+.volcard.on{border-color:var(--teal); background:var(--teal); color:#fff;} .volcard.on small{color:#d3f0f7;}
+.cover .cver{position:absolute; bottom:10mm; left:0; right:0; text-align:center; font:10px 'Consolas',monospace; letter-spacing:.25em; color:var(--dim);}
+.qa{border:2px solid var(--line2); border-radius:6px; background:var(--panel); padding:6px 9px; font-size:10.8px; line-height:1.5;}
+.qa .qn{font:800 10px 'Consolas',monospace; color:var(--teal);}
+.qa .ans{color:#3d4a56;}
+.qa.star{border:2px solid var(--teal); background:var(--teal-t);}
+code{font-family:'Consolas',monospace; background:var(--panel2); border:1px solid var(--line); border-radius:4px; padding:0 5px; font-size:.9em;}
+
+
+@media(max-width:700px){.sheet{padding:10px}.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+
+/* converted-book compat: old structure, SIGNAL look */
+.sheet .body{font-size:14px;line-height:1.7;margin:9px 0;color:var(--ink)}
+.sheet h2.section-title{font:800 19px/1.3 'Segoe UI',sans-serif;margin:16px 0 7px;color:var(--ink)}
+.sheet h2.section-title .n{color:var(--teal);font-family:'Consolas',monospace;margin-right:6px}
+.sheet h2{font:800 19px/1.3 'Segoe UI',sans-serif;margin:16px 0 7px;color:var(--ink)}
+.sheet ul.tight,.sheet ol.tight{margin:8px 0 8px 22px}
+.sheet .tblwrap{overflow-x:auto;margin:8px 0}
+.sheet .volcard{text-decoration:none}
+.code .term-ok,.code .term-blue{color:#7dd3fc}.code .term-out,.code .term-artifact{color:#c9d8e4}
+.code .term-prompt{color:#67e8f9}.code .term-err,.code .term-fail{color:#f87171}
+@media print{.sheet{page-break-after:always}}
+
+:root{--teal:#64748B;--teal-d:#485464;--teal-t:#ebedf0}</style><style>/* print-cover-slim */@media print{.cover{padding-top:9mm}.cover .band{margin-bottom:12px}.cover h1{font-size:38px}.cover .vols{margin-top:12px}.cover .byline{margin-top:12px}}</style><style>/* trav-pills */.trav{font:700 10px Consolas,monospace;color:var(--dim);margin-top:10px}.trav a{color:var(--teal-d);text-decoration:none;border-bottom:1px dotted var(--teal)}</style></head><body><div class="sheet cover" id="s01"><div class="band"><div class="bar" style="height:14px"></div><div class="bar" style="height:30px"></div><div class="bar" style="height:52px"></div><div class="bar" style="height:38px"></div><div class="bar" style="height:64px"></div><div class="bar" style="height:46px"></div><div class="bar" style="height:70px"></div><div class="bar" style="height:28px"></div><div class="bar" style="height:56px"></div><div class="bar" style="height:18px"></div></div><div class="ckick">SIGNAL SERIES · REFERENCE</div><h1>Command Cheatsheet</h1><div class="sub">Every command used across the labs and guides, grouped by tool. Copy-paste ready; details live in the linked chapters.</div><div class="byline">By <span class="sig">Nabawy</span><small>AUTHOR &amp; COMPILER</small></div><div class="vols"><div class="volcard on">Git</div><div class="volcard">npm / Builds</div><div class="volcard">Docker / GHCR</div><div class="volcard">Jenkins (Compose lab)</div><div class="volcard">Jenkins backup</div></div><div class="cver">V4 · 2026 · REFERENCE · verified 2026-09-18</div></div><div class="sheet" id="toc"><div class="pghead"><div class="hrow"><div><div class="kick">Contents</div><h1 class="t">Table of Contents</h1></div><span class="hmeta">8 sheets</span></div></div><div class="tocgrid"><a class="tocrow" href="#s03"><span class="tnum">03</span><span class="tp">Git</span><span class="dots"></span><span>03</span></a><a class="tocrow" href="#s04"><span class="tnum">04</span><span class="tp">npm / Builds</span><span class="dots"></span><span>04</span></a><a class="tocrow" href="#s05"><span class="tnum">05</span><span class="tp">Docker / GHCR</span><span class="dots"></span><span>05</span></a><a class="tocrow" href="#s06"><span class="tnum">06</span><span class="tp">Jenkins (Compose lab)</span><span class="dots"></span><span>06</span></a><a class="tocrow" href="#s07"><span class="tnum">07</span><span class="tp">Jenkins backup</span><span class="dots"></span><span>07</span></a><a class="tocrow" href="#s08"><span class="tnum">08</span><span class="tp">GitHub Actions snippets</span><span class="dots"></span><span>08</span></a><a class="tocrow" href="#s09"><span class="tnum">09</span><span class="tp">Interview Notes</span><span class="dots"></span><span>09</span></a><a class="tocrow" href="#s10"><span class="tnum">10</span><span class="tp">Related Topics</span><span class="dots"></span><span>10</span></a></div><div class="taskhead">How to use this book <span class="hst">legend</span></div><div class="lgd"><div><span class="dot8" style="border-color:#0e7490;background:#e3f2f7"></span>NOTE · context</div><div><span class="dot8" style="border-color:#4f46e5;background:#eef0fd"></span>KEY · must retain</div><div><span class="dot8" style="border-color:#b45309;background:#fdf3e0"></span>WATCH OUT · gotcha</div><div><span class="dot8" style="border-color:#15803d;background:#e7f5ec"></span>VERIFIED · check</div></div><div class="mark m-tip"><span class="tag">NOTE</span>Read cover to cover once, then use the Contents to jump. Every chapter ends with a 🎓 EXAM box — if you can answer it cold, move on.</div><div class="folio"><span>📘 Command Cheatsheet · <span class="by">By Nabawy</span></span><span class="fnum">— 2 —</span><span><a class="tlink" href="#s03">Start ▶</a></span></div></div><div class="sheet" id="s03"><div class="pghead"><div class="hrow"><div><div class="kick">REFERENCE</div><h1 class="t">Git</h1></div><span class="hmeta">03</span></div></div><pre class="code" data-lang="bash">git checkout -b feat/x      # short branch, merge daily
+git push -u origin feat/x
+gh pr create --fill         # PR with CI gate</pre><p class="small">See also: Git, Branching &amp; Pull Requests.</p><div class="folio"><span>📘 Command Cheatsheet · <span class="by">By Nabawy</span></span><span class="fnum">— 3 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> <a class="tlink" href="#s04">Next</a></span></div></div><div class="sheet" id="s04"><div class="pghead"><div class="hrow"><div><div class="kick">REFERENCE</div><h1 class="t">npm / Builds</h1></div><span class="hmeta">04</span></div></div><pre class="code" data-lang="bash">npm ci                      # lockfile-exact install (CI only)
+npm test
+./gradlew build             # wrapper pins toolchain</pre><p class="small">See also: Build Systems.</p><div class="folio"><span>📘 Command Cheatsheet · <span class="by">By Nabawy</span></span><span class="fnum">— 4 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s03">Prev</a> · <a class="tlink" href="#s05">Next</a></span></div></div><div class="sheet" id="s05"><div class="pghead"><div class="hrow"><div><div class="kick">REFERENCE</div><h1 class="t">Docker / GHCR</h1></div><span class="hmeta">05</span></div></div><pre class="code" data-lang="bash">docker build -t ghcr.io/OWNER/APP:sha-SHORT .
+docker push ghcr.io/OWNER/APP:sha-SHORT
+docker pull ghcr.io/OWNER/APP:sha-SHORT   # same digest everywhere</pre><p class="small">See also: Artifact Management.</p><div class="trav"><span>Threads: </span><a href="../threads/#artifact-digest">Artifact Digest</a></div><div class="folio"><span>📘 Command Cheatsheet · <span class="by">By Nabawy</span></span><span class="fnum">— 5 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s04">Prev</a> · <a class="tlink" href="#s06">Next</a></span></div></div><div class="sheet" id="s06"><div class="pghead"><div class="hrow"><div><div class="kick">REFERENCE</div><h1 class="t">Jenkins (Compose lab)</h1></div><span class="hmeta">06</span></div></div><pre class="code" data-lang="bash">docker compose up -d
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+docker compose stop jenkins          # before backup
+docker compose down -v               # destroy everything</pre><p class="small">See also: Lab 06, Lab 08.</p><div class="folio"><span>📘 Command Cheatsheet · <span class="by">By Nabawy</span></span><span class="fnum">— 6 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s05">Prev</a> · <a class="tlink" href="#s07">Next</a></span></div></div><div class="sheet" id="s07"><div class="pghead"><div class="hrow"><div><div class="kick">REFERENCE</div><h1 class="t">Jenkins backup</h1></div><span class="hmeta">07</span></div></div><pre class="code" data-lang="bash">docker run --rm -v LAB_jenkins_home:/data -v "$PWD":/out alpine \
+  tar czf /out/jenkins-backup.tar.gz -C /data .</pre><p class="small">See also: Jenkins Advanced.</p><div class="folio"><span>📘 Command Cheatsheet · <span class="by">By Nabawy</span></span><span class="fnum">— 7 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s06">Prev</a> · <a class="tlink" href="#s08">Next</a></span></div></div><div class="sheet" id="s08"><div class="pghead"><div class="hrow"><div><div class="kick">REFERENCE</div><h1 class="t">GitHub Actions snippets</h1></div><span class="hmeta">08</span></div></div><pre class="code" data-lang="yaml">runs-on: ubuntu-latest
+needs: build                # DAG edge
+permissions: { packages: write }
+environment: production     # approval gate</pre><p class="small">See also: GitHub Actions.</p><div class="trav"><span>Threads: </span><a href="../threads/#approval-gates">Approval Gates</a></div><div class="folio"><span>📘 Command Cheatsheet · <span class="by">By Nabawy</span></span><span class="fnum">— 8 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s07">Prev</a> · <a class="tlink" href="#s09">Next</a></span></div></div><div class="sheet" id="s09"><div class="pghead"><div class="hrow"><div><div class="kick">REFERENCE</div><h1 class="t">Interview Notes</h1></div><span class="hmeta">09</span></div></div><ul class="tight"><li>Reproduce any pipeline in this file from memory: trigger, build, gate, promote, rollback.</li><li>Which snippet pins versions — and what breaks first when nothing is pinned.</li><li>Where the approval gate lives in each platform's snippet, and what happens without it.</li></ul><div class="trav"><span>Threads: </span><a href="../threads/#approval-gates">Approval Gates</a></div><div class="folio"><span>📘 Command Cheatsheet · <span class="by">By Nabawy</span></span><span class="fnum">— 9 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s08">Prev</a> · <a class="tlink" href="#s10">Next</a></span></div></div><div class="sheet" id="s10"><div class="pghead"><div class="hrow"><div><div class="kick">REFERENCE</div><h1 class="t">Related Topics</h1></div><span class="hmeta">10</span></div></div><ul class="tight"><li>[Topic Index](../TOPIC_INDEX.md)</li><li>[Glossary](../GLOSSARY.md)</li></ul><div class="folio"><span>📘 Command Cheatsheet · <span class="by">By Nabawy</span></span><span class="fnum">— 10 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s09">Prev</a> · <a class="tlink" href="#toc">▲ Top</a></span></div><p class="small">⏭️ Cycle back: <a class="tlink" href="../read/start-here.html">Start Here: Foundations, Git &amp; CI</a></p></div></body></html>

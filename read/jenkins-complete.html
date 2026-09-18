@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title>Jenkins Complete — CICD BY Nabawy</title>
+<link rel="icon" type="image/svg+xml" href="https://eslamnabawy.github.io/cicd-by-nabawy/favicon.svg">
+<meta name="description" content="Controller to pipeline to hardening: architecture, setup, Jenkinsfiles, agents, Groovy, credentials, security, backup, triage.">
+<meta name="theme-color" content="#0B0D10">
+<link rel="canonical" href="https://eslamnabawy.github.io/cicd-by-nabawy/read/jenkins-complete.html">
+<meta property="og:title" content="Jenkins Complete — CICD BY Nabawy">
+<meta property="og:description" content="Controller to pipeline to hardening: architecture, setup, Jenkinsfiles, agents, Groovy, credentials, security, backup, triage.">
+<meta property="og:url" content="https://eslamnabawy.github.io/cicd-by-nabawy/read/jenkins-complete.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="CICD BY Nabawy">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Jenkins Complete — CICD BY Nabawy">
+<meta name="twitter:description" content="Controller to pipeline to hardening: architecture, setup, Jenkinsfiles, agents, Groovy, credentials, security, backup, triage.">
+<meta property="og:image" content="https://eslamnabawy.github.io/cicd-by-nabawy/og/jenkins-complete.png">
+<link rel="prefetch" href="platforms-roadmaps.html">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap');
+:root{--bg:#0B0D10;--bg2:#12151a;--card:#12151a;--ink:#ededed;--mut:#a0a0a0;--line:rgba(255,255,255,.1);--line-soft:rgba(255,255,255,.07);--acc:#18E299;--acc-soft:rgba(24,226,153,.12);--brand:#18E299;--warn:#c37d0d;--red:#d45656;--shadow:rgba(0,0,0,.4) 0px 2px 4px;--shadow-btn:rgba(0,0,0,.4) 0px 1px 2px;--shadow-lift:rgba(0,0,0,.5) 0px 12px 28px -8px;--radius:12px;--mono:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+[data-theme=light]{--bg:#ffffff;--bg2:#fafafa;--card:#ffffff;--ink:#0d0d0d;--mut:#666666;--line:rgba(0,0,0,.07);--line-soft:rgba(0,0,0,.05);--acc:#0b9b68;--acc-soft:#d4fae8;--brand:#18E299;--warn:#c37d0d;--red:#d45656;--shadow:rgba(0,0,0,.03) 0px 2px 4px;--shadow-btn:rgba(0,0,0,.06) 0px 1px 2px;--shadow-lift:rgba(0,0,0,.1) 0px 12px 28px -8px;--radius:12px;--mono:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+/* category accents */
+[data-cat="CI/CD"]{--cat:#5B8DEF}[data-cat="Build"]{--cat:#F5A524}[data-cat="Testing"]{--cat:#2ECC71}[data-cat="Security"]{--cat:#E5484D}[data-cat="Reliability"]{--cat:#9B7BF0}[data-cat="Jenkins"]{--cat:#22B8CF}[data-cat="Delivery"]{--cat:#F472B6}[data-cat="GitHub"]{--cat:#94A3B8}[data-cat="Platforms"]{--cat:#F97316}[data-cat="Labs"]{--cat:#EAB308}[data-cat="Reference"]{--cat:#64748B}[data-cat="Series"]{--cat:#18E299}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--ink);text-decoration:none}
+a:hover{color:var(--acc)}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 32px}
+header.top{position:sticky;top:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(255,255,255,.04);z-index:20}
+header.top .wrap{display:flex;align-items:center;gap:10px;max-width:1320px;padding:10px 28px;min-height:58px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.01em;font-size:16px;white-space:nowrap;margin-right:8px}
+.logo svg{flex:none}
+.logo span{color:var(--ink)}
+.search{flex:1;display:flex;max-width:440px;margin:0 auto}
+.search input{flex:1;background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:9px 16px;font-size:14px;outline:none;box-shadow:inset 0 1px 2px rgba(0,0,0,.04)}
+[data-theme=light] .search input{border-color:rgba(0,0,0,.08)}
+.search input:focus{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+.search input::placeholder{color:var(--mut)}
+.search kbd{font-family:var(--mono);font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:6px;padding:1px 7px;margin-left:-44px;align-self:center;pointer-events:none}
+.btn{background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:8px 13px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s ease,border-color .15s ease,transform .15s ease}
+[data-theme=light] .btn{border-color:rgba(0,0,0,.08)}
+.btn:hover{opacity:1;background:var(--bg2);border-color:var(--brand);transform:translateY(-1px)}
+header.top .wrap>.btn[aria-current="page"]{background:var(--acc-soft);border-color:var(--brand);color:var(--brand)}
+header.top #themebtn{min-width:38px;padding-left:9px;padding-right:9px}
+header.top .reader-nav{display:flex;align-items:center;gap:8px}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.hero{padding:64px 24px 44px;text-align:center;position:relative;background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(24,226,153,.16),transparent 70%)}
+.hero .eyebrow{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--brand);background:rgba(24,226,153,.14);border-radius:9999px;padding:5px 14px;margin-bottom:20px}
+[data-theme=light] .hero .eyebrow{color:#0fa76e;background:#d4fae8}
+.hero h1{font-size:clamp(38px,5vw,60px);font-weight:600;letter-spacing:-1px;line-height:1.15;max-width:800px;margin:0 auto}
+.hero h1 span{color:var(--ink)}
+.hero p{color:var(--mut);font-size:18px;line-height:1.5;max-width:640px;margin:16px auto 0}
+.hero .stats{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap;justify-content:center}
+.hero .stats span{font-size:13px;font-weight:500;color:var(--mut);background:var(--card);border:1px solid var(--line-soft);border-radius:9999px;padding:5px 14px}
+.hero .stats b{color:var(--ink);font-weight:600;font-family:var(--mono);font-size:12px}
+#resume{position:fixed;right:20px;bottom:20px;z-index:40;background:var(--ink);color:var(--bg);border-radius:9999px;padding:10px 22px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lift);max-width:min(420px,80vw);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#resume:hover{opacity:.85;color:var(--bg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{position:relative;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);padding:22px 24px 24px;display:flex;flex-direction:column;gap:9px;box-shadow:var(--shadow);overflow:hidden;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+.card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--cat,var(--brand))}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lift);border-color:var(--line)}
+.card .num{font-family:var(--mono);color:var(--mut);font-size:10px;font-weight:500;letter-spacing:.6px;text-transform:uppercase}
+.card h3{font-size:19px;font-weight:600;letter-spacing:-.2px;line-height:1.3}
+.card h3 a{color:var(--ink)}
+.card p{font-size:13.5px;color:var(--mut);flex:1;line-height:1.55}
+.dif{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--ink)}
+.dif i{font-style:normal;width:8px;height:8px;border-radius:50%;background:var(--cat,var(--brand));flex:none}
+.meta-line{font-size:12px;color:var(--mut)}
+.card a.read{margin-top:8px;align-self:flex-start;background:var(--cat,var(--brand));border:2px solid var(--cat,var(--brand));color:#08251b;font-weight:700;font-size:16px;border-radius:9999px;padding:12px 30px;min-height:48px;display:inline-flex;align-items:center;box-shadow:0 3px 10px color-mix(in srgb,var(--cat,var(--brand)) 22%,transparent)}
+.card a.read:hover{background:var(--cat,var(--brand));color:#0B0D10;opacity:1}
+[data-theme=light] .card a.read:hover{color:#fff}
+.card a.read::after{content:" →"}
+.prog{height:5px;background:var(--bg2);border-radius:4px;overflow:hidden}
+.prog b{display:block;height:100%;background:var(--brand)}
+h2.sec{font-size:24px;font-weight:500;letter-spacing:-.24px;margin:64px 0 4px;color:var(--ink)}
+.sub{color:var(--mut);font-size:16px;margin-bottom:24px}
+footer{border-top:1px solid var(--line-soft);margin-top:64px;color:var(--mut);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:var(--radius);padding:30px;text-align:center;color:var(--mut)}
+.empty p{margin:0 0 14px;font-size:14px}
+.empty-cats{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 16px}
+.empty .chip{font-family:var(--mono);font-size:12px;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9999px;border:1px solid var(--line);background:var(--base);color:var(--mut);text-decoration:none}
+.empty .chip:hover{border-color:var(--brand);color:var(--brand)}
+.empty a{color:var(--brand);font-weight:600}
+/* collection: shelf rows */
+.collectlabel{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);margin:56px 0 20px}
+.jumpnav{display:flex;gap:8px;flex-wrap:wrap;margin:-6px 0 30px}
+.jumpnav a{font-size:13px;font-weight:500;background:var(--card);border:1px solid var(--line-soft);border-radius:9999px;padding:5px 14px;color:var(--mut)}
+.jumpnav a:hover{border-color:var(--line);color:var(--ink)}
+.morewrap{text-align:center;margin:8px 0 40px}
+.shelf{margin:0 0 28px}
+.shelf-head{margin-bottom:10px}
+.shelf-head h2{font-size:18px}
+.jumpnav{margin:-2px 0 18px;gap:6px}
+.jumpnav a{font-size:12px;padding:4px 11px}
+.hero{padding:48px 24px 20px}
+.hero h1{font-size:clamp(32px,4.5vw,52px)}
+.hero p{font-size:16px;margin:10px auto 0}
+.shelf-head{display:flex;align-items:baseline;gap:14px;margin-bottom:16px}
+.shelf-head h2{font-size:20px;font-weight:700;letter-spacing:-.2px;padding-bottom:8px;border-bottom:2px solid var(--cat,var(--brand))}
+.shelf-head span{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--mut)}
+.shelf-head .arrows{margin-left:auto;display:flex;gap:8px}
+.shelf-head .arrows button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;cursor:pointer;line-height:1}
+.shelf-head .arrows button:hover{border-color:var(--brand);color:var(--brand)}
+.rail{display:flex;gap:20px;overflow-x:auto;padding:4px 24px 16px 2px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.rail .card{flex:0 0 272px;scroll-snap-align:start}
+.rail .card p{-webkit-line-clamp:3}
+/* roadmap — dense left-aligned editorial timeline */
+.route{list-style:none;position:relative;margin:0;padding:6px 0 10px 36px;display:flex;flex-direction:column;gap:8px}
+.route::before{content:"";position:absolute;top:4px;bottom:4px;left:18px;width:2px;background:var(--line);opacity:.5;border-radius:2px}
+.stop{position:relative;width:auto;margin:0}
+.stop::before{content:attr(data-mile);position:absolute;left:-30px;top:12px;width:24px;height:24px;border-radius:50%;background:var(--card);border:1.5px solid var(--cat,var(--brand));color:var(--ink);font-family:var(--mono);font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.stop .card{margin:0;padding:13px 14px;gap:5px;border-radius:10px;display:grid;grid-template-columns:1fr auto;align-items:center}
+.stop .card .num{grid-column:1 / -1}
+.stop .card h3{grid-column:1;font-size:14.5px;line-height:1.25}
+.stop .card p{grid-column:1;font-size:12px;line-height:1.45;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+.stop .card .dif{grid-column:1}
+.stop .card a.read{grid-column:2;grid-row:2 / 5;align-self:center;margin:0}
+.trip{position:relative;text-align:left;margin:4px 0 6px;padding-left:36px}
+.trip span{font-size:9px;padding:4px 10px}
+@media(max-width:700px){
+.route::before{left:22px}
+.stop{width:auto;margin:0 0 14px 52px}
+.stop:nth-child(even of .stop){margin-left:52px}
+.stop:nth-child(odd of .stop)::before,.stop:nth-child(even of .stop)::before{left:-44px;right:auto}
+.trip{text-align:left;padding-left:8px}
+}
+.cores-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+@media(max-width:1024px){.cores-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.cores-grid{grid-template-columns:1fr}}
+/* reader */
+.rlayout{display:flex;max-width:1320px;margin:0 auto;min-height:100vh;min-height:100dvh}
+aside.toc{width:300px;flex:none;border-right:1px solid var(--line-soft);padding:0 14px 24px;position:sticky;top:57px;height:calc(100vh - 57px);height:calc(100dvh - 57px);overflow:auto;counter-reset:tocsec;scrollbar-width:thin}
+aside.toc .toc-head{position:sticky;top:0;z-index:2;background:var(--bg);margin:0 -14px;padding:20px 14px 12px;border-bottom:1px solid var(--line-soft)}
+aside.toc h4{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--mut)}
+aside.toc a{position:relative;display:block;font-size:13.5px;font-weight:500;color:var(--mut);text-decoration:none;padding:8px 12px 8px 40px;border-radius:10px;line-height:1.45;transition:background .15s ease,color .15s ease,transform .15s ease}
+aside.toc a::before{counter-increment:tocsec;content:counter(tocsec,decimal-leading-zero);position:absolute;left:13px;top:9px;font-family:var(--mono);font-size:10px;color:var(--mut);opacity:.7}
+aside.toc a:hover{color:var(--ink);background:var(--bg2);transform:translateX(2px)}
+aside.toc a:hover::before{opacity:1}
+aside.toc a.cur{background:var(--acc-soft);color:var(--brand);font-weight:700}
+aside.toc a.cur::before{color:var(--brand);opacity:1}
+[data-theme=light] aside.toc a.cur{color:#0fa76e}
+main.read{flex:1;min-width:0;padding:32px 32px 90px}
+.readbody{margin:0 auto;max-width:820px}
+.readbody .page{width:auto !important;min-height:0 !important;margin:0 auto 22px !important;padding:26px !important;border-radius:14px;scroll-margin-top:80px}
+.readbody .page.cover{align-items:flex-start !important}
+.readbody .cover{display:grid;grid-template-columns:1fr !important;max-width:100%}
+.readbody .cover-left{padding:28px 22px !important}
+.readbody .cover-right{padding:28px 22px !important;border-left:none !important;border-top:1px solid #2a2f2d}
+.readbody .cover-title{font-size:34px !important;letter-spacing:-.5px}
+@media(max-width:700px){.readbody .pipeline,.readbody .map-row,.readbody .arch-row,.readbody .dec-branches,.readbody .lab-step,.readbody .v-stage{flex-wrap:wrap}.readbody .pipeline .stage,.readbody .map-box,.readbody .arch-node{flex:1 1 140px;min-width:0}.readbody .pipeline .connector,.readbody .map-arr{flex-shrink:0}.readbody .lab-step .lab-content,.readbody .lab-step .step-body{min-width:0}.readbody .cmdres{grid-template-columns:1fr !important}.readbody .cmdres .col,.readbody .cmdres .res-block,.readbody .cmdres .term-box,.readbody .cmdres .cmd-block{min-width:0}}
+.readbody .cover-sub{font-size:16px !important;margin-bottom:24px !important}
+.readbody .cover h1{font-size:32px !important}
+.readbody .cover .sig{white-space:normal !important}
+.readbody .page,.readbody .cover,.readbody .cover-left,.readbody .cover-right{max-width:100%}
+.readbody pre,.readbody .terminal{position:relative;overflow-x:auto;max-width:100%;scrollbar-width:thin;white-space:pre}
+.readbody code,.readbody .mono{overflow-wrap:anywhere}.readbody .step .mono{overflow-wrap:break-word}
+.readbody .md-fallback{font-size:18px;line-height:var(--lh,1.75)}
+.readbody .md-fallback .body{font-size:18px;line-height:inherit;margin:14px 0}
+.readbody .md-fallback .sec{font-size:27px;line-height:1.25;margin:30px 0 12px}
+.readbody .md-fallback .tight{font-size:17px;line-height:1.7;margin:14px 0 14px 24px}
+.readbody .md-fallback .terminal{font-size:15px;line-height:1.6;padding:16px}
+.readbody .md-fallback.cover h1{font-size:32px;line-height:1.1}
+.copybar{display:flex;justify-content:flex-end;margin:0 0 8px}
+.copybtn{position:static;background:var(--bg);border:1px solid rgba(255,255,255,.14);color:var(--ink);border-radius:9999px;font-size:12px;font-weight:500;padding:4px 12px;cursor:pointer}
+[data-theme=light] .copybtn{border-color:rgba(0,0,0,.08)}
+.copybtn:hover{opacity:.7}
+mark{background:var(--acc-soft);color:var(--ink);border-radius:3px;padding:0 2px}
+.chapnav{display:flex;justify-content:space-between;gap:12px;margin-top:32px}
+.chapnav a{flex:1;background:var(--card);border:1px solid var(--line-soft);border-radius:16px;padding:16px 24px;text-decoration:none;color:var(--ink);font-size:14px;font-weight:500;box-shadow:var(--shadow)}
+.chapnav a:hover{border-color:var(--line)}
+.chapnav a small{display:block;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);margin-bottom:4px}
+.chapnav a.r{text-align:right}
+.drawer{display:none;position:fixed;inset:0;z-index:70}
+.drawer.open{display:block}
+.drawer .scrim{position:absolute;inset:0;background:rgba(0,0,0,.5)}
+.drawer .panel{position:absolute;right:0;top:0;bottom:0;width:320px;background:var(--card);border-left:1px solid var(--line-soft);padding:24px 32px;overflow:auto;box-shadow:var(--shadow)}
+.drawer .panel h3{font-size:20px;font-weight:600;letter-spacing:-.2px;margin-bottom:4px}
+.setrow{margin:20px 0}
+.setrow h5{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);margin-bottom:10px}
+.setrow .opts{display:flex;gap:8px;flex-wrap:wrap}
+.setrow .opts .btn.on{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+.tocbtn{display:inline-flex;align-items:center}
+.pdflink{display:inline-block;margin-top:12px;background:var(--ink);color:var(--bg);border-radius:9999px;padding:8px 24px;text-decoration:none;font-size:14px;font-weight:500;box-shadow:var(--shadow-btn)}
+.pdflink:hover{opacity:.85;color:var(--bg)}
+.crumbs{display:flex;align-items:center;gap:8px;font-size:13.5px;min-width:0}
+.crumbs .here{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
+.crumbs .sep{color:var(--mut)}
+@media(max-width:900px){aside.toc{position:fixed;left:0;top:0;bottom:0;background:var(--card);z-index:60;transform:translateX(-105%);transition:transform .2s;height:100vh;height:100dvh}
+aside.toc.open{transform:none}.tocscrim{display:none}@media(max-width:900px){body.toc-open .tocscrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:55}}
+aside.toc a{padding:11px 12px 11px 40px;font-size:15px}
+.tocbtn{display:inline-block}
+main.read{padding:20px 14px 90px}
+.crumbs .here{max-width:140px}
+.hero{padding:36px 0 6px}
+.chapnav{flex-direction:column}
+.readbody table,.readbody .terminal,table.gloss{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.drawer .panel{width:min(320px,88vw)}}
+aside.toc a{scroll-margin-top:0}
+body.lock{overflow:hidden}
+@media(min-width:901px){body.toc-hide aside.toc{display:none}}
+#fsbar{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));z-index:80;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:8px 10px;gap:5px;box-shadow:var(--shadow-lift);align-items:center;max-width:96vw}
+body.fs #fsbar{display:flex}
+body.fs main.read{padding-top:24px}
+#fsbar .btn{min-height:44px;padding:7px 14px}
+#fsexit-m{display:none;position:fixed;top:12px;right:12px;z-index:90;min-height:44px;min-width:44px;border-radius:12px}
+@media(max-width:900px){body.fs #fsbar{display:none !important}body.fs #fsexit-m{display:inline-flex;align-items:center;justify-content:center}}
+#fs-prog{font-family:var(--mono);font-size:12px;color:var(--mut);padding:0 8px;white-space:nowrap}
+body.fs .topbtn,body.lock .topbtn{display:none !important}
+.toc-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}.toc-head h4{flex:1;min-width:0;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.drawerx{position:static;flex:0 0 auto;width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--line);border-radius:10px;color:var(--mut);font-size:20px;cursor:pointer}
+.drawerx:hover{color:var(--ink);border-color:var(--brand)}
+.readbody .step{list-style:none;display:flex;gap:10px;align-items:flex-start;margin:8px 0}
+.readbody .step input[type=checkbox]{width:22px;height:22px;flex:none;margin-top:2px;accent-color:var(--brand);cursor:pointer;flex:none}.readbody .stephit{display:inline-flex;padding:11px;margin:-11px;cursor:pointer;flex:none}
+.readbody pre,.readbody .terminal{background-image:linear-gradient(to left,rgba(127,127,127,.28),transparent 16px);background-position:right center;background-size:16px 100%;background-repeat:no-repeat;background-attachment:scroll}
+@media(max-width:600px){
+.wrap{padding:16px 14px}
+.search input,#mobileq{font-size:16px}
+.grid{grid-template-columns:1fr}
+.hero .stats{gap:6px}
+main.read{padding:16px 10px 90px}
+.readbody .page{padding:18px !important}
+.btn{min-height:40px}
+.readbody pre,.readbody .terminal{font-size:11px}}
+@media(max-width:480px){
+header.top .wrap{height:56px;min-height:56px;padding:8px 10px;gap:7px;flex-wrap:nowrap}
+header.top .crumbs{flex:1;min-width:0;gap:5px;font-size:12px}
+header.top .crumbs .logo{font-size:13px;gap:4px}
+header.top .crumbs .logo svg{width:17px;height:17px}
+header.top .crumbs .sep,header.top .crumbs .here{display:none}
+header.top .search,header.top #qcount,header.top #markbtn,header.top nav.reader-nav{display:none}
+header.top .mobilemenu{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;font-size:19px}
+header.top #tocbtn{display:inline-flex;order:2;width:78px;height:44px;padding:0;overflow:hidden;font-size:0;align-items:center;justify-content:center;color:transparent}
+header.top #tocbtn::before{content:'Contents';font-size:11px;font-family:var(--mono);color:var(--ink)}
+header.top #backbtn{display:inline-flex;order:3;font-size:12px;padding:5px 9px;min-height:44px;align-items:center}
+.topbtn{right:12px;bottom:14px}
+.mobile-controls,.mobile-search{display:flex;gap:8px;flex-wrap:wrap}
+.mobile-controls .btn{min-height:38px}
+.mobile-search{display:block}.mobile-search label{display:block;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--mut);margin-bottom:7px}.mobile-search input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:9999px;padding:9px 12px}
+}
+/* shared non-reader chrome: keep the landing, shelf, roadmap and glossary
+   inside the viewport instead of letting the nav establish a wide canvas */
+@media(max-width:600px){
+header.top .wrap{min-width:0;max-width:100%;padding:8px 10px;gap:4px;overflow:hidden}
+header.top .logo{font-size:14px;gap:5px;flex:none}
+header.top .logo{margin-right:0}
+header.top .logo span{display:none}
+header.top .search{display:none}
+header.top .btn{padding:5px 7px;font-size:11px;min-height:44px}
+header.top .wrap>.btn{flex:none}
+header.top #themebtn{width:28px;min-width:28px;min-height:44px;padding:0}
+}
+@media(min-width:601px) and (max-width:900px){
+header.top .wrap{min-width:0;max-width:100%;padding:10px 18px;gap:8px;overflow:hidden}
+header.top .search{display:none}
+header.top .btn{padding:6px 11px;font-size:13px;flex:none}
+}
+
+
+/* icon: dark glyphs (github #181717 + currentColor line icons) invert ONLY on dark surfaces; light/sepia keep native dark svg */
+:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="github"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="github"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="workflow"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="hammer"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="package"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="database"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="puzzle"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="server"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="terminal"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="shield"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="activity"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="webhook"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="wrench"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="flask"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="rocket"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="workflow"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="hammer"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="package"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="database"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="puzzle"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="server"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="terminal"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="shield"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="activity"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="webhook"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="wrench"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="flask"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="rocket"]{filter:invert(1) brightness(1.05);}
+/* icon: currentColor line glyphs resolve via OS CanvasText (unreliable) — force black strokes on light surfaces */
+:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="github"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="github"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="workflow"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="hammer"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="package"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="database"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="puzzle"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="server"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="terminal"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="shield"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="activity"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="webhook"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="wrench"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="flask"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="rocket"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="workflow"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="hammer"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="package"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="database"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="puzzle"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="server"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="terminal"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="shield"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="activity"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="webhook"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="wrench"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="flask"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="rocket"]{filter:brightness(0);}
+
+
+@media print{body{background:#fff !important;color:#000 !important}header.top,aside.toc,.drawer,.chapnav,.copybtn,.settingsbar,.copybar,.codehead,.topbtn,#resume,#fsbar,.drawerx{display:none !important}
+main.read{padding:0}.readbody{max-width:none}}
+table.gloss{width:100%;border-collapse:collapse;font-size:14px;margin:16px 0}
+table.gloss td,table.gloss th{border:1px solid var(--line);padding:9px 11px;text-align:left}
+table.gloss th{background:var(--bg2)}
+table.gloss .upd{color:var(--brand);font-weight:700;font-size:11px;white-space:nowrap}
+.gtbar{position:sticky;top:57px;z-index:15;background:var(--bg);padding:10px 0 6px}
+.gtbar input{width:100%;background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:9999px;padding:9px 14px;font-size:14px}
+.az{display:flex;gap:4px;overflow-x:auto;padding:8px 2px 2px;-webkit-overflow-scrolling:touch}
+.az a,.az span.dim{flex:none;min-width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:8px;font-family:var(--mono);font-size:13px;color:var(--ink)}
+.az a{background:var(--card)}
+.az span.dim{opacity:.3}
+table.gloss tr{scroll-margin-top:150px}
+@media(max-width:600px){table.gloss,table.gloss tbody{display:block;width:100%;overflow:visible}table.gloss tr:first-child{display:none}table.gloss tr{display:block;background:var(--card);border:1px solid var(--line-soft);border-radius:12px;margin:0 0 10px;padding:12px 14px}table.gloss td{display:block;border:none;padding:3px 0}table.gloss td:first-child{font-size:16px}table.gloss td:last-child a{display:inline-block;padding:10px 16px;border:1px solid var(--line);border-radius:9999px}.gtbar input{min-height:44px;font-size:16px}.az a,.az span.dim{min-width:44px;height:44px}}
+/* P0: sepia theme + light leak guards + covers + filters + a11y */
+[data-theme=sepia]{--bg:#F6F1E7;--bg2:#EDE3CC;--card:#FFFBF0;--ink:#3B2F1E;--mut:#6F665A;--line:rgba(59,47,30,.16);--line-soft:rgba(59,47,30,.09);--acc:#0B9B68;--acc-soft:rgba(11,155,104,.11);--brand:#0B9B68;--shadow:rgba(59,47,30,.08) 0px 2px 8px;--shadow-btn:rgba(59,47,30,.10) 0px 1px 3px;--shadow-lift:rgba(59,47,30,.16) 0px 16px 32px -10px}
+[data-theme=sepia] .readbody{--paper:#FFFBF0;--white:#FFFBF0;--ink:#3B2F1E;--muted:#6F665A;--line:rgba(59,47,30,.14);--panel:#EDE3CC;--text-light:#3B2F1E}
+[data-theme=light] .readbody{--paper:#ffffff;--white:#ffffff;--ink:#0d0d0d;--muted:#555;--line:rgba(0,0,0,.1);--panel:#f4f4f4;--text-light:#0d0d0d}
+[data-theme=light] .readbody .page,[data-theme=sepia] .readbody .page{background:var(--card) !important;color:var(--ink)}
+[data-theme=light] .readbody pre,[data-theme=light] .readbody .terminal,[data-theme=sepia] .readbody pre,[data-theme=sepia] .readbody .terminal{background:var(--bg2) !important;color:var(--ink);border:1px solid var(--line)}
+.coverart{height:96px;border-radius:10px 10px 0 0;margin:-22px -24px 12px;background:linear-gradient(135deg,var(--cat,#18E299),transparent 140%),repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 2px,transparent 2px 10px),var(--card);border-bottom:1px solid var(--line-soft);display:flex;align-items:flex-end;padding:10px 14px;overflow:hidden}
+.coverart b{font-family:var(--mono);font-size:28px;font-weight:600;letter-spacing:-1px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+[data-theme=light] .coverart b,[data-theme=sepia] .coverart b{color:#fff}
+.filterbar{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 6px;align-items:center}
+.filterbar select,.filterbar input[type=search]{background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:9999px;padding:7px 14px;font-size:13px;outline:none}
+.filterbar .count{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--mut)}
+.toc-l2{padding-left:50px !important}.toc-l3{padding-left:60px !important}.toc-num{font-family:var(--mono);font-size:11px;color:var(--mut);margin-right:6px}
+.codehead{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--mut);margin:12px 0 0;background:var(--bg2);border:1px solid var(--line);border-bottom:none;border-radius:8px 8px 0 0;padding:6px 12px}
+.codehead .dot{width:8px;height:8px;border-radius:50%;background:var(--brand)}
+.codehead button{margin-left:auto;background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:9999px;font-size:11px;padding:2px 10px;cursor:pointer}
+.readbody img{max-width:100%;height:auto;border-radius:8px}
+.readbody img[data-broken]{display:none}
+.imgfallback{display:none;background:var(--bg2);border:1px dashed var(--line);border-radius:8px;padding:12px;font-size:13px;color:var(--mut)}
+@media(max-width:900px){header.top .wrap{gap:10px}.crumbs .here{max-width:110px} .search kbd{display:none}}
+@media(max-width:600px){header.top .wrap{gap:4px}}
+@media(max-width:380px){header.top .wrap>a[href$="glossary.html"]{display:none}}
+
+
+/* icon: dark glyphs (github #181717 + currentColor line icons) invert ONLY on dark surfaces; light/sepia keep native dark svg */
+:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="github"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="github"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="workflow"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="hammer"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="package"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="database"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="puzzle"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="server"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="terminal"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="shield"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="activity"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="webhook"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="wrench"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="flask"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .readbody .page.cover img[src*="rocket"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="workflow"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="hammer"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="package"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="database"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="puzzle"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="server"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="terminal"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="shield"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="activity"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="webhook"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="wrench"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="flask"],:is([data-theme="dark"],[data-theme="dim"],[data-theme="contrast"]) .coverart img[src*="rocket"]{filter:invert(1) brightness(1.05);}
+/* icon: currentColor line glyphs resolve via OS CanvasText (unreliable) — force black strokes on light surfaces */
+:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="github"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="github"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="workflow"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="hammer"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="package"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="database"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="puzzle"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="server"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="terminal"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="shield"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="activity"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="webhook"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="wrench"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="flask"],:is([data-theme="light"],[data-theme="sepia"]) .readbody .page.cover img[src*="rocket"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="workflow"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="hammer"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="package"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="database"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="puzzle"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="server"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="terminal"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="shield"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="activity"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="webhook"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="wrench"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="flask"],:is([data-theme="light"],[data-theme="sepia"]) .coverart img[src*="rocket"]{filter:brightness(0);}
+
+
+@media print{header.top,aside.toc,.drawer,.chapnav,.copybtn,.copybar,.codehead,.filterbar,#resume,.jumpnav,.shelf-head .arrows{display:none !important} body{background:#fff !important;color:#000 !important} .card,.readbody .page{break-inside:avoid;border:1px solid #ccc !important;background:#fff !important;color:#000 !important} main.read{padding:0}.readbody{max-width:none;font-size:12pt}}
+@media(prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;scroll-behavior:auto !important}.rail{scroll-snap-type:none}}
+/* P1: paths + rubric + search dropdown + bookmarks + related + labs + lightbox */
+/* Learning Paths — journey cards reusing the map card system (same gradient/border/shadow tokens, --cat accent, currentColor icons) */
+.pathgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin:16px 0 8px}
+.pathcard{position:relative;background:linear-gradient(135deg,color-mix(in srgb,var(--cat) 7%,var(--card)) 0%,var(--card) 55%);border:1.5px solid color-mix(in srgb,var(--cat) 28%,var(--line-soft));border-radius:16px;padding:0;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px -8px color-mix(in srgb,var(--cat) 18%,transparent),0 2px 10px rgba(0,0,0,.06);display:flex;flex-direction:column}
+.pathcard::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:var(--cat,var(--brand));z-index:2}
+.pathcard-head{display:flex;gap:12px;align-items:flex-start;padding:22px 20px 0}
+.pathcard-head .map-icon{width:42px;height:42px;border-radius:11px;flex:none}
+.pathcard-head .map-icon svg{width:22px;height:22px}
+.pathcard-titles h3{font-size:16px;font-weight:700;letter-spacing:-.2px;line-height:1.25}
+.pathcount{font-family:var(--mono);font-size:11px;color:var(--mut);font-weight:500}
+.pathdesc{font-size:13px;color:var(--mut);line-height:1.55;padding:8px 20px 0}
+.pathsteps{list-style:none;margin:12px 0 0;padding:2px 20px 0;position:relative;display:flex;flex-direction:column}
+.pathstep{position:relative;padding:2px 0 16px 36px;min-height:44px}
+.pathstep::before{content:attr(data-n);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--card);border:1.5px solid var(--cat,var(--brand));color:var(--ink);font-family:var(--mono);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:1}
+.pathstep::after{content:"";position:absolute;left:12px;top:28px;bottom:0;width:2px;background:color-mix(in srgb,var(--cat) 32%,var(--line-soft));border-radius:2px}
+.pathstep:last-child::after{display:none}
+.pathstep.finish::before{background:var(--cat,var(--brand));border-color:var(--cat,var(--brand));color:#0B0D10}
+[data-theme=light] .pathstep.finish::before{color:#fff}
+.pathsteps.long .pathstep{padding-bottom:9px;min-height:38px}
+.steptitle{display:block;font-size:14.5px;font-weight:600;line-height:1.35;color:var(--ink)}
+.steptitle:hover{color:var(--cat,var(--brand))}
+.stepmeta{display:block;font-family:var(--mono);font-size:11px;color:var(--mut);margin-top:3px}
+.finpill{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.4px;background:color-mix(in srgb,var(--cat) 12%,transparent);border:1px solid color-mix(in srgb,var(--cat) 35%,transparent);color:var(--cat);border-radius:9999px;padding:1px 8px;margin-left:6px;white-space:nowrap}
+.difbadge{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:9999px;border:1px solid;color:var(--cat);background:color-mix(in srgb,var(--cat) 10%,var(--bg2));border-color:color-mix(in srgb,var(--cat) 22%,var(--line-soft));white-space:nowrap}
+.difbadge.beg{--cat:#2ECC71}
+.difbadge.int{--cat:#F5A524}
+.difbadge.adv{--cat:#E5484D}
+.pathfoot{display:flex;gap:6px;flex-wrap:wrap;padding:14px 20px 18px;margin-top:auto}
+@media(max-width:600px){.pathgrid{grid-template-columns:1fr}.pathstep{padding-bottom:14px}.pathsteps.long .pathstep{padding-bottom:8px}}
+.rubric{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.rubric div{flex:1;min-width:200px;background:var(--card);border:1px solid var(--line-soft);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--mut)}
+.rubric b{display:block;color:var(--ink);margin-bottom:4px}
+.searchwrap{position:relative}
+.searchdrop{position:absolute;top:110%;left:0;right:0;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-lift);overflow:hidden;z-index:50;display:none;max-height:320px;overflow:auto}
+.searchdrop.open{display:block}
+.searchdrop a{display:block;padding:9px 16px;font-size:14px;border-bottom:1px solid var(--line-soft)}
+.searchdrop a small{display:block;font-size:11px;color:var(--mut)}
+.searchdrop a:hover{background:var(--bg2)}
+.markbtn{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:9999px;font-size:12px;padding:4px 12px;cursor:pointer}
+.markbtn.on{background:var(--acc-soft);border-color:var(--brand);color:var(--brand)}
+.relatedbox{background:var(--card);border:1px solid var(--line-soft);border-radius:14px;padding:18px 22px;margin-top:28px}
+.relatedbox h4{font-family:var(--mono);font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);margin-bottom:12px}
+.relgrid{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin:0;padding:0}
+.relcard{position:relative;display:flex;gap:10px;align-items:flex-start;background:var(--bg2);border:1px solid var(--line-soft);border-left:3px solid var(--cat,var(--brand));border-radius:10px;padding:10px 12px}
+.rel-icon{width:30px;height:30px;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--cat) 12%,var(--bg2));border:1px solid color-mix(in srgb,var(--cat) 18%,var(--line-soft));color:var(--cat)}
+.rel-icon svg{width:16px;height:16px;display:block}
+.rel-main{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.rel-main>a{font-size:13.5px;font-weight:600;line-height:1.35;color:var(--ink)}
+.rel-main>a:hover{color:var(--cat,var(--brand))}
+.rel-meta{font-family:var(--mono);font-size:11px;color:var(--mut);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.rel-why{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--cat)}
+@media(max-width:600px){.relgrid{grid-template-columns:1fr}}
+.upnext{display:flex;justify-content:space-between;gap:10px;background:var(--acc-soft);border:1px solid var(--brand);border-radius:14px;padding:14px 20px;margin-top:20px;font-size:14px}
+.labcheck{list-style:none;margin:12px 0}
+.labcheck li{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line-soft);border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:14px}
+.labcheck li.done{opacity:.6;text-decoration:line-through}
+.labcheck input{margin-top:4px;accent-color:var(--brand)}
+.labbanner{background:var(--acc-soft);border:1px solid var(--brand);border-radius:12px;padding:12px 18px;margin:0 auto 20px;max-width:820px;font-size:14px}
+#lightbox{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:24px}
+#lightbox.open{display:flex}
+#lightbox img{max-width:94vw;max-height:90vh;max-height:90dvh;border-radius:10px}
+.readbody table{border-collapse:collapse}
+.readbody thead th{position:sticky;top:0;background:var(--bg2);z-index:1}
+.readbody tbody tr:nth-child(even){background:rgba(127,127,127,.07)}
+.readbody thead th{position:sticky;top:57px;background:var(--bg2);z-index:2}
+.bookhero{display:flex;gap:26px;flex-wrap:wrap;margin:30px 0}
+.bookhero .coverart{height:190px;flex:0 0 220px;margin:0;border-radius:14px;align-items:center;justify-content:center}
+.bookhero .coverart b{font-size:54px}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.chiprow a,.chiprow span{font-size:12px;border:1px solid var(--line);border-radius:9999px;padding:4px 12px;color:var(--mut)}
+.chiprow a:hover{color:var(--ink);border-color:var(--brand)}
+.outcomes{background:var(--card);border:1px solid var(--line-soft);border-radius:12px;padding:14px 20px;margin:16px 0}
+.outcomes li{margin:4px 0 4px 18px;font-size:14px}
+/* P2.1: recommended-path strip — single cold-start path, distinct from shelves */
+.recstrip{background:var(--card);border:1px solid var(--brand);border-radius:16px;padding:20px 22px;margin:28px 0 8px;box-shadow:var(--shadow)}
+.rec-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.rec-head .eyebrow{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--brand);background:var(--acc-soft);border-radius:9999px;padding:5px 14px}
+.rec-meta{font-family:var(--mono);font-size:11px;color:var(--mut)}
+.rec-steps{list-style:none;display:flex;gap:10px;margin:0 0 14px;padding:0;flex-wrap:wrap}
+.rec-steps li{flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--line-soft);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--mut)}
+.rec-steps li b{display:block;color:var(--ink);font-size:14px;font-weight:600;margin:2px 0}
+.rec-steps li .n{font-family:var(--mono);font-size:11px;color:var(--brand)}
+.rec-steps li a{color:var(--ink)}
+.rec-cta{display:inline-block;background:var(--brand);color:#0B0D10;font-weight:600;font-size:14px;border-radius:9999px;padding:10px 22px}
+[data-theme=light] .rec-cta{color:#fff}
+.rec-cta:hover{opacity:.85;color:#0B0D10}
+[data-theme=light] .rec-cta:hover{color:#fff}
+@media(max-width:700px){.rec-steps{flex-direction:column}.rec-steps li{min-width:0}}
+/* P2.2: reader orientation — breadcrumb + prereq + path position (existing vars only) */
+.upnext{background:var(--card);border:0;border-left:3px solid var(--brand);border-radius:0;padding:14px 18px;margin-top:22px;box-shadow:0 1px 0 var(--line-soft)}
+.labbanner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:0;border-left:3px solid var(--brand);border-radius:0;padding:12px 16px;margin:0 auto 24px;max-width:820px;font-size:14px;box-shadow:0 1px 0 var(--line-soft)}
+.labbanner a{color:var(--brand);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.labbanner .markbtn{margin-left:auto !important;background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:7px;padding:6px 10px}
+/* P2.4: mobile icon-chain reflow (≤480px only, desktop untouched) */
+@media(max-width:480px){
+.readbody .life{flex-direction:column;gap:0}
+.readbody .life .lconn{transform:rotate(90deg);padding:3px 0;align-self:center}
+.readbody .life .lnode{display:flex;align-items:center;gap:10px;text-align:left;padding:8px 12px}
+.readbody .life .lnode img{margin:0;flex:none}
+.readbody .life .lnode b{font-size:11px}
+.readbody .two{grid-template-columns:1fr}.readbody .timeline{flex-wrap:wrap;row-gap:6px}
+.readbody .fnode{font-size:13px}
+.readbody .vflow{margin:8px 0}
+}
+/* P2: typography, reading preferences, and ratings */
+body[data-font=serif] .readbody{font-family:Georgia,'Times New Roman',serif}
+body[data-font=serif] .readbody code,body[data-font=serif] .readbody pre,body[data-font=serif] .readbody .terminal{font-family:var(--mono)}
+.readbody{line-height:var(--lh,1.7)}
+.readback{display:inline-flex;align-items:center;gap:6px;color:var(--mut);text-decoration:none;font-size:13px;font-weight:600;border:1px solid var(--line-soft);border-radius:9999px;padding:5px 12px;white-space:nowrap}
+.readback:hover{color:var(--ink);border-color:var(--line);background:var(--bg2)}
+.topbtn{position:fixed;right:20px;bottom:20px;z-index:40;width:42px;height:42px;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--ink);box-shadow:var(--shadow-lift);font-size:19px;cursor:pointer;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease,visibility .2s ease}
+.topbtn.on{opacity:1;visibility:visible;transform:none}
+.mobilemenu{display:none}
+.reader-nav{display:flex;align-items:center;gap:8px}
+.mobile-controls,.mobile-search{display:none}
+@media(prefers-reduced-motion:reduce){.topbtn{transition:none}}
+.popsearch{font-size:12px;color:var(--mut);margin-top:6px}
+.popsearch a{color:var(--mut);text-decoration:underline;cursor:pointer}
+/* — HOME: SIGNAL contents — */
+.hm-hero{position:relative;border:2px solid var(--line);border-radius:18px;background:var(--card);padding:38px 32px 32px;margin:26px 0 8px;overflow:hidden;box-shadow:var(--shadow-lift)}
+.hm-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:7px;background:linear-gradient(90deg,var(--brand) 0 55%,#4f46e5 55% 100%)}
+.hm-hero::after{content:'';position:absolute;top:-120px;right:-120px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle at center,color-mix(in srgb,var(--brand) 14%,transparent) 0%,transparent 70%);pointer-events:none}
+.hm-hero .hm-sub{position:relative}
+.hm-band{display:flex;justify-content:center;gap:5px;margin-bottom:18px}
+.hm-band i{width:9px;border-radius:3px 3px 0 0;background:var(--brand);opacity:.85;display:block}
+.hm-kick{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:var(--brand);text-align:center}
+.hm-hero h1{font-size:clamp(34px,5vw,54px);font-weight:800;letter-spacing:-1px;text-align:center;margin:10px 0 4px}
+.hm-sub{text-align:center;color:var(--mut);font-size:16px;margin:0 auto;max-width:560px}
+.hm-vols{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:22px}
+.hm-vol{display:inline-flex;align-items:center;gap:9px;border:2px solid var(--line);border-radius:10px;background:var(--bg);padding:9px 16px;font-size:13px;font-weight:700;color:var(--ink);text-decoration:none;transition:border-color .15s,transform .15s,box-shadow .15s;box-shadow:var(--shadow-btn)}
+.hm-vol:hover{border-color:var(--cat);transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+.hm-vol i{width:10px;height:10px;border-radius:3px;background:var(--cat);flex:none}
+.hm-vol .vc{font-family:var(--mono);font-size:10px;color:var(--mut);font-weight:600}
+.hm-label{display:flex;align-items:baseline;gap:12px;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);margin:38px 0 6px;padding-top:8px;border-top:1px solid var(--line-soft)}
+.hm-label::after{content:'';flex:1;border-bottom:2px dotted var(--line)}
+.hm-label .lc{color:var(--cat)}
+.hm-list{display:flex;flex-direction:column;margin:6px 0 14px;max-width:880px}
+.hm-row{display:flex;align-items:center;gap:14px;padding:14px 12px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line-soft);background:var(--bg);transition:background .12s,border-color .12s,transform .12s}
+.hm-row:first-child{border-top:1px solid var(--line-soft)}
+.hm-row:hover{background:var(--bg2);border-color:var(--line);transform:translateX(3px)}
+.hm-row:hover .hm-cat{color:var(--cat)}
+.hm-row:hover .hm-ico{background:color-mix(in srgb,var(--cat) 22%,var(--bg2));color:var(--cat);transform:rotate(-6deg)}
+.hm-row:focus-visible{outline:2px solid var(--cat);outline-offset:2px;border-radius:10px}
+.hm-num{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--cat);width:26px;flex:none;text-align:right;opacity:.85}
+.hm-ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--cat) 12%,var(--bg2));border:1px solid color-mix(in srgb,var(--cat) 18%,var(--line-soft));color:var(--cat);flex:none;transition:background .12s,transform .12s}
+.hm-ico svg{width:22px;height:22px;display:block}
+.hm-main{min-width:0;flex:1}
+.hm-kicker{display:block;font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--cat);margin-bottom:2px}
+.hm-cat{display:block;font-size:17px;font-weight:800;letter-spacing:-.25px;line-height:1.15}
+.hm-desc{display:block;font-size:13px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.hm-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.hm-dots{flex:1;border-bottom:2px dotted var(--line);transform:translateY(-4px);min-width:16px;opacity:.5}
+.hm-go{color:var(--cat);font-weight:800;font-size:18px;opacity:0;transition:opacity .15s,transform .15s;flex:none}
+.hm-row:hover .hm-go,.hm-row:focus-visible .hm-go{opacity:1;transform:translateX(2px)}
+.hm-row.hm-series{background:linear-gradient(180deg,color-mix(in srgb,#18E299 10%,var(--bg)) 0%,var(--bg) 45%);border-color:color-mix(in srgb,#18E299 30%,var(--line))}
+.hm-row.hm-series .hm-ico{background:color-mix(in srgb,#18E299 22%,var(--bg2));color:#18E299}
+.map-pill.dif-beginner{background:color-mix(in srgb,#2ECC71 16%,var(--bg2));border-color:color-mix(in srgb,#2ECC71 30%,var(--line-soft));color:#2ECC71}
+.map-pill.dif-intermediate{background:color-mix(in srgb,#F5A524 16%,var(--bg2));border-color:color-mix(in srgb,#F5A524 30%,var(--line-soft));color:#F5A524}
+.map-pill.dif-advanced{background:color-mix(in srgb,#E5484D 16%,var(--bg2));border-color:color-mix(in srgb,#E5484D 30%,var(--line-soft));color:#E5484D}
+@media(max-width:600px){.hm-desc{display:none}.hm-ico{width:34px;height:34px}.hm-ico svg{width:18px;height:18px}.hm-pills{display:none}.hm-vols{gap:8px}.hm-hero{padding:30px 18px 26px}.hm-meta{font-size:10.5px}}
+.map-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--cat) 12%,var(--bg2));border:1px solid color-mix(in srgb,var(--cat) 18%,var(--line-soft));color:var(--cat);flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+[data-theme=dark] .map-icon,[data-theme=dim] .map-icon{box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.map-icon svg{width:28px;height:28px;display:block}
+.map-pill{font-family:var(--mono);font-size:11px;font-weight:600;padding:3px 9px;border-radius:9999px;background:color-mix(in srgb,var(--cat) 8%,var(--bg2));border:1px solid color-mix(in srgb,var(--cat) 14%,var(--line-soft));color:var(--mut)}
+.map-pill b{color:var(--ink)}
+@media(max-width:600px){
+}
+@media(prefers-reduced-motion:reduce){
+}
+</style><script>try{var _p=JSON.parse(localStorage.getItem('cicdlib:pref')||'null');var _t=_p&&_p.theme;var _ok=['sepia','dark','light','dim','contrast'].indexOf(_t)>=0;document.documentElement.dataset.theme=_ok?_t:'sepia'}catch(e){document.documentElement.dataset.theme='sepia'}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Jenkins Complete", "description": "Controller to pipeline to hardening: architecture, setup, Jenkinsfiles, agents, Groovy, credentials, security, backup, triage.", "url": "https://eslamnabawy.github.io/cicd-by-nabawy/read/jenkins-complete.html", "author": {"@type": "Person", "name": "Nabawy"}, "isPartOf": {"@type": "CollectionPage", "name": "CICD BY Nabawy", "url": "https://eslamnabawy.github.io/cicd-by-nabawy"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Library", "item": "https://eslamnabawy.github.io/cicd-by-nabawy/"}, {"@type": "ListItem", "position": 2, "name": "Jenkins Complete", "item": "https://eslamnabawy.github.io/cicd-by-nabawy/read/jenkins-complete.html"}]}</script>
+<style>
+.readbody{--paper:#f5f6f4;--white:#fff;--ink:#161a19;--muted:#68706d;--line:#d5dad7;--panel:#111614;--panel-2:#1a201d;--text-light:#e8eeeb;--text-muted:#9ca8a3;--accent:#00b87c;--accent-dark:#008f61;--blue:#4387ff;--amber:#d99a24;--red:#d94b4b;--artifact:#8b6cff}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+.readbody{font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+
+@page{size:A4;margin:0}
+
+.page{width:210mm;min-height:297mm;padding:16mm 16mm 19mm;margin:8mm auto;position:relative;background:var(--paper);page-break-after:always;overflow:hidden;display:flex;flex-direction:column}
+
+@media print{.readbody{}.page{margin:0;box-shadow:none}h3.sec,.phead h2{break-after:avoid}table.cmp,.qa,.kv,.callout{break-inside:avoid}}
+
+h3.sec{font-size:23px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;break-after:avoid}
+
+h3.sec .n{color:var(--accent-dark);font-family:"Cascadia Code",Consolas,monospace;font-size:15px;margin-right:10px}
+
+p.body{font-size:14.5px;line-height:1.6;margin:8px 0}
+
+code,.mono{font-family:"SFMono-Regular","Cascadia Code",Consolas,monospace}
+
+.vpipe{display:flex;flex-direction:column;margin:6px 0 26px}
+
+.vnode{display:flex;align-items:center;gap:12px}
+
+.vnode .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--red);box-shadow:0 0 10px rgba(217,75,75,.5);flex:none}
+
+.vnode img{width:26px;height:26px;flex:none}
+
+.vnode b{font-size:12px;letter-spacing:2px}
+
+.vnode small{font-size:10px;color:var(--text-muted)}
+
+.vline{width:2px;height:16px;background:#2c3531;margin-left:6px}
+
+.callout{border-left:3px solid var(--red);background:var(--white);padding:12px 14px;margin:12px 0}
+
+.callout h4{font-size:11px;letter-spacing:2px;color:var(--red);margin-bottom:5px}
+
+.callout p{font-size:13px;line-height:1.6}
+
+ul.tight{font-size:13px;line-height:1.7;margin:8px 0 8px 20px}
+
+ul.tight li{margin-bottom:4px}
+
+/* m-reflow: screen-only mobile reflow; print unaffected */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0 auto;padding:16px 14px 20px}h3.sec{font-size:19px}.opener .bignum{font-size:48px}.cover h1{font-size:32px}.cover .tri{font-size:9px}table.cmp{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}.terminal{font-size:10.5px}.vnode b,.fnode b{font-size:11px}.phead h2{font-size:18px}.step{font-size:12.5px}}
+
+
+
+.readbody{--paper:#f5f6f4;--white:#fff;--ink:#161a19;--muted:#68706d;--line:#d5dad7;--panel:#111614;--panel-2:#1a201d;--text-light:#e8eeeb;--text-muted:#9ca8a3;--accent:#00b87c;--accent-dark:#008f61;--blue:#4387ff;--amber:#d99a24;--red:#d94b4b;--artifact:#8b6cff}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+.readbody{font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+
+@page{size:A4;margin:0}
+
+.page{width:210mm;min-height:297mm;padding:16mm 16mm 19mm;margin:8mm auto;position:relative;background:var(--paper);page-break-after:always;overflow:hidden;display:flex;flex-direction:column}
+
+@media print{.readbody{}.page{margin:0;box-shadow:none}h3.sec,.phead h2{break-after:avoid}.terminal,table.cmp,.qa,.kv,.callout,.vflow{break-inside:avoid}}
+
+h3.sec{font-size:23px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;break-after:avoid}
+
+h3.sec .n{color:var(--accent-dark);font-family:"Cascadia Code",Consolas,monospace;font-size:15px;margin-right:10px}
+
+p.body{font-size:14.5px;line-height:1.6;margin:8px 0}
+
+code,.mono{font-family:"SFMono-Regular","Cascadia Code",Consolas,monospace}
+
+.vpipe{display:flex;flex-direction:column;margin:6px 0 26px}
+
+.vnode{display:flex;align-items:center;gap:12px}
+
+.vnode .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--red);box-shadow:0 0 10px rgba(217,75,75,.5);flex:none}
+
+.vnode.g .dot{border-color:var(--accent);box-shadow:0 0 10px rgba(0,184,124,.55)}
+
+.vnode img{width:26px;height:26px;flex:none}
+
+.vnode b{font-size:12px;letter-spacing:2px}
+
+.vnode small{font-size:10px;color:var(--text-muted)}
+
+.vline{width:2px;height:16px;background:#2c3531;margin-left:6px}
+
+.vflow{margin:10px 0}
+
+.fnode{background:var(--white);border:1px solid var(--line);padding:10px 14px;font-size:12.5px;display:flex;align-items:center;gap:10px}
+
+.fnode img{width:24px;height:24px;flex:none}
+
+.fnode b{letter-spacing:1px;font-size:12px}
+
+.fnode small{color:var(--muted);font-size:11px}
+
+.farrow{text-align:center;color:var(--accent-dark);font-weight:700;line-height:1.1;padding:1px 0}
+
+ul.tight{font-size:13px;line-height:1.7;margin:8px 0 8px 20px}
+
+ul.tight li{margin-bottom:4px}
+
+/* m-reflow: screen-only mobile reflow; print unaffected */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0 auto;padding:16px 14px 20px}h3.sec{font-size:19px}.opener .bignum{font-size:48px}.cover h1{font-size:32px}.cover .tri{font-size:9px}table.cmp{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}.terminal{font-size:10.5px}.vnode b,.fnode b{font-size:11px}.phead h2{font-size:18px}.step{font-size:12.5px}}
+
+
+
+.readbody{--paper:#f5f6f4;--white:#fff;--ink:#161a19;--muted:#68706d;--line:#d5dad7;--panel:#111614;--panel-2:#1a201d;--text-light:#e8eeeb;--text-muted:#9ca8a3;--accent:#00b87c;--accent-dark:#008f61;--blue:#4387ff;--amber:#d99a24;--red:#d94b4b;--artifact:#8b6cff}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+.readbody{font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+
+@page{size:A4;margin:0}
+
+.page{width:210mm;min-height:297mm;padding:16mm 16mm 19mm;margin:8mm auto;position:relative;background:var(--paper);page-break-after:always;overflow:hidden;display:flex;flex-direction:column}
+
+@media print{.readbody{}.page{margin:0;box-shadow:none}h3.sec,.phead h2{break-after:avoid}.terminal,table.cmp,.qa,.kv,.callout{break-inside:avoid}}
+
+h3.sec{font-size:23px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;break-after:avoid}
+
+h3.sec .n{color:var(--accent-dark);font-family:"Cascadia Code",Consolas,monospace;font-size:15px;margin-right:10px}
+
+p.body{font-size:14.5px;line-height:1.6;margin:8px 0}
+
+code,.mono{font-family:"SFMono-Regular","Cascadia Code",Consolas,monospace}
+
+.vpipe{display:flex;flex-direction:column;margin:6px 0 26px}
+
+.vnode{display:flex;align-items:center;gap:12px}
+
+.vnode .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--accent);box-shadow:0 0 10px rgba(0,184,124,.55);flex:none}
+
+.vnode img{width:22px;height:22px;flex:none}
+
+.vnode b{font-size:12px;letter-spacing:2px}
+
+.vnode small{font-size:10px;color:var(--text-muted)}
+
+.vline{width:2px;height:16px;background:#2c3531;margin-left:6px}
+
+.step{background:var(--white);border:1px solid var(--line);border-left:4px solid var(--accent);padding:10px 12px;margin:8px 0;font-size:13px;line-height:1.6}
+
+.step b{color:var(--accent-dark)}
+
+ul.tight{font-size:13px;line-height:1.7;margin:8px 0 8px 20px}
+
+ul.tight li{margin-bottom:4px}
+
+/* m-reflow: screen-only mobile reflow; print unaffected */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0 auto;padding:16px 14px 20px}h3.sec{font-size:19px}.opener .bignum{font-size:48px}.cover h1{font-size:32px}.cover .tri{font-size:9px}table.cmp{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}.terminal{font-size:10.5px}.vnode b,.fnode b{font-size:11px}.phead h2{font-size:18px}.step{font-size:12.5px}}
+
+
+
+.readbody{--paper:#f5f6f4;--white:#fff;--ink:#161a19;--muted:#68706d;--line:#d5dad7;--panel:#111614;--panel-2:#1a201d;--text-light:#e8eeeb;--text-muted:#9ca8a3;--accent:#00b87c;--accent-dark:#008f61;--blue:#4387ff;--amber:#d99a24;--red:#d94b4b;--artifact:#8b6cff}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+.readbody{font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+
+@page{size:A4;margin:0}
+
+.page{width:210mm;min-height:297mm;padding:16mm 16mm 19mm;margin:8mm auto;position:relative;background:var(--paper);page-break-after:always;overflow:hidden;display:flex;flex-direction:column}
+
+@media print{.readbody{}.page{margin:0;box-shadow:none}h3.sec,.phead h2{break-after:avoid}.terminal,table.cmp,.qa,.kv,.callout,.vflow{break-inside:avoid}}
+
+h3.sec{font-size:23px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;break-after:avoid}
+
+h3.sec .n{color:var(--accent-dark);font-family:"Cascadia Code",Consolas,monospace;font-size:15px;margin-right:10px}
+
+p.body{font-size:14.5px;line-height:1.6;margin:8px 0}
+
+code,.mono{font-family:"SFMono-Regular","Cascadia Code",Consolas,monospace}
+
+.vpipe{display:flex;flex-direction:column;margin:6px 0 26px}
+
+.vnode{display:flex;align-items:center;gap:12px}
+
+.vnode .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--accent);box-shadow:0 0 10px rgba(0,184,124,.55);flex:none}
+
+.vnode.purp .dot{border-color:var(--artifact);box-shadow:0 0 10px rgba(139,108,255,.55)}
+
+.vnode.amber .dot{border-color:var(--amber);box-shadow:0 0 10px rgba(217,154,36,.55)}
+
+.vnode img{width:22px;height:22px;flex:none}
+
+.vnode b{font-size:12px;letter-spacing:2px}
+
+.vnode small{font-size:10px;color:var(--text-muted)}
+
+.vline{width:2px;height:16px;background:#2c3531;margin-left:6px}
+
+.vflow{margin:10px 0}
+
+.fnode{background:var(--white);border:1px solid var(--line);padding:10px 14px;font-size:12.5px;display:flex;align-items:center;gap:10px}
+
+.fnode img{width:24px;height:24px;flex:none}
+
+.fnode b{letter-spacing:1px;font-size:12px}
+
+.fnode small{color:var(--muted);font-size:11px}
+
+.fnode.art{border-left:4px solid var(--artifact)}
+
+.fnode.gate{border-left:4px solid var(--amber);background:#fdf8ec}
+
+.farrow{text-align:center;color:var(--accent-dark);font-weight:700;line-height:1.1;padding:1px 0}
+
+ul.tight{font-size:13px;line-height:1.7;margin:8px 0 8px 20px}
+
+ul.tight li{margin-bottom:4px}
+
+/* m-reflow: screen-only mobile reflow; print unaffected */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0 auto;padding:16px 14px 20px}h3.sec{font-size:19px}.opener .bignum{font-size:48px}.cover h1{font-size:32px}.cover .tri{font-size:9px}table.cmp{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}.terminal{font-size:10.5px}.vnode b,.fnode b{font-size:11px}.phead h2{font-size:18px}.step{font-size:12.5px}}
+
+
+
+.readbody{--paper:#f5f6f4;--white:#fff;--ink:#161a19;--muted:#68706d;--line:#d5dad7;--panel:#111614;--panel-2:#1a201d;--text-light:#e8eeeb;--text-muted:#9ca8a3;--accent:#00b87c;--accent-dark:#008f61;--blue:#4387ff;--amber:#d99a24;--red:#d94b4b;--artifact:#8b6cff}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+.readbody{font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+
+@page{size:A4;margin:0}
+
+.page{width:210mm;min-height:297mm;padding:16mm 16mm 19mm;margin:8mm auto;position:relative;background:var(--paper);page-break-after:always;overflow:hidden;display:flex;flex-direction:column}
+
+@media print{.readbody{}.page{margin:0;box-shadow:none}h3.sec,.phead h2{break-after:avoid}.terminal,table.cmp,.qa,.kv,.callout,.vflow{break-inside:avoid}}
+
+h3.sec{font-size:23px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;break-after:avoid}
+
+h3.sec .n{color:var(--accent-dark);font-family:"Cascadia Code",Consolas,monospace;font-size:15px;margin-right:10px}
+
+p.body{font-size:14.5px;line-height:1.6;margin:8px 0}
+
+code,.mono{font-family:"SFMono-Regular","Cascadia Code",Consolas,monospace}
+
+.vpipe{display:flex;flex-direction:column;margin:6px 0 26px}
+
+.vnode{display:flex;align-items:center;gap:12px}
+
+.vnode .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--accent);box-shadow:0 0 10px rgba(0,184,124,.55);flex:none}
+
+.vnode img{width:22px;height:22px;flex:none}
+
+.vnode b{font-size:12px;letter-spacing:2px}
+
+.vnode small{font-size:10px;color:var(--text-muted)}
+
+.vline{width:2px;height:16px;background:#2c3531;margin-left:6px}
+
+.callout{border-left:3px solid var(--red);background:var(--white);padding:12px 14px;margin:12px 0}
+
+.callout h4{font-size:11px;letter-spacing:2px;color:var(--red);margin-bottom:5px}
+
+.callout p{font-size:13px;line-height:1.6}
+
+ul.tight{font-size:13px;line-height:1.7;margin:8px 0 8px 20px}
+
+ul.tight li{margin-bottom:4px}
+
+/* m-reflow: screen-only mobile reflow; print unaffected */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0 auto;padding:16px 14px 20px}h3.sec{font-size:19px}.opener .bignum{font-size:48px}.cover h1{font-size:32px}.cover .tri{font-size:9px}table.cmp{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}.terminal{font-size:10.5px}.vnode b,.fnode b{font-size:11px}.phead h2{font-size:18px}.step{font-size:12.5px}}
+
+
+
+.readbody{--paper:#f5f6f4;--white:#fff;--ink:#161a19;--muted:#68706d;--line:#d5dad7;--panel:#111614;--panel-2:#1a201d;--text-light:#e8eeeb;--text-muted:#9ca8a3;--accent:#00b87c;--accent-dark:#008f61;--blue:#4387ff;--amber:#d99a24;--red:#d94b4b;--artifact:#8b6cff}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+.readbody{font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+
+@page{size:A4;margin:0}
+
+.page{width:210mm;min-height:297mm;padding:16mm 16mm 19mm;margin:8mm auto;position:relative;background:var(--paper);page-break-after:always;overflow:hidden;display:flex;flex-direction:column}
+
+@media print{.readbody{}.page{margin:0;box-shadow:none}h3.sec,.phead h2{break-after:avoid}.terminal,table.cmp,.qa,.kv,.callout{break-inside:avoid}}
+
+h3.sec{font-size:23px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;break-after:avoid}
+
+h3.sec .n{color:var(--accent-dark);font-family:"Cascadia Code",Consolas,monospace;font-size:15px;margin-right:10px}
+
+p.body{font-size:14.5px;line-height:1.6;margin:8px 0}
+
+code,.mono{font-family:"SFMono-Regular","Cascadia Code",Consolas,monospace}
+
+.vpipe{display:flex;flex-direction:column;margin:6px 0 26px}
+
+.vnode{display:flex;align-items:center;gap:12px}
+
+.vnode .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--accent);box-shadow:0 0 10px rgba(0,184,124,.55);flex:none}
+
+.vnode img{width:22px;height:22px;flex:none}
+
+.vnode b{font-size:12px;letter-spacing:2px}
+
+.vnode small{font-size:10px;color:var(--text-muted)}
+
+.vline{width:2px;height:16px;background:#2c3531;margin-left:6px}
+
+ul.tight{font-size:13px;line-height:1.7;margin:8px 0 8px 20px}
+
+ul.tight li{margin-bottom:4px}
+
+/* m-reflow: screen-only mobile reflow; print unaffected */
+@media screen and (max-width:700px){.page{width:auto;min-height:0;margin:0 auto;padding:16px 14px 20px}h3.sec{font-size:19px}.opener .bignum{font-size:48px}.cover h1{font-size:32px}.cover .tri{font-size:9px}table.cmp{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}.terminal{font-size:10.5px}.vnode b,.fnode b{font-size:11px}.phead h2{font-size:18px}.step{font-size:12.5px}}
+
+.readbody{
+  --bg:#f2f5f8; --panel:#ffffff; --panel2:#eaf0f4; --ink:#16222e; --dim:#5c6b7a;
+  --line:#dde4ea; --line2:#cbd6de;
+  --teal:#0e7490; --teal-d:#0b5c73; --teal-t:#e3f2f7;
+  --indigo:#4f46e5; --indigo-t:#eef0fd;
+  --ok:#15803d; --ok-t:#e7f5ec;
+  --warn:#b45309; --warn-t:#fdf3e0;
+  --fail:#b91c1c; --fail-t:#fdeaea;
+  --code-bg:#0f1e2b;
+  --shadow:3px 3px 0 rgba(22,34,46,.10);
+}
+*{box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+.readbody{  font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif; color:var(--ink);}
+@page{size:A4; margin:0;}
+.sheet{width:210mm; height:297mm; background:var(--bg); margin:9mm auto; padding:13mm 13mm 20mm; position:relative; border:1px solid var(--line2); page-break-after:always; overflow:hidden;}
+.sheet::before{content:''; position:absolute; top:0; left:0; right:0; height:7px; background:linear-gradient(90deg,var(--teal) 0 55%,var(--indigo) 55% 100%);}
+@media print{ .readbody{} .sheet{margin:0; border:none; box-shadow:none;} }
+.mono{font-family:'Consolas','SF Mono',monospace;}
+.pghead{margin:0 0 10px; border-bottom:2px solid var(--ink); padding-bottom:7px;}
+.hrow{display:flex; align-items:flex-start; gap:10px;}
+.kick{font:800 10px 'Consolas',monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--teal); margin-bottom:3px;}
+h1.t{font:800 21px/1.3 'Segoe UI',sans-serif; margin:0; border-left:5px solid var(--teal); padding-left:11px;}
+.hmeta{margin-left:auto; font:800 9.5px 'Consolas',monospace; border:2px solid var(--teal); color:#fff; background:var(--teal); border-radius:4px; padding:2px 9px; white-space:nowrap;}
+.folio{position:absolute; bottom:6mm; left:13mm; right:13mm; display:flex; align-items:center; gap:8px; font:9.5px 'Consolas',monospace; color:var(--dim);}
+.folio::before,.folio::after{content:''; flex:1; border-top:1px solid var(--line2);}
+.folio .fnum{color:var(--ink); font-weight:700;}
+.folio .by{color:var(--teal); font-weight:800;}
+a.tlink{color:var(--teal-d); font-weight:700; text-decoration:none; border-bottom:2px dotted var(--teal);}
+a.backtoc{color:var(--dim); text-decoration:none; border:1.5px solid var(--line2); border-radius:4px; padding:0 6px; font:800 9px 'Consolas',monospace; background:var(--panel);}
+a.backtoc:hover{color:var(--teal); border-color:var(--teal);}
+.taskhead{display:flex; align-items:baseline; gap:9px; font:700 13px 'Segoe UI',sans-serif; margin:11px 0 5px;}
+.taskhead::before{content:'▪'; color:var(--teal);}
+.taskhead::after{content:''; flex:1; border-bottom:2px dotted var(--line2); transform:translateY(-3px);}
+.taskhead .hst{font:400 9.5px 'Consolas',monospace; color:var(--dim);}
+.mark{border-radius:8px; border-left:4px solid; padding:7px 11px; margin:8px 0; font-size:12px; line-height:1.6; background:var(--panel);}
+.mark .tag{display:inline-block; font:800 9.5px 'Consolas',monospace; letter-spacing:.1em; margin-right:6px; color:var(--dim);}
+.m-key{border-color:var(--indigo); background:var(--indigo-t);} .m-key .tag{color:var(--indigo);}
+.m-ok{border-color:var(--ok); background:var(--ok-t);} .m-ok .tag{color:var(--ok);}
+.m-tip{border-color:var(--teal); background:var(--teal-t);} .m-tip .tag{color:var(--teal);}
+.m-warn{border-color:var(--warn); background:var(--warn-t);} .m-warn .tag{color:var(--warn);}
+.m-fail{border-color:var(--fail); background:var(--fail-t);} .m-fail .tag{color:var(--fail);}
+.m-exam{border:2px solid var(--line2); border-left:5px solid var(--teal); background:var(--panel); border-radius:8px; box-shadow:var(--shadow); padding:6px 10px; margin:8px 0; font-size:12px; line-height:1.6;}
+.m-exam .tag{display:inline-block; font:800 9.5px 'Consolas',monospace; letter-spacing:.1em; color:var(--teal); margin-right:6px;}
+.panel{background:var(--panel); border:2px solid var(--line2); border-radius:8px; box-shadow:var(--shadow); padding:9px 12px;}
+.ptitle{font:700 13.5px 'Segoe UI',sans-serif; margin:0 0 5px; color:var(--teal-d);}
+.blk{display:inline-block; border:2px solid var(--line2); border-radius:6px; padding:7px 11px; font-weight:700; font-size:11.5px; text-align:center; background:var(--panel);}
+.blk small{display:block; font-weight:500; font-size:9.5px; margin-top:2px; color:var(--dim);}
+.chipr{display:inline-flex; align-items:center; background:var(--panel); border:2px solid var(--line2); border-radius:6px; padding:3px 10px; font:700 10.5px 'Consolas',monospace; box-shadow:var(--shadow);}
+.chipr small{color:var(--dim);}
+.pill{display:inline-block; border:2px solid var(--teal); color:var(--teal-d); background:var(--teal-t); border-radius:6px; padding:2px 10px; font:700 11px 'Consolas',monospace;}
+.darr{text-align:center; color:var(--teal); font-size:12px; margin:1px 0;}
+.harrow{color:var(--teal); font-size:12px; align-self:center;}
+.frow{display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap;}
+.dnote{text-align:center; font-size:11px; color:var(--dim); margin-top:4px;}
+.zone{border:2px solid var(--line2); border-radius:10px; padding:9px 11px; background:var(--panel); box-shadow:var(--shadow);}
+.code{background:var(--code-bg); color:#dbe9f2; border:2px solid var(--line2); border-radius:8px; box-shadow:var(--shadow); padding:9px 12px; font:11px/1.6 'Consolas','SF Mono',monospace; white-space:pre; overflow-x:auto; text-align:left; max-width:100%; margin:6px 0;}
+.code .p{color:#67e8f9;} .code .g{color:#64748b;} .code .s{color:#86efac;} .code .y{color:#fcd34d;} .code .c{color:#93c5fd;}
+.code.mini{font-size:10px; padding:7px 10px; line-height:1.55; margin:4px 0;}
+.tree{background:var(--code-bg); color:#c9d8e4; border:2px solid var(--line2); border-radius:8px; box-shadow:var(--shadow); padding:10px 14px; font:11px/1.7 'Consolas',monospace; white-space:pre; overflow-x:auto; text-align:left;}
+.tree b{color:#67e8f9;} .tree u{color:#86efac; text-decoration:none;} .tree em{color:#f9a8d4; font-style:normal;} .tree i{color:#93c5fd; font-style:normal;} .tree .g{color:#64748b;}
+.tblwrap{overflow-x:auto;}
+table.tb{width:100%; border-collapse:separate; border-spacing:0; border:2px solid var(--line2); border-radius:8px; overflow:hidden; font-size:11.5px; box-shadow:var(--shadow); background:var(--panel);}
+.tb th{background:var(--ink); color:#fff; border-bottom:3px solid var(--teal); padding:6px 10px; text-align:left; font:800 10.5px 'Segoe UI',sans-serif;}
+.tb td{padding:6px 10px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.55;}
+.tb tr:nth-child(even) td{background:var(--panel2);}
+.tb tr:last-child td{border-bottom:none;}
+.tb.tight{font-size:10.8px;}
+.tb.tight td{padding:4px 9px;}
+.tb.tight th{padding:4px 9px;}
+.tb.rowh td:first-child{font-weight:800; color:var(--teal-d); background:var(--panel2); width:110px;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.grid2>*{min-width:0;}
+.grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px;}
+.grid3>*{min-width:0;}
+.grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
+.grid4>*{min-width:0;}
+h3.sec{font:700 13.5px 'Segoe UI',sans-serif; margin:11px 0 5px;}
+h3.sec .n{color:var(--teal); margin-right:5px; font-family:'Consolas',monospace;}
+p.lead{font-size:12.6px; line-height:1.7; margin:0 0 8px; color:#3d4a56;}
+p.small,li{font-size:11.8px; line-height:1.65;}
+.pillar{border:2px solid var(--line2); border-radius:10px; background:var(--panel); box-shadow:var(--shadow); padding:10px 12px; text-align:center;}
+.pillar .ico{font-size:22px; line-height:1;}
+.pillar b{display:block; font-size:13px; margin:4px 0 2px; color:var(--teal-d);}
+.pillar .q{font-size:10.5px; color:var(--dim); font-style:italic; line-height:1.4;}
+.pillar p{font-size:10.8px; line-height:1.5; margin:5px 0 0; text-align:left;}
+.stbad{display:inline-block; border:2px solid; border-radius:5px; padding:0 8px; font:800 9.5px 'Consolas',monospace;}
+.st-ok{border-color:var(--ok); color:var(--ok); background:var(--ok-t);}
+.st-chg{border-color:var(--warn); color:var(--warn); background:var(--warn-t);}
+.st-fail{border-color:var(--fail); color:var(--fail); background:var(--fail-t);}
+.tocrow{display:flex; align-items:baseline; padding:5px 2px; font-size:12.2px;}
+.tocrow .tnum{font:700 11.5px 'Consolas',monospace; color:var(--teal); width:36px; flex:none;}
+.tocrow .dots{flex:1; border-bottom:2px dotted var(--line2); margin:0 8px 4px;}
+.tocrow .tp{font-weight:800;}
+a.tocrow{color:inherit; text-decoration:none;}
+a.tocrow:hover .tp{color:var(--teal);}
+.tocgrid{display:grid; grid-template-columns:1fr 1fr; gap:0 20px;}
+.lgd{display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:6px;}
+.lgd div{display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600;}
+.dot8{width:10px; height:10px; border:2px solid var(--line2); border-radius:3px; display:inline-block; flex:none;}
+.cover{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:18mm;}
+.cover .band{width:100%; display:flex; justify-content:center; gap:4px; margin-bottom:26px;}
+.cover .bar{width:9px; border-radius:3px 3px 0 0; background:var(--teal); opacity:.85;}
+.cover .ckick{font:800 12px 'Consolas',monospace; letter-spacing:.3em; text-transform:uppercase; color:var(--teal);}
+.cover h1{font:800 44px/1.25 'Segoe UI',sans-serif; margin:12px 0 4px;}
+.cover .sub{font-size:14px; color:var(--dim); max-width:150mm; line-height:1.8;}
+.cover .byline{margin-top:18px; font:800 16px 'Consolas',monospace; color:var(--teal-d); letter-spacing:.08em;}
+.cover .byline small{display:block; font:600 10.5px 'Consolas',monospace; color:var(--dim); margin-top:3px; letter-spacing:.15em;}
+.cover .vols{display:flex; gap:12px; margin-top:22px; flex-wrap:wrap; justify-content:center;}
+.volcard{border:2px solid var(--line2); border-radius:8px; background:var(--panel); box-shadow:var(--shadow); padding:9px 16px; font:800 12.5px 'Segoe UI',sans-serif;}
+.volcard small{display:block; font-weight:600; color:var(--dim); font-size:10px; margin-top:2px;}
+.volcard.on{border-color:var(--teal); background:var(--teal); color:#fff;} .volcard.on small{color:#d3f0f7;}
+.cover .cver{position:absolute; bottom:10mm; left:0; right:0; text-align:center; font:10px 'Consolas',monospace; letter-spacing:.25em; color:var(--dim);}
+.qa{border:2px solid var(--line2); border-radius:6px; background:var(--panel); padding:6px 9px; font-size:10.8px; line-height:1.5;}
+.qa .qn{font:800 10px 'Consolas',monospace; color:var(--teal);}
+.qa .ans{color:#3d4a56;}
+.qa.star{border:2px solid var(--teal); background:var(--teal-t);}
+code{font-family:'Consolas',monospace; background:var(--panel2); border:1px solid var(--line); border-radius:4px; padding:0 5px; font-size:.9em;}
+
+
+@media(max-width:700px){.sheet{padding:10px}.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+/* converted-book compat: old structure, SIGNAL look */
+.sheet .body{font-size:14px;line-height:1.7;margin:9px 0;color:var(--ink)}
+.sheet h2.section-title{font:800 19px/1.3 'Segoe UI',sans-serif;margin:16px 0 7px;color:var(--ink)}
+.sheet h2.section-title .n{color:var(--teal);font-family:'Consolas',monospace;margin-right:6px}
+.sheet h2{font:800 19px/1.3 'Segoe UI',sans-serif;margin:16px 0 7px;color:var(--ink)}
+.sheet ul.tight,.sheet ol.tight{margin:8px 0 8px 22px}
+.sheet .tblwrap{overflow-x:auto;margin:8px 0}
+.sheet .volcard{text-decoration:none}
+.code .term-ok,.code .term-blue{color:#7dd3fc}.code .term-out,.code .term-artifact{color:#c9d8e4}
+.code .term-prompt{color:#67e8f9}.code .term-err,.code .term-fail{color:#f87171}
+@media print{.sheet{page-break-after:always}}
+.readbody{--teal:#22B8CF;--teal-d:#188495;--teal-t:#e2f6f9}
+/* reader overrides */
+.readbody .page:not(.cover){width:auto !important;min-height:0 !important;margin:0 auto !important;padding:10px 26px !important;background:transparent !important;border-radius:0;page-break-after:auto !important;overflow:visible}
+.readbody .page.cover{align-items:flex-start !important;border-radius:16px;padding:48px 34px !important;margin:0 auto 30px !important}
+.readbody .sheet{width:auto !important;height:auto !important;min-height:0 !important;margin:0 auto 22px !important;padding:26px !important;border-radius:14px;page-break-after:auto !important;overflow:visible}
+.readbody .sheet::before{display:none}
+.readbody .sheet.cover{min-height:0 !important}
+.readbody .sheet.cover .cver{position:static !important;margin-top:26px}
+.readbody .folio{position:static !important;margin:14px 0 0}
+.readbody .sheet,.readbody h2,.readbody h3,.readbody h4{scroll-margin-top:78px}
+body.fs header.top,body.fs aside.toc,body.fs .tocscrim,body.fs #resume,body.fs .chapnav{display:none !important}
+body.fs .rlayout{max-width:none}
+body.fs main.read{padding:26px 22px 120px}
+body.fs .readbody{max-width:880px}
+.readbody .page.opener .bignum{margin-top:30px}
+[data-theme=dark] .readbody{--paper:#10161d;--white:#151c25;--ink:#e6edf3;--muted:#8b949e;--line:#26303d;--panel:#0a0e14;--text-light:#e6edf3}
+[data-theme=dark] .readbody table.cmp td:first-child{background:var(--white)}
+[data-theme=dark] .readbody .fnode.gate{background:rgba(217,154,36,.12)}
+[data-theme=dark] .readbody .i-gr{background:var(--muted)}
+/* SIGNAL theme layer: all book colors flow from :root vars, remapped per theme */
+[data-theme=dark] .readbody{--bg:#0d141b;--panel:#151e28;--panel2:#1b2634;--ink:#e6edf3;--dim:#8b98a9;--line:#2a3644;--line2:#333f4e;--code-bg:#0f1e2b;--teal:#2dd4bf;--teal-d:#5eead4;--teal-t:#123a45;--indigo:#a5b4fc;--indigo-t:#232350;--ok:#4ade80;--ok-t:#123a24;--warn:#fbbf24;--warn-t:#3f2c12;--fail:#f87171;--fail-t:#3f1a1a}
+[data-theme=dark] .readbody p.lead,[data-theme=dark] .readbody .qa .ans{color:#b8c4d0}
+[data-theme=dark] .readbody table.tb th{background:#1b2634;color:#e6edf3}
+[data-theme=sepia] .readbody{--bg:#f2ecdf;--panel:#fffaf0;--panel2:#ece2cc;--ink:#3B2F1E;--dim:#6F665A;--line:rgba(59,47,30,.16);--line2:rgba(59,47,30,.28);--teal-t:#e2ece5;--indigo-t:#e6e6f5;--ok-t:#e2efe4;--warn-t:#f5ecd9;--fail-t:#f5e3e3}
+[data-theme=sepia] .readbody p.lead,[data-theme=sepia] .readbody .qa .ans{color:#6F665A}
+[data-theme=light] .readbody{--bg:#f2f5f8;--panel:#ffffff;--panel2:#eaf0f4;--ink:#16222e;--dim:#5c6b7a;--line:#dde4ea;--line2:#cbd6de;--code-bg:#0f1e2b}
+</style>
+</head>
+<body data-book="jenkins-complete">
+<header class="top"><div class="wrap">
+<button class="btn tocbtn" id="tocbtn" aria-label="Open table of contents">☰ Contents · 60</button>
+<nav class="crumbs"><a class="logo" href="../index.html" style="color:inherit"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="2.6" stroke="#18E299" stroke-width="2"/><circle cx="19" cy="6" r="2.6" stroke="#18E299" stroke-width="2"/><circle cx="19" cy="18" r="2.6" stroke="#18E299" stroke-width="2"/><path d="M7.6 12h5.2m0 0-2.6-2.6m2.6 2.6-2.6 2.6M13.4 7.4l2.8-1M13.4 16.6l2.8 1" stroke="#18E299" stroke-width="2" stroke-linecap="round"/></svg>CICD<span> BY Nabawy</span></a>
+<span class="sep">/</span>
+<span class="here">Jenkins Complete</span></nav>
+<div class="search"><input id="q" type="search" placeholder="Find in this book…" aria-label="Find in this book"><kbd>⌘K</kbd></div>
+<span id="qcount" style="font-size:12px;color:var(--mut)"></span>
+<a class="readback btn reader-nav" id="backbtn" href="../index.html">← Back</a>
+<nav class="reader-nav" aria-label="Reader navigation"><a class="btn" href="../index.html" style="text-decoration:none">Home</a>
+<a class="btn" href="../threads/" style="text-decoration:none">Threads</a>
+<a class="btn" href="../tools/" style="text-decoration:none">Tools</a>
+</nav>
+<button class="btn" id="fsbtn" aria-label="Toggle fullscreen">⛶</button>
+<button class="btn" id="themebtn" aria-label="Cycle theme">◐</button>
+<button class="btn mobilemenu" id="mobilemenubtn" aria-label="Open reader menu" aria-expanded="false">☰</button>
+</div>
+<div class="prog" style="height:3px;background:var(--line)"><b id="pbar" style="display:block;height:100%;width:0;background:var(--acc)"></b></div>
+</header>
+<div class="rlayout">
+<aside class="toc" role="dialog" aria-modal="false" aria-label="Table of contents"><div class="toc-head"><h4>CONTENTS · 39 PAGES · 60 SECTIONS</h4><button class="drawerx" id="tocx" aria-label="Close contents">×</button></div><a href="#p1" class="toc-l1" aria-label="Cover — JENKINSCOMPLETE">Cover — JENKINSCOMPLETE</a><a href="#p2" class="toc-l1" aria-label="Cover — Table of Contents">Cover — Table of Contents</a><a href="#p3-h1" class="toc-l2" aria-label="1 01 / Why Jenkins">1 01 / Why Jenkins</a><a href="#p3-h2" class="toc-l2" aria-label="2 02 / Concept Map">2 02 / Concept Map</a><a href="#p4-h1" class="toc-l2" aria-label="3 03 / The Golden Rule">3 03 / The Golden Rule</a><a href="#p4-h2" class="toc-l2" aria-label="4 04 / Reading Order">4 04 / Reading Order</a><a href="#p5-h1" class="toc-l2" aria-label="5 01 / The Three Parts">5 01 / The Three Parts</a><a href="#p5-h2" class="toc-l2" aria-label="6 02 / What Lives in JENKINS_HOME">6 02 / What Lives in JENKINS_HOME</a><a href="#p6-h1" class="toc-l2" aria-label="7 05 / Failure Modes">7 05 / Failure Modes</a><a href="#p6-h2" class="toc-l2" aria-label="8 06 / Handoff">8 06 / Handoff</a><a href="#p7-h1" class="toc-l2" aria-label="9 01 / Run &amp;amp; Unlock">9 01 / Run &amp;amp; Unlock</a><a href="#p8-h1" class="toc-l2" aria-label="10 02 / Where to Run It">10 02 / Where to Run It</a><a href="#p8-h2" class="toc-l2" aria-label="11 03 / Smoke Test">11 03 / Smoke Test</a><a href="#p9-h1" class="toc-l2" aria-label="12 04 / Run &amp;amp; Use, End to End">12 04 / Run &amp;amp; Use, End to End</a><a href="#p10-h1" class="toc-l2" aria-label="13 05 / Production Checklist">13 05 / Production Checklist</a><a href="#p10-h2" class="toc-l2" aria-label="14 06 / Handoff">14 06 / Handoff</a><a href="#p11-h1" class="toc-l2" aria-label="15 01 / Generic → Jenkins">15 01 / Generic → Jenkins</a><a href="#p11-h2" class="toc-l2" aria-label="16 02 / Declarative vs Scripted">16 02 / Declarative vs Scripted</a><a href="#p12-h1" class="toc-l2" aria-label="17 03 / Canonical Jenkinsfile">17 03 / Canonical Jenkinsfile</a><a href="#p12-h2" class="toc-l2" aria-label="18 04 / Multibranch = PR Gates">18 04 / Multibranch = PR Gates</a><a href="#p13-h1" class="toc-l2" aria-label="19 06 / Socket vs DinD">19 06 / Socket vs DinD</a><a href="#p13-h2" class="toc-l2" aria-label="20 07 / Handoff">20 07 / Handoff</a><a href="#p14-h1" class="toc-l2" aria-label="21 01 / Three Kinds">21 01 / Three Kinds</a><a href="#p14-h2" class="toc-l2" aria-label="22 02 / Labels &amp;amp; Executors">22 02 / Labels &amp;amp; Executors</a><a href="#p15-h1" class="toc-l2" aria-label="23 03 / Connection &amp;amp; Trust">23 03 / Connection &amp;amp; Trust</a><a href="#p15-h2" class="toc-l2" aria-label="24 04 / Handoff">24 04 / Handoff</a><a href="#p16-h1" class="toc-l2" aria-label="25 01 / Strings, Collections, Conditionals">25 01 / Strings, Collections, Conditionals</a><a href="#p17-h1" class="toc-l2" aria-label="26 02 / Dynamic Stages, Safe Nulls, Maps">26 02 / Dynamic Stages, Safe Nulls, Maps</a><a href="#p18-h1" class="toc-l2" aria-label="27 03 / Jenkinsfile Idioms">27 03 / Jenkinsfile Idioms</a><a href="#p18-h2" class="toc-l2" aria-label="28 04 / Sandbox Gotchas">28 04 / Sandbox Gotchas</a><a href="#p19-h1" class="toc-l2" aria-label="29 01 / Kinds &amp;amp; Scopes">29 01 / Kinds &amp;amp; Scopes</a><a href="#p20-h1" class="toc-l2" aria-label="30 02 / Binding in Practice">30 02 / Binding in Practice</a><a href="#p20-h2" class="toc-l2" aria-label="31 03 / Failure Modes">31 03 / Failure Modes</a><a href="#p21-h1" class="toc-l2" aria-label="32 04 / Handoff">32 04 / Handoff</a><a href="#p22-h1" class="toc-l2" aria-label="33 01 / Essential Set">33 01 / Essential Set</a><a href="#p23-h1" class="toc-l2" aria-label="34 02 / Pin &amp;amp; Stage Upgrades">34 02 / Pin &amp;amp; Stage Upgrades</a><a href="#p23-h2" class="toc-l2" aria-label="35 03 / Failure Modes">35 03 / Failure Modes</a><a href="#p24-h1" class="toc-l2" aria-label="36 04 / Handoff">36 04 / Handoff</a><a href="#p25-h1" class="toc-l2" aria-label="37 01 / Trigger Options">37 01 / Trigger Options</a><a href="#p26-h1" class="toc-l2" aria-label="38 02 / GitHub Webhook Setup">38 02 / GitHub Webhook Setup</a><a href="#p26-h2" class="toc-l2" aria-label="39 03 / Multibranch = PR Gates">39 03 / Multibranch = PR Gates</a><a href="#p27-h1" class="toc-l2" aria-label="40 04 / Handoff">40 04 / Handoff</a><a href="#p28-h1" class="toc-l2" aria-label="41 01 / Authentication &amp;amp; Authorization">41 01 / Authentication &amp;amp; Authorization</a><a href="#p29-h1" class="toc-l2" aria-label="42 02 / Agent-to-Controller Distrust">42 02 / Agent-to-Controller Distrust</a><a href="#p29-h2" class="toc-l2" aria-label="43 03 / Secrets &amp;amp; Updates">43 03 / Secrets &amp;amp; Updates</a><a href="#p30-h1" class="toc-l2" aria-label="44 04 / Handoff">44 04 / Handoff</a><a href="#p31-h1" class="toc-l2" aria-label="45 01 / Shared Libraries">45 01 / Shared Libraries</a><a href="#p31-h2" class="toc-l2" aria-label="46 02 / Parallel &amp;amp; Matrix">46 02 / Parallel &amp;amp; Matrix</a><a href="#p32-h1" class="toc-l2" aria-label="47 03 / Controller From YAML">47 03 / Controller From YAML</a><a href="#p32-h2" class="toc-l2" aria-label="48 04 / Backup, Console, Tuning">48 04 / Backup, Console, Tuning</a><a href="#p33-h1" class="toc-l2" aria-label="49 05 / Interview Check">49 05 / Interview Check</a><a href="#p33-h2" class="toc-l2" aria-label="50 06 / Handoff">50 06 / Handoff</a><a href="#p34-h1" class="toc-l2" aria-label="51 01 / Triage Table">51 01 / Triage Table</a><a href="#p35-h1" class="toc-l2" aria-label="52 02 / Reading a Build Log">52 02 / Reading a Build Log</a><a href="#p35-h2" class="toc-l2" aria-label="53 03 / Sandbox &amp;amp; Recovery">53 03 / Sandbox &amp;amp; Recovery</a><a href="#p35-h3" class="toc-l2" aria-label="54 04 / Handoff">54 04 / Handoff</a><a href="#p36" class="toc-l1" aria-label="Cover — 📇 Quick Revision — Terms Table">Cover — 📇 Quick Revision — Terms Table</a><a href="#p37" class="toc-l1" aria-label="Cover — 🎤 Concept Questions — Distilled Answers">Cover — 🎤 Concept Questions — Distilled Answers</a><a href="#p38" class="toc-l1" aria-label="Cover — 📌 Command Cheat Sheet">Cover — 📌 Command Cheat Sheet</a><a href="#p39" class="toc-l1" aria-label="Cover — 🧪 Self-Quiz + Answer Key">Cover — 🧪 Self-Quiz + Answer Key</a>
+</aside><div class="tocscrim" id="tocscrim" aria-hidden="true"></div>
+<main class="read"><div class="readbody">
+
+
+<div class="sheet cover" id="s01"><div class="band"><div class="bar" style="height:14px"></div><div class="bar" style="height:30px"></div><div class="bar" style="height:52px"></div><div class="bar" style="height:38px"></div><div class="bar" style="height:64px;background:var(--indigo)"></div><div class="bar" style="height:46px"></div><div class="bar" style="height:70px"></div><div class="bar" style="height:28px"></div><div class="bar" style="height:56px"></div><div class="bar" style="height:18px"></div></div><div class="ckick">SIGNAL SERIES · JENKINS</div><h1>JENKINS<br/></br>COMPLETE</h1><div class="sub">Controller to pipeline to hardening — the full Jenkins craft.</div><div class="byline">By <span class="sig">Nabawy</span><small>AUTHOR &amp; COMPILER</small></div><div class="vols"><div class="volcard on">Jenkins</div><div class="volcard">Topology</div><div class="volcard">Setup</div><div class="volcard">Jenkinsfiles</div><div class="volcard">Agents</div></div><div class="cver">V4 · 2026 · JENKINS · verified 2026-09-18</div></div><div class="sheet" id="toc"><div class="pghead"><div class="hrow"><div><div class="kick">Contents</div><h1 class="t">Table of Contents</h1></div><span class="hmeta">37 sheets</span></div></div><div class="tocgrid"><a class="tocrow" href="#s02"><span class="tnum">03</span><span class="tp">Jenkins</span><span class="dots"></span><span>03</span></a><a class="tocrow" href="#s03"><span class="tnum">04</span><span class="tp">Rules &amp; Handoff</span><span class="dots"></span><span>04</span></a><a class="tocrow" href="#s04"><span class="tnum">05</span><span class="tp">Topology</span><span class="dots"></span><span>05</span></a><a class="tocrow" href="#s05"><span class="tnum">06</span><span class="tp">Failures &amp; Handoff</span><span class="dots"></span><span>06</span></a><a class="tocrow" href="#s06"><span class="tnum">07</span><span class="tp">Setup</span><span class="dots"></span><span>07</span></a><a class="tocrow" href="#s07"><span class="tnum">08</span><span class="tp">Platforms</span><span class="dots"></span><span>08</span></a><a class="tocrow" href="#s08"><span class="tnum">09</span><span class="tp">Seven Steps</span><span class="dots"></span><span>09</span></a><a class="tocrow" href="#s09"><span class="tnum">10</span><span class="tp">Harden &amp; Handoff</span><span class="dots"></span><span>10</span></a><a class="tocrow" href="#s10"><span class="tnum">11</span><span class="tp">Jenkinsfiles</span><span class="dots"></span><span>11</span></a><a class="tocrow" href="#s11"><span class="tnum">12</span><span class="tp">Canonical</span><span class="dots"></span><span>12</span></a><a class="tocrow" href="#s12"><span class="tnum">13</span><span class="tp">DinD &amp; Handoff</span><span class="dots"></span><span>13</span></a><a class="tocrow" href="#s13"><span class="tnum">14</span><span class="tp">Agents</span><span class="dots"></span><span>14</span></a><a class="tocrow" href="#s14"><span class="tnum">15</span><span class="tp">Agent Wiring</span><span class="dots"></span><span>15</span></a><a class="tocrow" href="#s15"><span class="tnum">16</span><span class="tp">Groovy Core</span><span class="dots"></span><span>16</span></a><a class="tocrow" href="#s16"><span class="tnum">17</span><span class="tp">Power</span><span class="dots"></span><span>17</span></a><a class="tocrow" href="#s17"><span class="tnum">18</span><span class="tp">Idioms</span><span class="dots"></span><span>18</span></a><a class="tocrow" href="#s18"><span class="tnum">19</span><span class="tp">Credentials</span><span class="dots"></span><span>19</span></a><a class="tocrow" href="#s19"><span class="tnum">20</span><span class="tp">Bindings</span><span class="dots"></span><span>20</span></a><a class="tocrow" href="#s20"><span class="tnum">21</span><span class="tp">Bindings & Handoff</span><span class="dots"></span><span>21</span></a><a class="tocrow" href="#s21"><span class="tnum">22</span><span class="tp">Plugins</span><span class="dots"></span><span>22</span></a><a class="tocrow" href="#s22"><span class="tnum">23</span><span class="tp">Discipline</span><span class="dots"></span><span>23</span></a><a class="tocrow" href="#s23"><span class="tnum">24</span><span class="tp">Plugins & Handoff</span><span class="dots"></span><span>24</span></a><a class="tocrow" href="#s24"><span class="tnum">25</span><span class="tp">Webhooks</span><span class="dots"></span><span>25</span></a><a class="tocrow" href="#s25"><span class="tnum">26</span><span class="tp">Webhook Wiring</span><span class="dots"></span><span>26</span></a><a class="tocrow" href="#s26"><span class="tnum">27</span><span class="tp">Webhooks & Handoff</span><span class="dots"></span><span>27</span></a><a class="tocrow" href="#s27"><span class="tnum">28</span><span class="tp">Security</span><span class="dots"></span><span>28</span></a><a class="tocrow" href="#s28"><span class="tnum">29</span><span class="tp">Trust</span><span class="dots"></span><span>29</span></a><a class="tocrow" href="#s29"><span class="tnum">30</span><span class="tp">Security & Handoff</span><span class="dots"></span><span>30</span></a><a class="tocrow" href="#s30"><span class="tnum">31</span><span class="tp">Advanced</span><span class="dots"></span><span>31</span></a><a class="tocrow" href="#s31"><span class="tnum">32</span><span class="tp">As Code</span><span class="dots"></span><span>32</span></a><a class="tocrow" href="#s32"><span class="tnum">33</span><span class="tp">Check &amp; Handoff</span><span class="dots"></span><span>33</span></a><a class="tocrow" href="#s33"><span class="tnum">34</span><span class="tp">Triage</span><span class="dots"></span><span>34</span></a><a class="tocrow" href="#s34"><span class="tnum">35</span><span class="tp">Logs &amp; Recovery</span><span class="dots"></span><span>35</span></a><a class="tocrow" href="#s35"><span class="tnum">36</span><span class="tp">📇 Quick Revision — Terms Table</span><span class="dots"></span><span>36</span></a><a class="tocrow" href="#s36"><span class="tnum">37</span><span class="tp">🎤 Concept Questions — Distilled Answers</span><span class="dots"></span><span>37</span></a><a class="tocrow" href="#s37"><span class="tnum">38</span><span class="tp">📌 Command Cheat Sheet</span><span class="dots"></span><span>38</span></a><a class="tocrow" href="#s38"><span class="tnum">39</span><span class="tp">🧪 Self-Quiz + Answer Key</span><span class="dots"></span><span>39</span></a></div><div class="taskhead">How to use this book <span class="hst">legend</span></div><div class="lgd"><div><span class="dot8" style="border-color:#0e7490;background:#e3f2f7"></span>NOTE · context</div><div><span class="dot8" style="border-color:#4f46e5;background:#eef0fd"></span>KEY · must retain</div><div><span class="dot8" style="border-color:#b45309;background:#fdf3e0"></span>WATCH OUT · gotcha</div><div><span class="dot8" style="border-color:#15803d;background:#e7f5ec"></span>VERIFIED · check</div></div><div class="mark m-tip"><span class="tag">NOTE</span>Read cover to cover once, then use the Contents to jump. Every chapter ends with a 🎓 EXAM box — if you can answer it cold, move on.</div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 2 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> <a class="tlink" href="#s02">Next</a></span></div></div><div class="sheet" id="s02"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Jenkins</h1></div><span class="hmeta">03</span></div></div>
+<p class="lead">Picking up from <em>Feedback</em>, where the loop closed — we now <em>implement that entire loop in Jenkins</em>, starting with the topology that runs everything.</p>
+<h3 id="p3-h1" class="sec"><span class="n">01 /</span> Why Jenkins</h3>
+<ul class="tight"><li><b>WHAT</b> — open-source automation server: pipelines as code, 1,800+ plugins, controller + agents. Self-hosted, free, runs anywhere.</li><li><b>WHY</b> — your data/secrets on your infra; reaches air-gapped networks and special hardware; no per-minute billing.</li><li><b>WITHOUT IT</b> — releases from laptops: no audit trail, secrets in shell history, one person's memory as infrastructure.</li></ul>
+<h3 id="p3-h2" class="sec"><span class="n">02 /</span> Concept Map</h3>
+<div class="tblwrap"><table class="tb"><tr><th>Generic</th><th>Jenkins</th></tr>
+<tr><td>Pipeline</td><td>Jenkinsfile</td></tr>
+<tr><td>Runner</td><td>Agent + executors</td></tr>
+<tr><td>Trigger</td><td>Webhook / multibranch</td></tr>
+<tr><td>Secrets</td><td>Credentials + bindings</td></tr>
+<tr><td>Server</td><td>Controller + agents</td></tr>
+<tr><td>Hardening</td><td>Auth matrix, agent trust</td></tr></table></div>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 3 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#toc">Prev</a> <a class="tlink" href="#s03">Next</a></span></div></div><div class="sheet" id="s03"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Rules &amp; Handoff</h1></div><span class="hmeta">04</span></div></div>
+<h3 id="p4-h1" class="sec"><span class="n">03 /</span> The Golden Rule</h3>
+<div class="mark m-tip"><span class="tag">DISTINCTIVELY JENKINS ONLY </span><p>If a paragraph would be true for GitHub Actions too, it belongs in the generic docs — not here. Jenkins files contain only what is distinctively Jenkins.</p></div>
+<h3 id="p4-h2" class="sec"><span class="n">04 /</span> Reading Order</h3>
+<div class="mark m-key"><span class="tag">PATH </span> Architecture (08) → Setup (09) → Pipelines (10) → Groovy (11) → Agents (12) → Credentials (13) → Plugins (14) → Webhooks (15) → Security (16) → Advanced (17) → Troubleshooting (18).</div>
+<p class="body">Begin in <b>Jenkins Architecture</b> — controller, agents, and executors first, because every later PDF assumes them.</p>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Jenkins in one breath: an open-source automation server where <b>pipelines as code</b> (Jenkinsfiles) run on <b>agents</b> under a <b>controller</b> that holds config, queue, history and credentials; 1,800+ plugins supply checkout, agents and gates. This book keeps only what is <b>distinctively Jenkins</b> and walks Architecture → Setup → Pipelines → Groovy → Agents → Credentials → Plugins → Webhooks → Security → Advanced → Troubleshooting.</div><p class="small">⏩️ Next: <a class="tlink" href="#s04">Topology</a></p><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 4 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s02">Prev</a> <a class="tlink" href="#s04">Next</a></span></div></div><div class="sheet" id="s04"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Topology</h1></div><span class="hmeta">05</span></div></div>
+<p class="lead">Picking up from the <em>Domain map</em> — we now examine the <em>controller–agent topology</em> that every pipeline, agent, and credential later plugs into.</p>
+<h3 id="p5-h1" class="sec"><span class="n">01 /</span> The Three Parts</h3>
+<ul class="tight"><li><b>Controller</b> — holds config (<span class="mono">JENKINS_HOME</span>), queue, history, UI/API, credentials. Runs no builds in production.</li><li><b>Agent</b> — a machine offering <b>executors</b>: numbered slots, one build each.</li><li><b>Remoting</b> — the channel shipping work out. Inbound = agent dials out (survives NAT); SSH = controller dials in (flat networks).</li></ul>
+<h3 id="p5-h2" class="sec"><span class="n">02 /</span> What Lives in JENKINS_HOME</h3>
+<div class="tblwrap"><table class="tb"><tr><th>Path</th><th>Holds</th></tr>
+<tr><td><span class="mono">jobs/</span></td><td>Job configs + build history</td></tr>
+<tr><td><span class="mono">workspace/</span></td><td>Checked-out code (rebuildable, deletable)</td></tr>
+<tr><td><span class="mono">credentials.xml</span> + <span class="mono">secrets/</span></td><td>Encrypted secrets — back up securely</td></tr>
+<tr><td><span class="mono">config.xml</span></td><td>Global configuration</td></tr></table></div>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 5 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s03">Prev</a> <a class="tlink" href="#s05">Next</a></span></div></div><div class="sheet" id="s05"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Failures &amp; Handoff</h1></div><span class="hmeta">06</span></div></div>
+<h3 id="p6-h1" class="sec"><span class="n">05 /</span> Failure Modes</h3>
+<ul class="tight"><li>Disk fills with old builds → UI freezes; fix with build discarders + log rotation.</li><li>Everything pinned to built-in node → single contention point; fix with labeled agents.</li><li>Clock skew → signatures/webhooks fail; run NTP everywhere.</li></ul>
+<div class="qa"><span class="qn">Q1</span> <b>Controller vs agent responsibilities?</b><br/></br><span class="ans">Controller schedules, serves, stores. Agents execute — nothing else.</span></div>
+<h3 id="p6-h2" class="sec"><span class="n">06 /</span> Handoff</h3>
+<p class="body">Topology understood — now build one. Continue in <b>Jenkins Setup</b>.</p>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Topology in one breath: the <b>controller</b> schedules, serves and stores (<span class="mono">JENKINS_HOME</span>: <span class="mono">jobs/</span>, <span class="mono">workspace/</span>, <span class="mono">credentials.xml</span> + <span class="mono">secrets/</span>, <span class="mono">config.xml</span>) and runs <b>zero builds</b>; <b>agents</b> offer <b>executors</b>, one build per slot, reached by <b>inbound remoting</b> (agent dials out, survives NAT) or <b>SSH</b> (controller dials in). Classic failures: disk full of old builds, everything pinned to the built-in node, clock skew.</div><p class="small">⏩️ Next: <a class="tlink" href="#s06">Setup</a></p><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 6 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s04">Prev</a> <a class="tlink" href="#s06">Next</a></span></div></div><div class="sheet" id="s06"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Setup</h1></div><span class="hmeta">07</span></div></div>
+<p class="lead">Picking up from <em>Architecture</em>, where the topology was defined — we now <em>run it</em>: one container, one volume, one socket.</p>
+<h3 id="p7-h1" class="sec"><span class="n">01 /</span> Run &amp; Unlock</h3>
+<pre class="code"><span class="p">$</span> docker volume create jenkins_home
+<span class="p">$</span> docker run -d --name jenkins \
+  -p 8080:8080 -p 50000:50000 \
+  -v jenkins_home:/var/jenkins_home \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  jenkins/jenkins:2.516-lts-jdk17
+<span class="p">$</span> docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword</pre>
+<p class="body">Open <span class="mono">localhost:8080</span> → paste the password → install suggested plugins → create admin user → set built-in executors to <b>0</b>.</p>
+<div class="mark m-tip"><span class="tag">WHEN TO USE JENKINS</span>use when self-hosted or air-gapped execution is required · use when pipelines span mixed legacy systems · use when plugin ecosystem covers the gap · avoid when greenfield SaaS with no ops team · avoid when zero-maintenance CI is the goal. <a class="tlink" href="../read/platforms-roadmaps.html#s29n">Tool vs Tool — The Whole Field</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 7 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s05">Prev</a> <a class="tlink" href="#s07">Next</a></span></div></div><div class="sheet" id="s07"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Platforms</h1></div><span class="hmeta">08</span></div></div>
+<h3 id="p8-h1" class="sec"><span class="n">02 /</span> Where to Run It</h3>
+<div class="tblwrap"><table class="tb"><tr><th>Method</th><th>When</th></tr>
+<tr><td>Docker image</td><td>Default: dev, training, labs</td></tr>
+<tr><td>OS package</td><td>Long-lived on-prem server</td></tr>
+<tr><td>Kubernetes Helm</td><td>Production, ephemeral agents</td></tr></table></div>
+<div class="mark m-key"><span class="tag">WINDOWS </span> native <span class="mono">msi</span> works, but prefer Docker Desktop (WSL2 backend): same command, Linux-normal paths. Keep a Windows <b>agent</b> (label <span class="mono">windows</span>) only for .NET/MSBuild workloads. Watch <span class="mono">bat</span> vs <span class="mono">sh</span>, CRLF, and firewall ports 8080/50000.</div>
+<h3 id="p8-h2" class="sec"><span class="n">03 /</span> Smoke Test</h3>
+<pre class="code">New Item → Pipeline → `hello` → inline script:
+pipeline { agent any { stage('Hello') { echo 'alive' } } }
+Build Now → <span class="p">green ball = controller + executors + workspace work</span></pre>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 8 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s06">Prev</a> <a class="tlink" href="#s08">Next</a></span></div></div><div class="sheet" id="s08"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Seven Steps</h1></div><span class="hmeta">09</span></div></div>
+<h3 id="p9-h1" class="sec"><span class="n">04 /</span> Run &amp; Use, End to End</h3>
+<div class="step"><b>1 · Run</b> — container + volume + socket (above).</div>
+<div class="step"><b>2 · Unlock</b> — password, suggested plugins, admin user.</div>
+<div class="step"><b>3 · Lock controller</b> — built-in executors = 0.</div>
+<div class="step"><b>4 · Agent</b> — new node <span class="mono">linux-1</span>, labels <span class="mono">linux docker</span>, idle in Executor Status.</div>
+<div class="step"><b>5 · Multibranch job</b> — repo URL + credentials; Jenkinsfile discovered per branch.</div>
+<div class="step"><b>6 · Webhook</b> — <span class="mono">/github-webhook/</span>; push → build in seconds.</div>
+<div class="step"><b>7 · Verify loop</b> — green → staging → approve → production. Break it on purpose once.</div>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 9 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s07">Prev</a> <a class="tlink" href="#s09">Next</a></span></div></div><div class="sheet" id="s09"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Harden &amp; Handoff</h1></div><span class="hmeta">10</span></div></div>
+<h3 id="p10-h1" class="sec"><span class="n">05 /</span> Production Checklist</h3>
+<ul class="tight"><li>Persistent, backed-up <span class="mono">JENKINS_HOME</span> (test restore).</li><li>Pinned image + plugin versions; deliberate upgrades.</li><li>TLS reverse proxy + auth matrix from day one.</li><li>Lost data on recreate = volume wasn't mounted. Port 50000 blocked = agents can't connect.</li></ul>
+<h3 id="p10-h2" class="sec"><span class="n">06 /</span> Handoff</h3>
+<p class="body">Server running and first job green — now write real pipelines. Continue in <b>Jenkins Pipelines</b>.</p>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Setup in one breath: one volume, one container, one socket — <span class="mono">docker volume create jenkins_home</span>, run pinned LTS with port 8080/50000, unlock with <span class="mono">initialAdminPassword</span>, install suggested plugins, then set <b>built-in executors to 0</b>; the seven steps run → unlock → lock controller → agent → multibranch job → webhook → verify loop, sealed by a production checklist of backed-up <span class="mono">JENKINS_HOME</span>, pinned versions and TLS plus auth matrix.</div><p class="small">⏩️ Next: <a class="tlink" href="#s10">Jenkinsfiles</a></p><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 10 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s08">Prev</a> <a class="tlink" href="#s10">Next</a></span></div></div><div class="sheet" id="s10"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Jenkinsfiles</h1></div><span class="hmeta">11</span></div></div>
+<p class="lead">Picking up from <em>Setup</em>, where the first smoke job went green — we now write <em>production Jenkinsfiles</em>: Declarative structure, multibranch, and the full CI→CD arc.</p>
+<h3 id="p11-h1" class="sec"><span class="n">01 /</span> Generic → Jenkins</h3>
+<div class="tblwrap"><table class="tb"><tr><th>Generic</th><th>Jenkins</th></tr>
+<tr><td>Pipeline</td><td><span class="mono">pipeline { … }</span> in Jenkinsfile</td></tr>
+<tr><td>Stage / Step</td><td><span class="mono">stage('Build')</span> / <span class="mono">sh</span>, <span class="mono">echo</span>, plugin steps</td></tr>
+<tr><td>Runner</td><td><span class="mono">agent</span> directive (label, docker, any)</td></tr>
+<tr><td>Artifact</td><td><span class="mono">archiveArtifacts</span> / pushed image</td></tr></table></div>
+<h3 id="p11-h2" class="sec"><span class="n">02 /</span> Declarative vs Scripted</h3>
+<div class="mark m-key"><span class="tag">DECLARATIVE </span> (default, 95%) — opinionated skeleton, syntax-checked pre-run. <b>SCRIPTED</b> — raw Groovy (<span class="mono">node { stage(…) }</span>) for dynamic stages. Language: Apache Groovy; DSL steps documented in the built-in snippet generator.</div>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 11 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s09">Prev</a> <a class="tlink" href="#s11">Next</a></span></div></div><div class="sheet" id="s11"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Canonical</h1></div><span class="hmeta">12</span></div></div>
+<h3 id="p12-h1" class="sec"><span class="n">03 /</span> Canonical Jenkinsfile</h3>
+<pre class="code"><span class="g">pipeline</span> {
+  agent { label <span class="p">'linux'</span> }
+  stages {
+    stage(<span class="p">'Build'</span>) { steps { sh <span class="p">'npm ci &amp;&amp; npm run build'</span> } }
+    stage(<span class="p">'Test'</span>)  { steps { sh <span class="p">'npm test'</span> }
+      post { always { junit <span class="p">'reports/**/*.xml'</span> } } }
+    stage(<span class="p">'Image'</span>) { steps { sh <span class="p">'docker build -t registry/app:$GIT_COMMIT .'</span> } }
+  }
+  post { failure { mail to: <span class="p">'team@acme.io'</span> } }
+}</pre>
+<h3 id="p12-h2" class="sec"><span class="n">04 /</span> Multibranch = PR Gates</h3>
+<p class="body">A Multibranch job auto-discovers branches/PRs containing a Jenkinsfile and builds each independently — the Jenkins-native PR gate. Prefer it over hand-wired jobs per branch.</p>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 12 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s10">Prev</a> <a class="tlink" href="#s12">Next</a></span></div></div><div class="sheet" id="s12"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">DinD &amp; Handoff</h1></div><span class="hmeta">13</span></div></div>
+<h3 id="p13-h1" class="sec"><span class="n">06 /</span> Socket vs DinD</h3>
+<div class="tblwrap"><table class="tb"><tr><th></th><th>Socket mount</th><th>DinD</th></tr>
+<tr><td>Isolation</td><td>Weak — shared daemon</td><td>Strong — own daemon</td></tr>
+<tr><td>Risk</td><td>Malicious build = host root</td><td>Blast radius: dind container</td></tr>
+<tr><td>Use when</td><td>Trusted teams (fast)</td><td>Untrusted builds</td></tr></table></div>
+<ul class="tight"><li><span class="mono">agent any</span> everywhere → builds land on controller; use labeled agents.</li><li>Inline scripts → unreviewable; keep Jenkinsfiles in the repo.</li><li>Giant single stage → no visibility; mirror build/test/scan 1:1.</li></ul>
+<div class="qa"><span class="qn">Q2</span> <b>Declarative vs Scripted?</b><br/></br><span class="ans">Declarative for 95% (validated, readable); Scripted for dynamic stages and advanced flow.</span></div>
+<h3 id="p13-h2" class="sec"><span class="n">07 /</span> Handoff</h3>
+<p class="body">Pipelines need a language upgrade next: the Groovy subset that powers them lives in <b>Groovy Essentials</b>.</p>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Jenkinsfiles in one breath: <b>Declarative</b> (<span class="mono">pipeline { … }</span>) is the default for 95% — validated pre-run and readable — while <b>Scripted</b> (<span class="mono">node { stage(…) }</span>) covers dynamic stages; the canonical shape is Build → Test (with <span class="mono">junit</span> post) → Image tagged by <span class="mono">$GIT_COMMIT</span>, and <b>Multibranch</b> turns each branch Jenkinsfile into its own PR gate. Antipatterns: <span class="mono">agent any</span> everywhere, inline scripts, one giant stage, socket mounts for untrusted builds (use DinD).</div><p class="small">⏩️ Next: <a class="tlink" href="#s13">Agents</a></p><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a> · <a href="../threads/#approval-gates">Approval Gates</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 13 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s11">Prev</a> <a class="tlink" href="#s13">Next</a></span></div></div><div class="sheet" id="s13"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Agents</h1></div><span class="hmeta">14</span></div></div>
+<p class="lead">Picking up from <em>Groovy</em> — pipelines written, language in hand — we now provision <em>the machines that execute them</em>.</p>
+<h3 id="p14-h1" class="sec"><span class="n">01 /</span> Three Kinds</h3>
+<div class="tblwrap"><table class="tb"><tr><th>Type</th><th>Lifecycle</th><th>Best for</th></tr>
+<tr><td>Permanent</td><td>Long-lived VM</td><td>Special HW, Windows/GPU</td></tr>
+<tr><td>Docker cloud</td><td>Container per build</td><td>Default Linux — clean every run</td></tr>
+<tr><td>Kubernetes</td><td>Pod per build</td><td>Elastic, bursty CI</td></tr></table></div>
+<h3 id="p14-h2" class="sec"><span class="n">02 /</span> Labels &amp; Executors</h3>
+<pre class="code">agent { label <span class="p">'linux &amp;&amp; docker'</span> }   <span class="c">// must have BOTH</span>
+agent { docker { image <span class="p">'node:20'</span> } } <span class="c">// ephemeral container</span>
+agent none                           <span class="c">// each stage picks</span></pre>
+<div class="mark m-key"><span class="tag">LABEL </span> = capability tag matched by jobs. <b>EXECUTOR</b> = one build slot (~1 per 1–2 cores). Wrong labels = builds queue forever.</div>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 14 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s12">Prev</a> <a class="tlink" href="#s14">Next</a></span></div></div><div class="sheet" id="s14"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Agent Wiring</h1></div><span class="hmeta">15</span></div></div>
+<h3 id="p15-h1" class="sec"><span class="n">03 /</span> Connection &amp; Trust</h3>
+<ul class="tight"><li><b>Inbound</b> — agent dials out via WebSocket; survives NAT, needs port 50000.</li><li><b>SSH</b> — controller dials in; simple on flat networks, needs port 22 + credential.</li><li><b>Ephemeral wins</b> — pristine container per run kills "works on my machine" and tool drift.</li></ul>
+<div class="mark m-tip"><span class="tag">TRUST BOUNDARY </span><p>Never run untrusted fork PRs on permanent agents holding deploy credentials. Forks get isolated, credential-free agents — a malicious workflow otherwise owns your box.</p></div>
+<ul class="tight"><li>Label typo → queue forever; check Executor Status.</li><li>Too many executors per CPU → starvation.</li></ul>
+<h3 id="p15-h2" class="sec"><span class="n">04 /</span> Handoff</h3>
+<p class="body">Agents run the work — next they need secrets. Continue in <b>Jenkins Credentials</b>.</p>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Agents in one breath: <b>permanent</b> nodes for special hardware, <b>Docker cloud</b> containers per build as the Linux default, <b>Kubernetes</b> pods per build for bursty CI — matched by <b>labels</b> (capability tags, <span class="mono">linux &amp;&amp; docker</span>) while an <b>executor</b> is one build slot sized ~1 per 1–2 cores; <b>ephemeral wins</b> because a pristine container kills tool drift, and fork PRs run only on <b>isolated, credential-free</b> agents.</div><p class="small">⏩️ Next: <a class="tlink" href="#s15">Groovy</a></p><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 15 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s13">Prev</a> <a class="tlink" href="#s15">Next</a></span></div></div><div class="sheet" id="s15"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Groovy Core</h1></div><span class="hmeta">16</span></div></div>
+<p class="lead">Picking up from <em>Pipelines</em>, where Declarative met Scripted — this is <em>the Groovy subset both run on</em>.</p>
+<h3 id="p16-h1" class="sec"><span class="n">01 /</span> Strings, Collections, Conditionals</h3>
+<pre class="code"><span class="c">// "double quotes" interpolate, 'single' don't</span>
+def tag = env.GIT_COMMIT.take(7)
+echo <span class="p">"Building ${app}:${tag}"</span>
+stages.each { s -&gt; echo <span class="p">"stage: ${s}"</span> }
+def failed = results.findAll { k, v -&gt; v != <span class="p">'SUCCESS'</span> }
+def env2 = env.BRANCH_NAME == <span class="p">'main'</span> ? <span class="p">'prod'</span> : <span class="p">'staging'</span></pre>
+<div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 16 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s14">Prev</a> <a class="tlink" href="#s16">Next</a></span></div></div><div class="sheet" id="s16"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Power</h1></div><span class="hmeta">17</span></div></div>
+<h3 id="p17-h1" class="sec"><span class="n">02 /</span> Dynamic Stages, Safe Nulls, Maps</h3>
+<pre class="code"><span class="c">// one stage per service — impossible in pure Declarative</span>
+[<span class="p">'api'</span>,<span class="p">'web'</span>,<span class="p">'worker'</span>].each { svc -&gt;
+  stage(<span class="p">"Test ${svc}"</span>) { sh <span class="p">"./test.sh ${svc}"</span> } }
+<span class="c">// ?. skips nulls, ?: falls back</span>
+def owner = env.CHANGE_AUTHOR?.toLowerCase() ?: <span class="p">'unknown'</span>
+def cfg = [retries: 3, timeout: 20]
+timeout(time: cfg.timeout, unit: <span class="p">'MINUTES'</span>) { sh <span class="p">'make ci'</span> }</pre>
+<div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 17 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s15">Prev</a> <a class="tlink" href="#s17">Next</a></span></div></div><div class="sheet" id="s17"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Idioms</h1></div><span class="hmeta">18</span></div></div>
+<h3 id="p18-h1" class="sec"><span class="n">03 /</span> Jenkinsfile Idioms</h3>
+<pre class="code">withCredentials([string(credentialsId: <span class="p">'api-token'</span>, variable: <span class="p">'T'</span>)]) {
+  sh <span class="p">'curl -H "Authorization: Bearer $T" ...'</span> }
+retry(3) { sh <span class="p">'./flaky-deploy.sh'</span> }
+catchError(buildResult: <span class="p">'UNSTABLE'</span>) { sh <span class="p">'./optional-audit.sh'</span> }</pre>
+<h3 id="p18-h2" class="sec"><span class="n">04 /</span> Sandbox Gotchas</h3>
+<div class="tblwrap"><table class="tb"><tr><th>Code</th><th>Fix</th></tr>
+<tr><td><span class="mono">new File().text</span></td><td>Use <span class="mono">readFile</span> step</td></tr>
+<tr><td><span class="mono">System.getenv()</span></td><td>Use <span class="mono">env.X</span></td></tr>
+<tr><td><span class="mono">.execute()</span></td><td>Use <span class="mono">sh</span> step</td></tr></table></div>
+<div class="mark m-key"><span class="tag">RULE </span> if Groovy fights you, push logic into <span class="mono">sh</span> and keep Groovy as glue. Next: give pipelines somewhere to run — <b>Jenkins Agents</b>.</div>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Groovy in one breath: <span class="mono">"double quotes"</span> interpolate and <span class="mono">'single'</span> do not; <span class="mono">each</span>/<span class="mono">findAll</span>/ternary shape data, <span class="mono">?.</span> skips nulls and <span class="mono">?:</span> falls back; Scripted-only dynamic stages fan one stage per service; pipeline idioms are <span class="mono">withCredentials</span>, <span class="mono">retry(3)</span> and <span class="mono">catchError</span>; the <b>sandbox</b> bans <span class="mono">new File</span>, <span class="mono">System.getenv</span> and <span class="mono">.execute()</span> — use <span class="mono">readFile</span>, <span class="mono">env.X</span> and <span class="mono">sh</span>, and push real logic into <span class="mono">sh</span> keeping Groovy as glue.</div><p class="small">⏩️ Next: <a class="tlink" href="#s18">Credentials</a></p><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 18 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s16">Prev</a> <a class="tlink" href="#s18">Next</a></span></div></div><div class="sheet" id="s18"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Credentials</h1></div><span class="hmeta">19</span></div></div>
+<p class="lead">Picking up from <em>Agents</em>, where executors run untrusted build code — secrets must therefore <em>never live in Jenkinsfiles</em>. Enter the credentials store.</p>
+<h3 id="p19-h1" class="sec"><span class="n">01 /</span> Kinds &amp; Scopes</h3>
+<div class="tblwrap"><table class="tb"><tr><th>Kind</th><th>Holds</th><th>Binding</th></tr>
+<tr><td>Secret text</td><td>API token</td><td><span class="mono">string(…)</span></td></tr>
+<tr><td>Username + password</td><td>Registry login</td><td><span class="mono">usernamePassword(…)</span></td></tr>
+<tr><td>SSH key</td><td>Git / agent auth</td><td><span class="mono">sshUserPrivateKey(…)</span></td></tr>
+<tr><td>Secret file</td><td>kubeconfig, keystore</td><td><span class="mono">file(…)</span></td></tr></table></div>
+<div class="mark m-key"><span class="tag">SCOPES </span> System (server internals) vs Global/Job (pipelines). Narrowest scope that works. IDs are stable references; values never appear in code, logs, or images.</div>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 19 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s17">Prev</a> <a class="tlink" href="#s19">Next</a></span></div></div><div class="sheet" id="s19"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Bindings</h1></div><span class="hmeta">20</span></div></div>
+<h3 id="p20-h1" class="sec"><span class="n">02 /</span> Binding in Practice</h3>
+<pre class="code">withCredentials([usernamePassword(
+  credentialsId: <span class="p">'registry-creds'</span>,
+  usernameVariable: <span class="p">'U'</span>, passwordVariable: <span class="p">'P'</span>)]) {
+  sh <span class="p">'echo "$P" | docker login registry -u "$U" --password-stdin'</span> }
+<span class="c"># Jenkins masks $U/$P in console output automatically</span></pre>
+<h3 id="p20-h2" class="sec"><span class="n">03 /</span> Failure Modes</h3>
+<ul class="tight"><li>Secret echoed or baked into an image layer → treat as compromised, <b>rotate immediately</b>.</li><li>Wrong scope (System-only in pipeline) → "credentials not found"; move to Global.</li><li>Duplicate IDs → ambiguous resolution; keep IDs unique (<span class="mono">github-acme-app-token</span>).</li></ul>
+<div class="mark m-tip"><span class="tag">LEAK = ROTATE </span><p>Masking is a backstop, not a guarantee. Any secret that touched a log, layer, or chat is compromised — replace by ID, zero Jenkinsfile changes.</p></div>
+<div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 20 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s18">Prev</a> <a class="tlink" href="#s20">Next</a></span></div></div><div class="sheet" id="s20"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Bindings & Handoff</h1></div><span class="hmeta">21</span></div></div>
+<h3 id="p21-h1" class="sec"><span class="n">04 /</span> Handoff</h3>
+<p class="body">Secrets stored — but who delivers all these capabilities? Continue in <b>Jenkins Plugins</b>, where Git, Docker, and credentials bindings themselves come from.</p>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Credentials in one breath: kinds are <b>secret text</b>, <b>username + password</b>, <b>SSH key</b> and <b>secret file</b>, scoped <b>System</b> (server internals) versus <b>Global/Job</b> (pipelines) with the narrowest scope that works and unique stable IDs; <span class="mono">withCredentials</span> binds values to masked variables so secrets never live in Jenkinsfiles, logs or image layers — and <b>LEAK = ROTATE</b>: anything that touched a log, layer or chat is compromised and replaced by ID with zero Jenkinsfile changes.</div><p class="small">⏩️ Next: <a class="tlink" href="#s21">Plugins</a></p><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 21 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s19">Prev</a> <a class="tlink" href="#s21">Next</a></span></div></div><div class="sheet" id="s21"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Plugins</h1></div><span class="hmeta">22</span></div></div>
+<p class="lead">Picking up from <em>Credentials</em> — whose bindings are themselves a plugin — we now survey <em>the ecosystem that makes Jenkins Jenkins</em>.</p>
+<h3 id="p22-h1" class="sec"><span class="n">01 /</span> Essential Set</h3>
+<div class="tblwrap"><table class="tb"><tr><th>Plugin</th><th>Why</th></tr>
+<tr><td>Pipeline (workflow-*)</td><td>Declarative/Scripted, stage/steps</td></tr>
+<tr><td>Git + Branch Source</td><td>Checkout, multibranch, webhooks</td></tr>
+<tr><td>Credentials (+Binding)</td><td>Secret storage + withCredentials</td></tr>
+<tr><td>Docker / Kubernetes</td><td>Ephemeral build agents</td></tr>
+<tr><td>JUnit / Warnings NG</td><td>Test reports, analysis gates</td></tr></table></div>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 22 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s20">Prev</a> <a class="tlink" href="#s22">Next</a></span></div></div><div class="sheet" id="s22"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Discipline</h1></div><span class="hmeta">23</span></div></div>
+<h3 id="p23-h1" class="sec"><span class="n">02 /</span> Pin &amp; Stage Upgrades</h3>
+<pre class="code"><span class="c"># plugins.txt — pinned, version-controlled</span>
+git:5.2.1
+workflow-aggregator:596.v8c21c963d92d
+credentials-binding:681.v346b_f30f5d80
+docker-workflow:572.v950f58993843</pre>
+<div class="mark m-key"><span class="tag">RULES </span> upgrade in a staging Jenkins first (plugin updates, not core, cause most outages) · remove unused plugins (attack surface + startup + conflicts).</div>
+<h3 id="p23-h2" class="sec"><span class="n">03 /</span> Failure Modes</h3>
+<ul class="tight"><li>Update-all Friday → Monday outage; update deliberately with a snapshot.</li><li><span class="mono">No such DSL method</span> → owning plugin not installed.</li><li>Core/plugin skew → cryptic startup failures; keep LTS + compatible set.</li></ul>
+<div class="mark m-tip"><span class="tag">FRIDAY RULE </span><p>Never bulk-update plugins before a weekend. Deliberate upgrades with a rollback snapshot, or Monday owns you.</p></div>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 23 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s21">Prev</a> <a class="tlink" href="#s23">Next</a></span></div></div><div class="sheet" id="s23"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Plugins & Handoff</h1></div><span class="hmeta">24</span></div></div>
+<h3 id="p24-h1" class="sec"><span class="n">04 /</span> Handoff</h3>
+<p class="body">Plugins installed — now connect the trigger wire. Continue in <b>Jenkins Webhooks</b>, where pushes become builds in seconds.</p>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Plugins in one breath: the essential set is <b>Pipeline (workflow-*)</b>, <b>Git + Branch Source</b>, <b>Credentials (+Binding)</b>, <b>Docker/Kubernetes</b> and <b>JUnit/Warnings NG</b> — pinned in a version-controlled <span class="mono">plugins.txt</span>, upgraded in a <b>staging Jenkins first</b> with unused plugins removed; <b>Friday rule</b>: never bulk-update before a weekend, keep a snapshot, because plugin updates (not core) cause most outages and <span class="mono">No such DSL method</span> always means the owning plugin is missing.</div><p class="small">⏩️ Next: <a class="tlink" href="#s24">Webhooks</a></p><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 24 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s22">Prev</a> <a class="tlink" href="#s24">Next</a></span></div></div><div class="sheet" id="s24"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Webhooks</h1></div><span class="hmeta">25</span></div></div>
+<p class="lead">Picking up from <em>Plugins</em>, which delivered the Branch Source plugin — we now <em>wire it</em>: webhooks that turn pushes into builds.</p>
+<h3 id="p25-h1" class="sec"><span class="n">01 /</span> Trigger Options</h3>
+<div class="tblwrap"><table class="tb"><tr><th>Method</th><th>Latency</th><th>Verdict</th></tr>
+<tr><td>Webhook</td><td>Seconds</td><td>Default</td></tr>
+<tr><td>Multibranch + webhook</td><td>Seconds</td><td>Default for PRs</td></tr>
+<tr><td>SCM polling</td><td>Minutes</td><td>Fallback / air-gapped</td></tr>
+<tr><td>Scheduled / manual</td><td>—</td><td>Nightly, promotions</td></tr></table></div>
+<div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 25 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s23">Prev</a> <a class="tlink" href="#s25">Next</a></span></div></div><div class="sheet" id="s25"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Webhook Wiring</h1></div><span class="hmeta">26</span></div></div>
+<h3 id="p26-h1" class="sec"><span class="n">02 /</span> GitHub Webhook Setup</h3>
+<pre class="code">1. Job: enable <span class="g">GitHub hook trigger for GITScm polling</span>
+2. Repo → Settings → Webhooks → Add:
+   Payload URL <span class="p">https://jenkins.acme.io/github-webhook/</span>
+   events: <span class="p">push + pull requests</span>
+3. Push → <span class="g">GitHub Hook Log shows delivery → build in seconds</span>
+<span class="c"># private nets: controller needs a reachable URL (reverse proxy / ngrok)</span></pre>
+<h3 id="p26-h2" class="sec"><span class="n">03 /</span> Multibranch = PR Gates</h3>
+<p class="body">Multibranch scans the repo, builds each branch/PR Jenkinsfile independently, reports status to GitHub checks. Branch deleted → job auto-removed. No hand-wired jobs per branch, ever.</p>
+<ul class="tight"><li>403/404 → wrong URL (trailing slash matters) or missing plugin.</li><li>Not triggering → trigger checkbox off; check Hook Log.</li><li>Duplicates → webhook + polling both on; disable polling.</li><li>Validate webhook secrets — or anyone curls your builds.</li></ul>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 26 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s24">Prev</a> <a class="tlink" href="#s26">Next</a></span></div></div><div class="sheet" id="s26"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Webhooks & Handoff</h1></div><span class="hmeta">27</span></div></div>
+<h3 id="p27-h1" class="sec"><span class="n">04 /</span> Handoff</h3>
+<p class="body">Triggers fire — but open triggers are an attack surface. Continue in <b>Jenkins Security</b>, where authentication, authorization, and agent trust lock this down.</p>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Webhooks in one breath: <b>webhook</b> (seconds) is the default trigger with polling as fallback and schedule/manual for nightlies and promotions — the GitHub hook fires at <span class="mono">/github-webhook/</span> (trailing slash matters) and <b>Multibranch</b> scans the repo, builds each branch/PR Jenkinsfile independently, reports GitHub checks and auto-removes dead branches; validate webhook secrets so nobody curls your builds, and never run webhook plus polling together.</div><p class="small">⏩️ Next: <a class="tlink" href="#s27">Security</a></p><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 27 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s25">Prev</a> <a class="tlink" href="#s27">Next</a></span></div></div><div class="sheet" id="s27"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Security</h1></div><span class="hmeta">28</span></div></div>
+<p class="lead">Picking up from <em>Webhooks</em>, where anyone-with-curl could fire builds — we now decide <em>who may do what</em>.</p>
+<h3 id="p28-h1" class="sec"><span class="n">01 /</span> Authentication &amp; Authorization</h3>
+<div class="tblwrap"><table class="tb"><tr><th>Role</th><th>Grants</th></tr>
+<tr><td>Developers</td><td>Job/Build + Read</td></tr>
+<tr><td>Leads</td><td>+ Configure / Cancel</td></tr>
+<tr><td>Admins</td><td>Overall / Administer</td></tr></table></div>
+<div class="mark m-key"><span class="tag">RULES </span> SSO (Google/GitHub/Okta) for teams, local users for labs · start from "logged-in users can do nothing", grant upward · audit everything with the Audit Trail plugin.</div>
+<div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 28 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s26">Prev</a> <a class="tlink" href="#s28">Next</a></span></div></div><div class="sheet" id="s28"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Trust</h1></div><span class="hmeta">29</span></div></div>
+<h3 id="p29-h1" class="sec"><span class="n">02 /</span> Agent-to-Controller Distrust</h3>
+<ul class="tight"><li>Builds execute attacker-influenced code — default deny on Agent → Controller access.</li><li>Ephemeral agents: a compromised container dies with the build.</li><li>Fork PRs → isolated, credential-free agents. Never shared permanent ones.</li></ul>
+<h3 id="p29-h2" class="sec"><span class="n">03 /</span> Secrets &amp; Updates</h3>
+<ul class="tight"><li>Secrets only via bindings; <span class="mono">set +x</span> around manual handling; TLS-only admin.</li><li>Rotate by ID replacement; deprovision SSO, don't rely on memory.</li><li>CVEs cluster in plugins: staging validates → snapshot → production.</li></ul>
+<div class="mark m-fail"><span class="tag">IF SECRETS LEAK </span><p><span class="mono">JENKINS_HOME/secrets</span> decrypts the whole store. Its exposure = everything is compromised. Rotate all of it.</p></div>
+<div class="qa"><span class="qn">Q3</span> <b>Why are PR builds a trust boundary?</b><br/></br><span class="ans">PR contents are attacker-influenced code running on your agents — isolate execution and scope credentials.</span></div>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 29 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s27">Prev</a> <a class="tlink" href="#s29">Next</a></span></div></div><div class="sheet" id="s29"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Security & Handoff</h1></div><span class="hmeta">30</span></div></div>
+<h3 id="p30-h1" class="sec"><span class="n">04 /</span> Handoff</h3>
+<p class="body">Hardened core — now scale the craft. Continue in <b>Jenkins Advanced</b>: shared libraries, matrix builds, JCasC, and backup/restore.</p>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Security in one breath: <b>SSO</b> (Google/GitHub/Okta) for teams and local users for labs, a deny-by-default <b>matrix</b> (developers build, leads configure, admins administer) with <b>Audit Trail</b> on everything; <b>agent → controller access is default-deny</b> because builds run attacker-influenced code — ephemeral agents die with the build, fork PRs stay isolated and credential-free, secrets travel only via bindings, and exposure of <span class="mono">JENKINS_HOME/secrets</span> means rotating everything since CVEs cluster in plugins.</div><p class="small">⏩️ Next: <a class="tlink" href="#s30">Advanced</a></p><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 30 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s28">Prev</a> <a class="tlink" href="#s30">Next</a></span></div></div><div class="sheet" id="s30"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Advanced</h1></div><span class="hmeta">31</span></div></div>
+<p class="lead">Picking up from <em>Security</em>, where trust boundaries were drawn — shared libraries run <em>outside the sandbox</em>, so that trust model governs them.</p>
+<h3 id="p31-h1" class="sec"><span class="n">01 /</span> Shared Libraries</h3>
+<pre class="code"><span class="c">// Jenkinsfile: one line replaces 60 of boilerplate</span>
+@Library(<span class="p">'acme-pipeline-lib@1.4'</span>) _
+standardServicePipeline(app: <span class="p">'shop'</span>, deployEnv: <span class="p">'staging'</span>)</pre>
+<div class="mark m-key"><span class="tag">RULES </span> version the lib (<span class="mono">@1.4</span>, never <span class="mono">@main</span>) · test with JenkinsPipelineUnit before tagging · only admins approve library repos (unsandboxed).</div>
+<h3 id="p31-h2" class="sec"><span class="n">02 /</span> Parallel &amp; Matrix</h3>
+<p class="body">Parallelize <b>independent verification</b> (unit/lint/scan), never dependent deploys. Matrix multiplies stages × axes (JDK 17/21, browsers). Size agent pools for <b>peak fan-out</b>, not average load.</p>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 31 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s29">Prev</a> <a class="tlink" href="#s31">Next</a></span></div></div><div class="sheet" id="s31"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">As Code</h1></div><span class="hmeta">32</span></div></div>
+<h3 id="p32-h1" class="sec"><span class="n">03 /</span> Controller From YAML</h3>
+<pre class="code"><span class="c"># jenkins.yaml — identical controller every boot</span>
+jenkins: { numExecutors: <span class="p">0</span> }
+credentials: { system: { … registry-token: <span class="p">"${REGISTRY_TOKEN}"</span> } }
+<span class="c"># boot: pinned image + plugins.txt + jenkins.yaml. UI drift is ephemeral.</span></pre>
+<h3 id="p32-h2" class="sec"><span class="n">04 /</span> Backup, Console, Tuning</h3>
+<ul class="tight"><li><b>Backup</b> <span class="mono">JENKINS_HOME</span> minus workspaces; restore jobs + credentials + config + YAML + plugins. Untested backup = rumor. Encrypt off-site.</li><li><b>Script Console</b> = Groovy as admin; audit every run; never paste blind snippets.</li><li><b>Queue</b> — executors ≤ ~1 per 1–2 cores; heap ≥ 4 GB (<span class="mono">-Xmx4g</span>); stagger cron (<span class="mono">H 9 <em> </em> *</span>); quiet periods batch rapid commits.</li></ul>
+<div class="mark m-key"><span class="tag">PROD TOPOLOGY </span> active-passive controllers from one <span class="mono">jenkins.yaml</span> + replicated storage · agent fleets per team/env (labels route) · controller private behind TLS proxy, agents outbound-only · quarterly DR restore drill measured against RTO.</div>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 32 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s30">Prev</a> <a class="tlink" href="#s32">Next</a></span></div></div><div class="sheet" id="s32"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Check &amp; Handoff</h1></div><span class="hmeta">33</span></div></div>
+<h3 id="p33-h1" class="sec"><span class="n">05 /</span> Interview Check</h3>
+<div class="qa"><span class="qn">Q4</span> <b>Roll out a shared library to 50 repos?</b><br/></br><span class="ans">Version + unit-test the lib, migrate one pilot repo, pin tags, admin-approve the repo (unsandboxed trust).</span></div>
+<div class="qa"><span class="qn">Q5</span> <b>Rebuild-a-controller drill order?</b><br/></br><span class="ans">Image → plugins → JCasC → secrets → backup restore → smoke pipeline. Secrets break first.</span></div>
+<h3 id="p33-h2" class="sec"><span class="n">06 /</span> Handoff</h3>
+<p class="body">Advanced patterns banked — when they break, diagnose in order. Continue in <b>Jenkins Troubleshooting</b>.</p>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Advanced in one breath: one versioned line — <span class="mono">@Library('acme-pipeline-lib@1.4') _</span>, never <span class="mono">@main</span>, unit-tested with JenkinsPipelineUnit and admin-approved since libraries run unsandboxed — replaces 60 lines of boilerplate; <b>parallel</b> multiplies independent verification and <b>matrix</b> multiplies stages by axes, sized for peak fan-out; <span class="mono">jenkins.yaml</span> (<b>JCasC</b>) makes the controller reproducible, <span class="mono">JENKINS_HOME</span> minus workspaces is the backup (restore tested, off-site, encrypted), and prod runs active-passive controllers with a quarterly DR drill against RTO.</div><p class="small">⏩️ Next: <a class="tlink" href="#s33">Troubleshooting</a></p><div class="trav"><span>Threads: </span><a href="../threads/#supply-chain">Supply-Chain Security</a> · <a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 33 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s31">Prev</a> <a class="tlink" href="#s33">Next</a></span></div></div><div class="sheet" id="s33"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Triage</h1></div><span class="hmeta">34</span></div></div>
+<p class="lead">Picking up from <em>Advanced</em>, where moving parts multiplied — this is <em>the diagnostic order that untangles them</em>.</p>
+<h3 id="p34-h1" class="sec"><span class="n">01 /</span> Triage Table</h3>
+<div class="tblwrap"><table class="tb"><tr><th>Symptom</th><th>Check</th><th>Fix</th></tr>
+<tr><td>Stuck in queue</td><td>Executor Status, labels, agents</td><td>Fix typo, free executor</td></tr>
+<tr><td><span class="mono">No such DSL method</span></td><td>Owning plugin installed?</td><td>Install / pin plugin</td></tr>
+<tr><td><span class="mono">command not found</span></td><td>Tool on that agent?</td><td>Matching label / Docker image</td></tr>
+<tr><td>Clone/auth failure</td><td>Credential ID + scope</td><td>Rebind Global credential</td></tr>
+<tr><td>Webhook silent</td><td>Hook Log, checkbox</td><td>Fix URL, enable trigger</td></tr>
+<tr><td>Controller frozen</td><td>Disk, heap (<span class="mono">-Xmx4g</span>)</td><td>Discard builds, raise heap</td></tr></table></div>
+<div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 34 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s32">Prev</a> <a class="tlink" href="#s34">Next</a></span></div></div><div class="sheet" id="s34"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">Logs &amp; Recovery</h1></div><span class="hmeta">35</span></div></div>
+<h3 id="p35-h1" class="sec"><span class="n">02 /</span> Reading a Build Log</h3>
+<ul class="tight"><li>First red line = <b>effect</b>; scroll up for the <b>cause</b> (exit code, Groovy stack).</li><li><b>Replay</b> button re-runs edited pipelines without pushing commits.</li><li>Wipe workspace + rebuild separates dirty-workspace flakes from real failures.</li></ul>
+<h3 id="p35-h2" class="sec"><span class="n">03 /</span> Sandbox &amp; Recovery</h3>
+<div class="mark m-key"><span class="tag">SANDBOX </span> untrusted scripts run allowlisted only; beyond that needs Script Approval. Prefer allowlisted steps — each approval is future maintenance.<br/></br><b>RECOVERY —</b> bad config? Restore <span class="mono">config.xml</span> + Reload Configuration (no restart). Disaster? Restore <span class="mono">JENKINS_HOME</span> backup to a fresh pinned image, replay the smoke pipeline.</div>
+<h3 id="p35-h3" class="sec"><span class="n">04 /</span> Handoff</h3>
+<p class="body">Jenkins domain complete — now meet the sibling implementation. Continue in <b>GitHub Actions</b>: hosted runners, YAML, zero infrastructure.</p>
+<div class="m-exam"><span class="tag">🎓 EXAM</span>Troubleshooting in one breath: diagnose in order — stuck in queue → labels/executors, <span class="mono">No such DSL method</span> → owning plugin, <span class="mono">command not found</span> → tool on that agent, clone failures → credential scope, silent webhooks → hook log, frozen controller → disk/heap; the <b>first red line is the effect, scroll up for the cause</b>, replay without pushing, wipe the workspace to separate flakes from failures, prefer allowlisted steps over approvals, and recover via <span class="mono">config.xml</span> + Reload or a full <span class="mono">JENKINS_HOME</span> restore onto a pinned image plus the smoke pipeline.</div><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 35 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s33">Prev</a> <a class="tlink" href="#s35">Next</a></span></div></div><div class="sheet" id="s35"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">📇 Quick Revision — Terms Table</h1></div><span class="hmeta">36</span></div></div><div class="tblwrap"><table class="tb tight"><tr><td><b>Controller</b></td><td>Schedules, serves UI/API, stores config, history and credentials. Runs zero builds in production.</td></tr><tr><td><b>Agent</b></td><td>A machine offering executors that run builds. Permanent, Docker cloud, or Kubernetes.</td></tr><tr><td><b>Executor</b></td><td>One numbered build slot on an agent, roughly one per 1–2 cores.</td></tr><tr><td><b>Remoting</b></td><td>Channel shipping work to agents. Inbound = agent dials out; SSH = controller dials in.</td></tr><tr><td><b>JENKINS_HOME</b></td><td>Controller data: jobs/, workspace/, credentials.xml + secrets/, config.xml. Back up securely.</td></tr><tr><td><b>Jenkinsfile</b></td><td>Pipeline as code in the repo. Declarative pipeline { … } or Scripted node { … }.</td></tr><tr><td><b>Declarative</b></td><td>Opinionated validated pipeline syntax. Default for 95% of Jenkinsfiles.</td></tr><tr><td><b>Scripted</b></td><td>Raw Groovy pipelines for dynamic stages and advanced flow.</td></tr><tr><td><b>Multibranch</b></td><td>Job discovering every branch/PR Jenkinsfile and building each independently.</td></tr></table></div><div class="tblwrap"><table class="tb tight"><tr><td><b>Label</b></td><td>Capability tag matching jobs to agents, e.g. linux &amp;&amp; docker. Typos queue forever.</td></tr><tr><td><b>Credentials store</b></td><td>Encrypted vault keyed by stable IDs. Values never appear in code or logs.</td></tr><tr><td><b>withCredentials</b></td><td>Binding step exposing secrets as masked variables inside sh blocks.</td></tr><tr><td><b>Shared library</b></td><td>Versioned Groovy lib (@1.4, never @main) replacing boilerplate. Unsandboxed, admin-approved.</td></tr><tr><td><b>JCasC</b></td><td>Controller from YAML: identical controller every boot from jenkins.yaml.</td></tr><tr><td><b>Plugin</b></td><td>Capability unit. Pin in plugins.txt, upgrade in staging first, remove unused ones.</td></tr><tr><td><b>Webhook</b></td><td>/github-webhook/ trigger turning pushes into builds in seconds.</td></tr><tr><td><b>Sandbox</b></td><td>Allowlist restricting untrusted Groovy. Prefer allowlisted steps over approvals.</td></tr><tr><td><b>LTS</b></td><td>Long-term-support line cut every ~4 weeks. Production default over weeklies.</td></tr></table></div><div class="mark m-key"><span class="tag">KEY IDEA</span>Cover the right column and define each term aloud. Any stumble goes back to its chapter.</div><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a> · <a href="../threads/#supply-chain">Supply-Chain Security</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 36 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s34">Prev</a> <a class="tlink" href="#s36">Next</a></span></div></div><div class="sheet" id="s36"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">🎤 Concept Questions — Distilled Answers</h1></div><span class="hmeta">37</span></div></div><div class="grid2"><div class="qa"><span class="qn">Q1</span> <b>Controller vs agent responsibilities?</b><br/></br><span class="ans">Controller schedules, serves and stores. Agents execute — nothing else.</span></div><div class="qa"><span class="qn">Q2</span> <b>Declarative vs Scripted — when each?</b><br/></br><span class="ans">Declarative for 95%: validated, readable. Scripted for dynamic stages and advanced flow.</span></div><div class="qa"><span class="qn">Q3</span> <b>Label vs executor?</b><br/></br><span class="ans">Label is a capability tag matching jobs to agents. Executor is one build slot.</span></div><div class="qa"><span class="qn">Q4</span> <b>Why set built-in executors to 0?</b><br/></br><span class="ans">So no build ever lands on the controller — it is a single contention point, not a worker.</span></div><div class="qa"><span class="qn">Q5</span> <b>A secret touched a log. What now?</b><br/></br><span class="ans">Treat as compromised and rotate by ID immediately. Masking is a backstop, not a guarantee.</span></div><div class="qa"><span class="qn">Q6</span> <b>Multibranch vs hand-wired jobs?</b><br/></br><span class="ans">Multibranch auto-discovers branches/PRs, gates each, reports checks, removes dead branches. Never hand-wire.</span></div><div class="qa"><span class="qn">Q7</span> <b>Socket mount vs DinD?</b><br/></br><span class="ans">Socket is fast for trusted teams but shares the daemon. DinD isolates untrusted builds.</span></div><div class="qa"><span class="qn">Q8</span> <b>Rebuild-a-controller drill order?</b><br/></br><span class="ans">Pinned image → plugins → JCasC → secrets → backup restore → smoke pipeline. Secrets break first.</span></div></div><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 37 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s35">Prev</a> <a class="tlink" href="#s37">Next</a></span></div></div><div class="sheet" id="s37"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">📌 Command Cheat Sheet</h1></div><span class="hmeta">38</span></div></div><div class="taskhead">Docker</div><div class="tblwrap"><table class="tb tight"><tr><td><code>docker volume create jenkins_home</code></td><td>persistent controller data</td></tr><tr><td><code>docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:2.516-lts-jdk17</code></td><td>pinned LTS controller</td></tr><tr><td><code>docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword</code></td><td>first unlock password</td></tr></table></div><div class="taskhead">Jenkinsfile</div><div class="tblwrap"><table class="tb tight"><tr><td><code>pipeline { agent { label 'linux' } }</code></td><td>labeled agent, never any</td></tr><tr><td><code>stage('Test') { steps { sh 'npm test' } }</code></td><td>mirrored build/test/scan stages</td></tr><tr><td><code>post { always { junit 'reports/**/*.xml' } }</code></td><td>test report gate</td></tr><tr><td><code>withCredentials([string(credentialsId: 'api-token', variable: 'T')])</code></td><td>masked secret binding</td></tr><tr><td><code>retry(3) { sh './flaky-deploy.sh' }</code></td><td>transient-failure retry</td></tr><tr><td><code>@Library('acme-pipeline-lib@1.4') _</code></td><td>versioned shared library</td></tr></table></div><div class="mark m-tip"><span class="tag">NOTE</span>Diagnostic order: queue first (labels, executors), then plugin, tool, credential scope, hook log, disk and heap. Never bulk-update on Fridays.</div><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 38 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s36">Prev</a> <a class="tlink" href="#s38">Next</a></span></div></div><div class="sheet" id="s38"><div class="pghead"><div class="hrow"><div><div class="kick">JENKINS</div><h1 class="t">🧪 Self-Quiz + Answer Key</h1></div><span class="hmeta">39</span></div></div><div class="grid2"><div class="qa"><span class="qn">Q1</span> <b>What four paths live in JENKINS_HOME?</b></div><div class="qa"><span class="qn">Q2</span> <b>Inbound vs SSH agent connection?</b></div><div class="qa"><span class="qn">Q3</span> <b>The seven setup steps in order?</b></div><div class="qa"><span class="qn">Q4</span> <b>What does Multibranch give you?</b></div><div class="qa"><span class="qn">Q5</span> <b>Sandbox bans which three calls, and their fixes?</b></div><div class="qa"><span class="qn">Q6</span> <b>Friday rule?</b></div><div class="qa"><span class="qn">Q7</span> <b>Developers vs leads vs admins?</b></div><div class="qa"><span class="qn">Q8</span> <b>First red line: effect or cause?</b></div></div><div class="zone"><div class="taskhead">Answer key</div><ol><li>jobs/, workspace/, credentials.xml + secrets/, config.xml.</li><li>Inbound: agent dials out, survives NAT. SSH: controller dials in on flat networks.</li><li>Run, unlock, lock controller, agent, multibranch job, webhook, verify loop.</li><li>Per-branch/PR builds, GitHub checks, auto-removal of dead branches.</li><li>new File → readFile; System.getenv → env.X; .execute() → sh.</li><li>Never bulk-update plugins before a weekend. Stage first, keep a snapshot.</li><li>Developers build, leads configure/cancel, admins administer. Deny by default.</li><li>Effect — scroll up for the cause, then replay or wipe the workspace.</li></ol></div><div class="mark m-key"><span class="tag">FINAL CHECK</span>Eight for eight from memory, twice in a row — the Jenkins craft is yours. Open GitHub Actions next.</div><div class="trav"><span>Threads: </span><a href="../threads/#controller-agent">Controllers &amp; Agents</a></div><div class="folio"><span>📘 Jenkins Complete · <span class="by">By Nabawy</span></span><span class="fnum">— 39 —</span><span><a class="backtoc" href="#toc">▤ TOC</a> ◀ <a class="tlink" href="#s37">Prev</a> <a class="tlink" href="#toc">▲ Top</a></span></div></div>
+
+<div class="relatedbox"><h4>Related books</h4><ul class="relgrid"><li class="relcard" data-cat="Labs" style="--cat:#EAB308"><span class="rel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6v6l3 5a3 3 0 01-3 4H9a3 3 0 01-3-4l3-5V3z"/><path d="M8 14h8" opacity=".6"/></svg></span><span class="rel-main"><a href="labs-handbook.html">Labs Handbook</a><span class="rel-meta">675 min · <span class="difbadge int">Int</span></span><span class="rel-why">→ Follow-up</span></span></li><li class="relcard" data-cat="Platforms" style="--cat:#F97316"><span class="rel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4-8 4-8-4z"/><path d="M4 10l8 4 8-4"/><path d="M4 14l8 4 8-4"/><path d="M4 18l8 4 8-4" opacity=".4"/></svg></span><span class="rel-main"><a href="platforms-roadmaps.html">Platforms &amp; 2026 Roadmaps</a><span class="rel-meta">190 min · <span class="difbadge int">Int</span></span><span class="rel-why">→ Follow-up</span></span></li><li class="relcard" data-cat="Start Here" style="--cat:#5B8DEF"><span class="rel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3v18"/><path d="M6 4h11l-2.6 3.5L17 11H6"/></svg></span><span class="rel-main"><a href="start-here.html">Start Here: Foundations, Git &amp; CI</a><span class="rel-meta">75 min · <span class="difbadge beg">Beg</span></span><span class="rel-why">→ Prerequisite</span></span></li><li class="relcard" data-cat="Reference" style="--cat:#64748B"><span class="rel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h8a2 2 0 012 2v12a2 2 0 01-2 2H6z"/><path d="M6 8h6"/><path d="M6 12h6"/><path d="M6 16h4" opacity=".6"/></svg></span><span class="rel-main"><a href="cheatsheet.html">Command Cheatsheet</a><span class="rel-meta">15 min · <span class="difbadge beg">Beg</span></span><span class="rel-why">→ More to explore</span></span></li></ul></div>
+<div class="chapnav"><span></span><span></span></div>
+</div></main>
+<div id="lightbox" role="dialog" aria-label="Diagram viewer"><img alt="Enlarged diagram"></div>
+</div>
+<button class="topbtn" id="topbtn" aria-label="Back to top" title="Back to top">↑</button>
+<div class="drawer" id="drawer"><div class="scrim"></div><div class="panel" role="dialog" aria-modal="false" aria-label="Reader menu"><button class="drawerx" id="setx" aria-label="Close settings">×</button>
+<h3>Menu</h3>
+<div class="setrow mobile-controls"><a class="readback btn" href="../index.html">← Back</a> <button class="btn" id="fsbtnm" aria-label="Toggle fullscreen">⛶</button><a class="btn" href="../index.html">Home</a><button class="btn" id="mthemebtn" aria-label="Cycle theme">◐</button></div>
+<div class="setrow mobile-search"><label for="mobileq">Find in this book</label><input id="mobileq" type="search" placeholder="Search this book…"></div>
+
+
+
+
+
+
+
+</div></div>
+<div id="fsbar" hidden><button class="btn" id="fs-theme" aria-label="Cycle theme">◐</button><span id="fs-prog">0%</span><button class="btn" id="fs-exit">⛶ Exit</button></div><button class="btn" id="fsexit-m" aria-label="Exit fullscreen">⛶</button>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+function getP(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch(e){return d}}
+function setP(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+const BID=document.body.dataset.book,PREF='cicdlib:pref',PKEY='cicdlib:prog:'+BID;
+const pref=Object.assign({theme:'sepia',fs:18,width:'820px',font:'sans',lh:1.7},getP(PREF,{}));
+const RTHEMES=['sepia','dark','light'];
+function applyPref(){document.documentElement.dataset.theme=RTHEMES.includes(pref.theme)?pref.theme:'sepia';syncThemeBtn();
+  document.body.dataset.font=pref.font==='serif'?'serif':'sans';
+  const rb=document.querySelector('.readbody');if(rb){rb.style.fontSize=pref.fs+'px';rb.style.setProperty('max-width',pref.width);rb.style.setProperty('--lh',pref.lh);}
+  $$('.setrow .opts .btn').forEach(b=>b.classList.toggle('on',b.dataset.set===undefined?'':String(pref[b.dataset.k])===b.dataset.set));
+  setP(PREF,pref);}
+function setOpt(k,v){pref[k]=v;applyPref()}
+const THI={dark:'☀',light:'☾',sepia:'◐'};
+function syncThemeBtn(){const ic=THI[pref.theme]||'◐';const a=$('#themebtn'),b=$('#mthemebtn');if(a)a.textContent=ic;if(b)b.textContent=ic;}
+function cycleTheme(){setOpt('theme',RTHEMES[(RTHEMES.indexOf(pref.theme)+1)%RTHEMES.length]);}
+const _thb=$('#themebtn');if(_thb)_thb.onclick=cycleTheme;const _mth=$('#mthemebtn');if(_mth)_mth.onclick=cycleTheme;
+$$('.terminal').forEach(t=>{const bar=document.createElement('div');bar.className='copybar';const b=document.createElement('button');b.className='copybtn';b.textContent='Copy';b.onclick=()=>{let txt=t.innerText.split('\n').filter(l=>!l.match(/^\s*(NAME|nginx-|CONTAINER|NAME\s+READY)/)).join('\n');navigator.clipboard.writeText(txt||t.innerText).then(()=>{b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1200)})};bar.appendChild(b);t.before(bar)});
+$$('.readbody pre').forEach(p=>{if(p.closest('.terminal')||p.previousElementSibling?.classList?.contains('codehead'))return;const h=document.createElement('div');h.className='codehead';h.innerHTML='<span class=dot></span><span>'+(p.dataset.lang||"code")+'</span>';const b=document.createElement('button');b.textContent='Copy';b.onclick=()=>{navigator.clipboard.writeText(p.innerText).then(()=>{b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1200)})};const w=document.createElement('button');w.textContent='Wrap';w.style.marginLeft='6px';w.onclick=()=>{p.style.whiteSpace=p.style.whiteSpace==='pre-wrap'?'pre':'pre-wrap'};h.appendChild(b);h.appendChild(w);p.before(h)});
+$$('.readbody img').forEach(im=>{im.setAttribute('loading','lazy');if(!im.getAttribute('alt'))im.setAttribute('alt','Diagram from '+BID);im.style.cursor='zoom-in';im.addEventListener('click',()=>{const lb=$('#lightbox');if(lb){lb.querySelector('img').src=im.src;lb.classList.add('open');}});im.addEventListener('error',()=>{im.dataset.broken='1';const f=document.createElement('div');f.className='imgfallback';f.style.display='block';f.textContent='Image unavailable: '+(im.getAttribute('alt')||im.src);im.after(f);});});
+const _lb=$('#lightbox');if(_lb)_lb.addEventListener('click',()=>_lb.classList.remove('open'));
+const MARKS='cicdlib:marks';
+const LABKEY='cicdlib:lab:'+BID;
+function labChecks(){const done=getP(LABKEY,{});$$('.readbody .step').forEach((st,i)=>{if(st.querySelector('input[type=checkbox]'))return;const lab=document.createElement('input');lab.type='checkbox';lab.checked=!!done[i];lab.setAttribute('aria-label','Mark step done');lab.onchange=()=>{const d=getP(LABKEY,{});if(lab.checked)d[i]=1;else delete d[i];setP(LABKEY,d);st.classList.toggle('done',lab.checked);};st.classList.toggle('done',!!done[i]);const lb=document.createElement('label');lb.className='stephit';lb.setAttribute('aria-label','Mark step done');lb.appendChild(lab);st.prepend(lb);});const rst=$('#labreset');if(rst)rst.onclick=()=>{setP(LABKEY,{});$$('.readbody .step').forEach(st=>{st.classList.remove('done');const c=st.querySelector('input[type=checkbox]');if(c)c.checked=false;});};}
+labChecks();
+function tocUpdate(){const links=$$('aside.toc a');let cur=null;
+  links.forEach(a=>{const h=a.getAttribute('href');if(!h||h[0]!=='#')return;
+    const el=document.getElementById(h.slice(1));
+    if(el&&el.getBoundingClientRect().top<160)cur=h;});
+  window._cur=cur?cur.slice(1):null;
+  links.forEach(a=>a.classList.toggle('cur',a.getAttribute('href')===cur));}
+window.addEventListener('scroll',()=>{tocUpdate();
+  const h=document.documentElement,p=Math.min(100,Math.round(100*(h.scrollTop)/(h.scrollHeight-h.clientHeight||1)));
+  setP(PKEY,{pct:p,ts:Date.now()});const bar=$('#pbar');if(bar)bar.style.width=p+'%';const fp=$('#fs-prog');if(fp)fp.textContent=p+'%';},{passive:true});
+function findBook(q){$$('.readbody mark').forEach(m=>{m.replaceWith(document.createTextNode(m.textContent))});if(!q)return 0;
+  let n=0;const walker=document.createTreeWalker(document.querySelector('.readbody'),NodeFilter.SHOW_TEXT);
+  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(nd=>{const i=nd.textContent.toLowerCase().indexOf(q.toLowerCase());if(i<0)return;
+    if(nd.parentElement.closest('.terminal,script,style'))return;
+    const r=document.createRange();r.setStart(nd,i);r.setEnd(nd,i+q.length);
+    const m=document.createElement('mark');r.surroundContents(m);n++;});
+  const f=document.querySelector('.readbody mark');if(f)f.scrollIntoView({block:'center'});
+  window._marks=[...document.querySelectorAll('.readbody mark')];window._mi=0;window._lastQ=q;return n;}
+$('#q').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=e.target.value;
+  if(v&&v===window._lastQ&&(window._marks||[]).length){window._mi=(window._mi+1)%window._marks.length;window._marks[window._mi].scrollIntoView({block:'center'});$('#qcount').textContent='match '+(window._mi+1)+' of '+window._marks.length;return;}
+  const n=findBook(v);$('#qcount').textContent=n?n+' match'+(n>1?'es':'')+' in this book — Enter for next':'no matches in this book'}});
+$('#q').addEventListener('input',e=>{if(!e.target.value)findBook('')});
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#q').focus()}
+  if(e.key==='Escape'){if(document.activeElement===$('#q')||document.activeElement===$('#mobileq')){document.activeElement.value='';findBook('');const qc=$('#qcount');if(qc)qc.textContent='';}const _do=$('#drawer').classList.contains('open'),_to=$('aside.toc').classList.contains('open');$('#drawer').classList.remove('open');if($('aside.toc').classList.contains('open')){const tb=$('#tocbtn');if(tb)setTimeout(()=>tb.focus(),0);}$('aside.toc').classList.remove('open');if(!_do&&!_to&&document.body.classList.contains('fs'))setFS(false);lockScroll();}
+  if(e.key.toLowerCase()==='t'&&document.activeElement.tagName!=='INPUT'){$('aside.toc').classList.toggle('open')}
+  if(e.key==='ArrowRight'&&document.activeElement.tagName!=='INPUT'){const n=$('#nextbook');if(n)location.href=n.href}
+  if(e.key==='ArrowLeft'&&document.activeElement.tagName!=='INPUT'){const p=$('#prevbook');if(p)location.href=p.href}
+  if(e.key.toLowerCase()==='c'&&document.activeElement.tagName!=='INPUT'&&window._cur){try{navigator.clipboard.writeText(location.href.split('#')[0]+'#'+window._cur);const qc=$('#qcount');if(qc)qc.textContent='section link copied';}catch(err){}}});
+const _pr=$('#prefreset');if(_pr)_pr.onclick=()=>{setP(PREF,{theme:'sepia',fs:18,width:'820px',font:'sans',lh:1.7});location.reload();};
+$('#drawer .scrim').onclick=()=>$('#drawer').classList.remove('open');
+$('#tocbtn').onclick=()=>tocToggle();
+$$('aside.toc a').forEach(a=>a.onclick=(e)=>{const h=a.getAttribute('href');if(h&&h[0]==='#'){if(e)e.preventDefault();const el=document.getElementById(h.slice(1));if(el)el.scrollIntoView();try{history.replaceState(null,'',h);}catch(err){}tocUpdate();}if(innerWidth<=900)$('aside.toc').classList.remove('open')});
+const back=$('#backbtn');
+if(back)back.addEventListener('click',e=>{
+  let sameOrigin=false;
+  try{sameOrigin=!!document.referrer&&new URL(document.referrer,location.href).origin===location.origin;}catch(err){}
+  if(sameOrigin&&history.length>1){e.preventDefault();history.back();}
+});
+const menuBtn=$('#mobilemenubtn');
+if(menuBtn)menuBtn.onclick=()=>{const d=$('#drawer'),open=!d.classList.contains('open');d.classList.toggle('open',open);menuBtn.setAttribute('aria-expanded',String(open));};
+const mobileQ=$('#mobileq'),bookQ=$('#q');
+if(mobileQ&&bookQ){mobileQ.addEventListener('input',()=>{bookQ.value=mobileQ.value;});mobileQ.addEventListener('keydown',e=>{if(e.key==='Enter'){bookQ.value=mobileQ.value;bookQ.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter'}));}});}
+const topBtn=$('#topbtn');let topTimer;
+function syncTop(){if(!topBtn)return;const eligible=scrollY>innerHeight*.9;topBtn.classList.toggle('on',eligible);clearTimeout(topTimer);if(eligible)topTimer=setTimeout(()=>topBtn.classList.remove('on'),2800);}
+window.addEventListener('scroll',syncTop,{passive:true});
+if(topBtn)topBtn.onclick=()=>window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+window.addEventListener('hashchange',tocUpdate);
+window.addEventListener('pageshow',tocUpdate);
+function lockScroll(){const any=$('#drawer').classList.contains('open')||document.querySelector('aside.toc').classList.contains('open');document.body.classList.toggle('toc-open',document.querySelector('aside.toc').classList.contains('open')&&matchMedia('(max-width:900px)').matches);document.body.classList.toggle('lock',any);document.querySelector('aside.toc').setAttribute('aria-modal',document.querySelector('aside.toc').classList.contains('open')?'true':'false');document.querySelector('#drawer .panel').setAttribute('aria-modal',$('#drawer').classList.contains('open')?'true':'false');}
+new MutationObserver(lockScroll).observe(document.querySelector('aside.toc'),{attributes:true,attributeFilter:['class']});
+new MutationObserver(lockScroll).observe($('#drawer'),{attributes:true,attributeFilter:['class']});
+function tocToggle(){const mob=matchMedia('(max-width:900px)').matches;const toc=document.querySelector('aside.toc');if(mob){toc.classList.toggle('open');}else{document.body.classList.toggle('toc-hide');}lockScroll();const tb=$('#tocbtn');if(tb)tb.setAttribute('aria-expanded',String(!document.body.classList.contains('toc-hide')));}
+const _tocx=$('#tocx');if(_tocx)_tocx.onclick=()=>{document.querySelector('aside.toc').classList.remove('open');document.body.classList.add('toc-hide');lockScroll();const tb=$('#tocbtn');if(tb)tb.focus();};const _ts=$('#tocscrim');if(_ts)_ts.onclick=()=>{document.querySelector('aside.toc').classList.remove('open');lockScroll();const tb=$('#tocbtn');if(tb)tb.focus();};(function(){const toc=document.querySelector('aside.toc');let sx=0;toc.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});toc.addEventListener('touchend',e=>{if(sx-e.changedTouches[0].clientX>60&&matchMedia('(max-width:900px)').matches&&toc.classList.contains('open')){toc.classList.remove('open');lockScroll();const tb=$('#tocbtn');if(tb)tb.focus();}sx=0;},{passive:true});})();
+const _setx=$('#setx');if(_setx)_setx.onclick=()=>{$('#drawer').classList.remove('open');lockScroll();};
+document.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const open=document.querySelector('aside.toc.open')||document.querySelector('#drawer.open');if(!open)return;const f=[...open.querySelectorAll('button,a[href],input,[tabindex]')].filter(el=>el.offsetParent);if(!f.length)return;if(e.shiftKey&&document.activeElement===f[0]){e.preventDefault();f[f.length-1].focus();}else if(!e.shiftKey&&document.activeElement===f[f.length-1]){e.preventDefault();f[0].focus();}});
+// Fullscreen: Fullscreen API where available, CSS-immersive fallback otherwise. Per-session toggle (never auto-restored).
+function syncFS(){const on=document.body.classList.contains('fs');const bar=$('#fsbar');if(bar)bar.hidden=!on;const fb=$('#fsbtn');if(fb)fb.setAttribute('aria-pressed',on?'true':'false');const rb=document.querySelector('.readbody');if(rb)rb.style.setProperty('max-width',on?'880px':pref.width);}
+function setFS(on){if(on){document.body.classList.add('fs');try{const el=document.documentElement;const pr=el.requestFullscreen&&el.requestFullscreen();if(pr&&pr.catch)pr.catch(()=>{});}catch(err){}}else{document.body.classList.remove('fs');try{if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});}catch(err){}}syncFS();}
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)document.body.classList.remove('fs');syncFS();});
+const _fsb=$('#fsbtn'),_fsm=$('#fsbtnm');if(_fsb)_fsb.onclick=()=>setFS(!document.body.classList.contains('fs'));if(_fsm)_fsm.onclick=()=>{$('#drawer').classList.remove('open');setFS(!document.body.classList.contains('fs'));};
+const _ft=$('#fs-toc');if(_ft)_ft.onclick=()=>tocToggle();
+const _fx=$('#fs-exit');if(_fx)_fx.onclick=()=>setFS(false);const _fxm=$('#fsexit-m');if(_fxm)_fxm.onclick=()=>setFS(false);
+const _fth=$('#fs-theme');if(_fth)_fth.onclick=()=>{setOpt('theme',RTHEMES[(RTHEMES.indexOf(pref.theme)+1)%RTHEMES.length]);};
+function _fsStep(dd){const S=[16,18,20,22];let i=S.indexOf(pref.fs);if(i<0)i=1;setOpt('fs',S[Math.min(S.length-1,Math.max(0,i+dd))]);}
+const _fd=$('#fs-dec'),_fi=$('#fs-inc');if(_fd)_fd.onclick=()=>_fsStep(-1);if(_fi)_fi.onclick=()=>_fsStep(1);
+applyPref();tocUpdate();syncFS();
+</script>
+</body>
+</html>
