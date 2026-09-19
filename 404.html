@@ -509,12 +509,16 @@ body[data-font=serif] .readbody code,body[data-font=serif] .readbody pre,body[da
 .pathfoot{padding:10px 14px 14px}
 .thread-card{padding:12px 14px}
 .fcard{perspective:none}
-.fcard-inner{height:auto;min-height:140px}
-.fcard-front,.fcard-back{position:relative;inset:auto;transform:none !important;height:auto;min-height:140px}
+.fcard-inner{height:auto;min-height:150px;display:block;transform:none !important}
+.fcard-front,.fcard-back{position:relative;inset:auto;grid-area:auto;transform:none !important;height:auto;min-height:150px;backface-visibility:visible;-webkit-backface-visibility:visible}
 .fcard.flipped .fcard-inner{transform:none}
 .fcard-back{transform:none;display:none}
 .fcard.flipped .fcard-front{display:none}
-.fcard.flipped .fcard-back{display:flex}
+.fcard.flipped .fcard-back{display:flex;max-height:none}
+.fcard .fbtn{min-height:44px;font-size:14px}
+.fcard-back p{font-size:14px;line-height:1.55}
+.gtbar{top:52px}
+.az{padding:6px 2px}
 .gtbar{top:52px;padding:8px 0 6px}
 .gtbar input{min-height:44px;font-size:16px}
 .az{padding:6px 0 2px;gap:3px}

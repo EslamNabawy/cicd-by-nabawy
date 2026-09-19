@@ -524,12 +524,16 @@ body[data-font=serif] .readbody code,body[data-font=serif] .readbody pre,body[da
 .pathfoot{padding:10px 14px 14px}
 .thread-card{padding:12px 14px}
 .fcard{perspective:none}
-.fcard-inner{height:auto;min-height:140px}
-.fcard-front,.fcard-back{position:relative;inset:auto;transform:none !important;height:auto;min-height:140px}
+.fcard-inner{height:auto;min-height:150px;display:block;transform:none !important}
+.fcard-front,.fcard-back{position:relative;inset:auto;grid-area:auto;transform:none !important;height:auto;min-height:150px;backface-visibility:visible;-webkit-backface-visibility:visible}
 .fcard.flipped .fcard-inner{transform:none}
 .fcard-back{transform:none;display:none}
 .fcard.flipped .fcard-front{display:none}
-.fcard.flipped .fcard-back{display:flex}
+.fcard.flipped .fcard-back{display:flex;max-height:none}
+.fcard .fbtn{min-height:44px;font-size:14px}
+.fcard-back p{font-size:14px;line-height:1.55}
+.gtbar{top:52px}
+.az{padding:6px 2px}
 .gtbar{top:52px;padding:8px 0 6px}
 .gtbar input{min-height:44px;font-size:16px}
 .az{padding:6px 0 2px;gap:3px}
@@ -559,11 +563,11 @@ header.top .wrap{padding:6px 8px}
 }
 
 .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:14px 0}
-.fcard{perspective:900px;cursor:pointer;min-height:150px}
-.fcard-inner{position:relative;width:100%;height:150px;transition:transform .45s;transform-style:preserve-3d}
+.fcard{perspective:900px;cursor:pointer}
+.fcard-inner{position:relative;width:100%;display:grid;transition:transform .45s;transform-style:preserve-3d;min-height:150px}
 .fcard.flipped .fcard-inner{transform:rotateY(180deg)}
-.fcard-front,.fcard-back{position:absolute;inset:0;display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--line-soft);border-radius:14px;background:var(--card);backface-visibility:hidden}
-.fcard-back{transform:rotateY(180deg);overflow:auto}
+.fcard-front,.fcard-back{grid-area:1/1;display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--line-soft);border-radius:14px;background:var(--card);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.fcard-back{transform:rotateY(180deg);overflow:auto;max-height:60vh}
 .fcard-front b{font-size:16px}.fcard-front .fcat{font-size:12px;color:var(--mut)}.fcard-front .fcta{margin-top:auto;font-size:11px;color:var(--brand)}
 .fcard-back p{font-size:13px;color:var(--mut);margin:0}.fcard-back .fmeta{font-size:11px}
 .fcard.mastered{opacity:.45}.fcard.hard{border-color:var(--red)}
