@@ -149,7 +149,7 @@ main.read{flex:1;min-width:0;padding:32px 32px 90px}
 .readbody .cover .sig{white-space:normal !important}
 .readbody .page,.readbody .cover,.readbody .cover-left,.readbody .cover-right{max-width:100%}
 .readbody pre,.readbody .terminal{position:relative;overflow-x:auto;max-width:100%;scrollbar-width:thin;white-space:pre}
-.readbody code,.readbody .mono{overflow-wrap:anywhere}.readbody .step .mono{overflow-wrap:break-word}
+.readbody code,.readbody .mono{overflow-wrap:anywhere}.readbody table{max-width:100%}.readbody td,.readbody th{overflow-wrap:anywhere}.readbody .step .mono{overflow-wrap:break-word}
 .readbody .md-fallback{font-size:18px;line-height:var(--lh,1.75)}
 .readbody .md-fallback .body{font-size:18px;line-height:inherit;margin:14px 0}
 .readbody .md-fallback .sec{font-size:27px;line-height:1.25;margin:30px 0 12px}
@@ -242,7 +242,7 @@ header.top .logo span{display:none}
 header.top .search{display:none}
 header.top .btn{padding:5px 7px;font-size:11px;min-height:44px}
 header.top .wrap>.btn{flex:none}
-header.top #themebtn{width:28px;min-width:28px;min-height:44px;padding:0}
+header.top #themebtn{width:28px;min-width:28px;min-height:44px;padding:0}header.top .wrap{padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right))}
 }
 @media(min-width:601px) and (max-width:900px){
 header.top .wrap{min-width:0;max-width:100%;padding:10px 18px;gap:8px;overflow:hidden}
@@ -376,7 +376,7 @@ table.gloss tr:target td{background:color-mix(in srgb,var(--brand) 12%,transpare
 .bookhero{display:flex;gap:26px;flex-wrap:wrap;margin:30px 0}
 .bookhero .coverart{height:190px;flex:0 0 220px;margin:0;border-radius:14px;align-items:center;justify-content:center}
 .bookhero .coverart b{font-size:54px}
-.chiprow{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}@media(max-width:600px){.chiprow a,.chiprow .chip{padding:8px 14px;min-height:44px;display:inline-flex;align-items:center}.sechead{width:44px;height:44px}.morebtn{min-height:44px}.tquiz{min-height:44px}.qback .btn{min-height:44px}}
 .chiprow a,.chiprow span{font-size:12px;border:1px solid var(--line);border-radius:9999px;padding:4px 12px;color:var(--mut)}
 .chiprow a:hover{color:var(--ink);border-color:var(--brand)}
 .outcomes{background:var(--card);border:1px solid var(--line-soft);border-radius:12px;padding:14px 20px;margin:16px 0}
@@ -431,7 +431,7 @@ body[data-font=serif] .readbody code,body[data-font=serif] .readbody pre,body[da
 .hm-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:7px;background:linear-gradient(90deg,var(--brand) 0 55%,#4f46e5 55% 100%)}
 .hm-hero::after{content:'';position:absolute;top:-120px;right:-120px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle at center,color-mix(in srgb,var(--brand) 14%,transparent) 0%,transparent 70%);pointer-events:none}
 .hm-hero .hm-sub{position:relative}
-.hm-band{display:flex;justify-content:center;gap:5px;margin-bottom:18px}
+.hm-band{display:flex;justify-content:center;gap:5px;margin-bottom:18px}@media(max-width:600px){.hm-band{margin-bottom:12px}.hm-band i{width:7px}}
 .hm-band i{width:9px;border-radius:3px 3px 0 0;background:var(--brand);opacity:.85;display:block}
 .hm-kick{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:var(--brand);text-align:center}
 .hm-hero h1{font-size:clamp(34px,5vw,54px);font-weight:800;letter-spacing:-1px;text-align:center;margin:10px 0 4px}
